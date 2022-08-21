@@ -7,7 +7,7 @@ using namespace std;
 
 int main() {
 #ifndef _ONLY_MANUAL_CFG
-	ProgramConfig::readConfigFromFile();
+	//ProgramConfig::readConfigFromFile("");
 #endif
 
 #ifdef _ONLY_MANUAL_CFG
@@ -16,13 +16,8 @@ int main() {
 
 	serial s;
 
-	s.init("/dev/ttyUSB0");
+	s.init("/dev/ttyS0", B9600);
 
-	UmbThread *t;
-	t = new UmbThread(&s, ProgramConfig::getMasterId(), ProgramConfig::getDevices());
-	t->serviceThread();
-
-	delete t;
 
 	return 0;
 

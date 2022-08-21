@@ -20,9 +20,13 @@
 #include <memory>
 #include <vector>
 
+#include "./types/SerialState.h"
+
 using namespace std;
 
 class serial {
+
+	SerialState serialState;
 
 	int handle;
 
@@ -30,7 +34,7 @@ class serial {
 	struct termios tty_old;
 
 public:
-	void init(string port);
+	void init(string port, speed_t speed);
 	void testTransmit();
 
 	void transmitKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
