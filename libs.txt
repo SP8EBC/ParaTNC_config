@@ -1,0 +1,10 @@
+boost_unit_test_framework
+boost_thread
+boost_date_time
+boost_system
+config++
+config
+pthread
+
+/usr/lib/x86_64-linux-gnu
+

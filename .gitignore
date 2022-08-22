@@ -1,5 +1,7 @@
-/Debug/
+ParaTNC_config_linux/Debug/
 .tar.gz
 .gz
 
 *.tar.gz
+*.d
+*.o

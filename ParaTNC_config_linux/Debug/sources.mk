@@ -25,4 +25,6 @@ C_DEPS :=
 SUBDIRS := \
 src \
 src/exceptions \
+src/serial \
+src/services \
 
