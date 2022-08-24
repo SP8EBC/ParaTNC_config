@@ -51,7 +51,7 @@ void * SerialWorker::wrapper(void * object) {
 
 
 void SerialWorker::worker(void) {
-	std::cout << "I = SerialWorker::worker, start ";
+	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
 	std::shared_ptr<std::vector<uint8_t>> pointerToData = std::make_shared<std::vector<uint8_t>>();
 
@@ -84,7 +84,7 @@ void SerialWorker::worker(void) {
 		}
 	}	while (workerLoop);
 
-	std::cout << "I = SerialWorker::worker, end ";
+	std::cout << "I = SerialWorker::worker, end " << std::endl;
 
 
 }

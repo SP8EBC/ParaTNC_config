@@ -6,6 +6,7 @@
  */
 
 #include "SrvGetRunningConfig.h"
+#include "../types/CurrentConfigRegion.h"
 
 #include <iostream>
 
@@ -35,7 +36,14 @@ SrvGetRunningConfig& SrvGetRunningConfig::operator=(const SrvGetRunningConfig &o
 }
 
 void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
-	std::cout << "I = SrvGetRunningConfig::callback " << std::endl;
+
+	// data payload size - this is a size of data read from flash memory
+	uint8_t dataSize = frame.size() - 4;
+
+	//uint8_t runningConfigRegion = frame.at(2);
+	CurrentConfigRegion currentRegion = (CurrentConfigRegion)frame.at(2);
+
+	std::cout << "I = SrvGetRunningConfig::callback, dataSize: " << dataSize  << std::endl;
 
 }
 

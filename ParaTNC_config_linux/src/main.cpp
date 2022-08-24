@@ -31,11 +31,15 @@ int main() {
 	std::vector<uint8_t> test{0x20};
 	std::shared_ptr<std::vector<uint8_t>> pointerTxTest = std::make_shared<std::vector<uint8_t>>(test);
 
+	std::vector<uint8_t> testRx;
+	std::shared_ptr<std::vector<uint8_t>> pointerRxTest = std::make_shared<std::vector<uint8_t>>(testRx);
+
 
 	s->init("/dev/ttyUSB0", B9600);
 
-	s->transmitKissFrame(pointerTxTest);
 	worker.start();
+	s->transmitKissFrame(pointerTxTest);
+//	s->receiveKissFrame(pointerRxTest);
 	worker.terminate();
 
 	return 0;
