@@ -9,8 +9,6 @@
 #include "services/ServicesIds.h"
 #include "services/SrvGetRunningConfig.h"
 
-using namespace std;
-
 std::map<uint8_t, IService*> callbackMap;
 
 std::shared_ptr<Serial> s = std::make_shared<Serial>();

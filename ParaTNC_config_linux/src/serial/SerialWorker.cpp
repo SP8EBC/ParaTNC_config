@@ -14,6 +14,9 @@
 
 SerialWorker::SerialWorker(std::shared_ptr<Serial> serial, std::map<uint8_t, IService*> & callbcks)
 																	: ctx(serial), callbackMap(callbcks) {
+	pointerThis = std::shared_ptr<SerialWorker>(this);
+
+	workerLoop = true;
 
 }
 
@@ -37,7 +40,7 @@ SerialWorker& SerialWorker::operator=(SerialWorker &&other) {
 
 void * SerialWorker::wrapper(void * object) {
 
-	SerialWorker** pointer = (SerialWorker**)object;
+	std::shared_ptr<SerialWorker> * pointer = (std::shared_ptr<SerialWorker> *)object;
 
 	auto callable = std::bind(&SerialWorker::worker, *pointer);
 
@@ -76,7 +79,7 @@ void SerialWorker::worker(void) {
 
 			if (serviceCallback != NULL) {
 				// invoke callback
-				serviceCallback->callback(receivedData);
+				serviceCallback->callback(*pointerToData);
 			}
 		}
 	}	while (workerLoop);
@@ -88,13 +91,9 @@ void SerialWorker::worker(void) {
 
 bool SerialWorker::start(void) {
 
-	SerialWorker** pointerToObject = new SerialWorker*;
-
-	*pointerToObject = this;
-
 	workerLoop = true;
 
-	pthread_create(&this->thread, NULL, &SerialWorker::wrapper, pointerToObject);
+	pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);
 
 	return true;
 }

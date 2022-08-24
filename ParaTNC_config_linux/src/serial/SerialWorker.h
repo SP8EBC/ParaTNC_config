@@ -48,11 +48,13 @@ class SerialWorker {
 	std::vector<uint8_t> receivedData;
 
 	/**
-	 *
+	 * Map pointing to
 	 */
 	std::map<uint8_t, IService*> & callbackMap;
 
 	bool workerLoop;
+
+	std::shared_ptr<SerialWorker> pointerThis;
 
 public:
 	bool start(void);

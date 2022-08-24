@@ -31,6 +31,10 @@ void Serial::transmitKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 
 	ssize_t transmissionResult;
 
+	if (serialState == SERIAL_NOT_CONFIGURED) {
+		return;
+	}
+
 	std::cout << "I = serial::transmitKissFrame, frame size: " << frame->size() << std::endl;
 
 	if (frame && this->serialState == SERIAL_IDLE) {
@@ -59,6 +63,10 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 	struct timeval receivingStart, currentTime;
 
 	ReceivingState receivingState = RX_ST_WAITING_FOR_FEND;
+
+	if (serialState == SERIAL_NOT_CONFIGURED) {
+		return;
+	}
 
 	// received byte
 	uint8_t rxData = 0;
@@ -91,14 +99,19 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 				// decrement amont of data to receive
 				expectedRxLength--;
 
-				// add data to output buffer
-				frame->push_back(rxData);
-
 				// check if all bytes has been received
 				if (expectedRxLength <= 0) {
 					receivingState = RX_ST_DONE;
 					std::cout << "I = serial::receiveKissFrame, receiving done, frame->size(): " << frame->size() << std::endl;
+					// do not place the last byte as this is always FEND
+					if (rxData != FEND) {
+						std::cout << "E = serial::receiveKissFrame, the last byte is not 0xC0 (FEND). " << std::endl;
 
+					}
+				}
+				else {
+					// add data to output buffer
+					frame->push_back(rxData);
 				}
 			}
 
@@ -122,114 +135,11 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 	}
 }
 
-//UmbFrameRaw* serial::receiveUmb(unsigned short max_timeout) {
-//	uint8_t ln_rcv = 0;
-//	uint8_t rx_buf = 0;
-//	uint8_t n = 0;
-//	uint8_t pos = 0;
-//	struct timeval timeout, timeout_start;
-//
-//	vector<uint8_t> *rx = new vector<uint8_t>();
-//
-//	gettimeofday(&timeout_start, NULL);
-//	do {
-//		gettimeofday(&timeout, NULL);
-//		if (timeout.tv_sec - timeout_start.tv_sec > ProgramConfig::getTimeout())
-//			throw StartOfHeaderTimeoutEx();		//TODO: zrobić rzucanie wyjątku
-//
-//		n = read(handle, &rx_buf, 1);
-//	}while(rx_buf != SOH);
-//
-//	rx->push_back(rx_buf);
-//	pos = 2;
-//
-//	for (; pos <= 7; pos++)
-//	{
-//		gettimeofday(&timeout, NULL);
-//		if (timeout.tv_sec - timeout_start.tv_sec > ProgramConfig::getTimeout()) {
-//			printf("serial::receiveUmb.rx:");
-//			for (unsigned j = 0; j < rx->size(); j++) {
-//				printf(" 0x%x", (unsigned)rx->at(j));
-//			}
-//			printf("\r\n");
-//
-//
-//			throw TimeoutE();		//TODO: zrobić rzucanie wyjątku
-//		}
-//
-//		n = read(handle, &rx_buf, 1);
-//		if (n != 0)
-//			rx->push_back(rx_buf);
-//		else
-//			throw TimeoutE();
-//	}
-//
-//	ln_rcv = rx_buf;
-//	ln_rcv += 12;
-//
-//	for (; pos <= ln_rcv; pos++) {
-//		gettimeofday(&timeout, NULL);
-//		if (timeout.tv_sec - timeout_start.tv_sec > ProgramConfig::getTimeout()) {
-//			for (unsigned j = 0; j < rx->size(); j++) {
-//			}
-//
-//			throw TimeoutE();		//TODO: zrobić rzucanie wyjątku
-//		}
-//
-//		n = read(handle, &rx_buf, 1);
-//		if (n != 0)
-//			rx->push_back(rx_buf);
-//		else {
-//			for (unsigned j = 0; j < rx->size(); j++) {
-//			}
-//
-//
-//			throw TimeoutE();
-//		}
-//	}
-//
-//	for (unsigned j = 0; j < rx->size(); j++) {
-//		printf(" 0x%x", (unsigned)rx->at(j));
-//	}
-//	printf("\r\n");
-//
-//	uint8_t *data = rx->data();
-//
-//	UmbFrameRaw *out = new UmbFrameRaw();
-//	memset(out, 0, sizeof(UmbFrameRaw));
-//
-//	out->ln = ln_rcv - 12;
-//	out->bytesRxed = rx->size();
-//	out->cmdId = *(data + 8);
-//	out->content = new unsigned char[out->ln - 2];
-//	memset (out->content, 0x00, out->ln - 2);
-//	memcpy(out->content, data + 10, out->ln -2);
-//
-//	out->slaveId = *(data + 4);
-//	out->slaveClass = *(data + 5) >> 4;
-//	out->protVersion = *(data + 1);
-//
-//	out->checksumRxed = *(data +  out->bytesRxed - 3) | *(data +  out->bytesRxed - 2) << 8;
-//
-//	unsigned short crc = 0xFFFF;
-//
-//	for (int j = 0; j < (out->bytesRxed - 3); j++)
-//		crc = calc_crc(crc, *(data + j));
-//
-//	if (crc == out->checksumRxed)
-//		out->chceksumCorrectRX = true;
-//
-//	delete rx;
-//
-//	return out;
-//
-//}
-
 Serial::~Serial() {
 	// TODO Auto-generated destructor stub
 }
 
-void Serial::init(string port, speed_t speed)
+bool Serial::init(string port, speed_t speed)
 {
 	struct termios tty;
 	struct termios tty_old;
@@ -241,6 +151,8 @@ void Serial::init(string port, speed_t speed)
 	/* Error Handling */
 	if ( tcgetattr ( handle, &tty ) != 0 ) {
 		std::cout << "E = serial::init, tcgetattr error: " << strerror(errno) << std::endl;
+
+		return false;
 	}
 
 	/* Save old tty parameters */
@@ -271,12 +183,15 @@ void Serial::init(string port, speed_t speed)
 	if ( tcsetattr ( handle, TCSANOW, &tty ) != 0) {
 		std::cout << "E = serial::init, tcsetattr error: " << strerror(errno) << std::endl;
 	   //std::cout << "Error " << errno << " from tcsetattr" << std::endl;
+
+		return false;
 	}
 
 	this->serialState = SERIAL_IDLE;
 
 	std::cout << "I = serial::init, serial port " << port << " has been configured" << std::endl;
 
+	return true;
 }
 
 //void serial::test_transmit()

@@ -36,7 +36,7 @@ class Serial {
 
 
 public:
-	void init(string port, speed_t speed);
+	bool init(string port, speed_t speed);
 	void testTransmit();
 
 	void transmitKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
