@@ -85,15 +85,16 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 			// get current time
 			gettimeofday(&currentTime, NULL);
 
+			// try to receice single byte
+			rxLn = read(handle, &rxData, 1);
+
 			// check if timeout
 			if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
 				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
 
+				continue;
 				//throw TimeoutE();
 			}
-
-			// try to receice single byte
-			rxLn = read(handle, &rxData, 1);
 
 			if (receivingState == RX_ST_STARTED) {
 				// decrement amont of data to receive
@@ -102,16 +103,21 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 				// check if all bytes has been received
 				if (expectedRxLength <= 0) {
 					receivingState = RX_ST_DONE;
-					std::cout << "I = serial::receiveKissFrame, receiving done, frame->size(): " << frame->size() << std::endl;
+					//std::cout << "I = serial::receiveKissFrame, receiving done, frame->size(): " << frame->size() << std::endl;
 					// do not place the last byte as this is always FEND
 					if (rxData != FEND) {
-						std::cout << "E = serial::receiveKissFrame, the last byte is not 0xC0 (FEND). " << std::endl;
+						std::cout << "E = serial::receiveKissFrame, the last byte is 0x" << std::hex << (int)rxData << std::dec << " not 0xC0 (FEND). " << std::endl;
 
 					}
 				}
 				else {
 					// add data to output buffer
 					frame->push_back(rxData);
+
+					if (rxData == FEND) {
+						std::cout << "E = serial::receiveKissFrame, unexpected 0xC0 (FEND)! current expectedRxLength: " << expectedRxLength << std::endl;
+
+					}
 				}
 			}
 
@@ -126,8 +132,6 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 			}
 
 			if (receivingState == RX_ST_WAITING_FOR_FEND && rxData == FEND) {
-				std::cout << "D = serial::receiveKissFrame, start of frame received, waiting for more" << std::endl;
-
 				receivingState = RX_ST_STARTED_WAITING_FOR_LN;
 			}
 		} while(receivingState != RX_ST_DONE);

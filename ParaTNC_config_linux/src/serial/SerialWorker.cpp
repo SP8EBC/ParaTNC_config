@@ -53,7 +53,7 @@ void * SerialWorker::wrapper(void * object) {
 void SerialWorker::worker(void) {
 	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
-	std::shared_ptr<std::vector<uint8_t>> pointerToData = std::make_shared<std::vector<uint8_t>>();
+	std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
 
 	// pointer to callback
 	IService * serviceCallback = NULL;

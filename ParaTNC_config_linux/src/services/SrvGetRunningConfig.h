@@ -11,20 +11,38 @@
 #include <memory>
 
 #include "../serial/Serial.h"
+#include "../types/CurrentConfigRegion.h"
 
 #include "IService.h"
 
-static enum GetRunningConfigFrameContent {
-	FIRST_REGION	= 0x01,
-	SECOND_REGION	= 0x02,
-	DATA			= 0xFF
-}GetRunningConfigFrameContent;
-
 class SrvGetRunningConfig : public IService {
 
+	/**
+	 * Pointer to serial port context used to talk with TNC
+	 */
 	std::shared_ptr<Serial> s;
 
+	/**
+	 * This is a content of 'GET_RUNNING_CONFIG' request. It is so damn awkward definition,
+	 * because functions for KISS frame transmission have only one overload. his overload expects
+	 * a pointer to vector
+	 */
 	const static shared_ptr<std::vector<uint8_t>> requestData;
+
+	/**
+	 * Current memory area which is received from the TNC + and information if any reception is
+	 * initiated. This holds an internal state
+	 */
+	CurrentConfigRegion currentRegion;
+
+	/**
+	 * How many frames is expected to be received from TNC
+	 */
+	uint16_t expectedKissFrames;
+
+	std::vector<uint8_t> configurationData;
+
+	void reset();
 public:
 	/**
 	 * Sends a request to upload current running configuration
