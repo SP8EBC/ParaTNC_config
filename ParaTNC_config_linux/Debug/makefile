@@ -11,6 +11,7 @@ RM := rm -rf
 -include src/services/subdir.mk
 -include src/serial/subdir.mk
 -include src/exceptions/subdir.mk
+-include src/config/decode/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk

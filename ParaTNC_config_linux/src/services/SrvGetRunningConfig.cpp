@@ -8,6 +8,8 @@
 #include "SrvGetRunningConfig.h"
 #include "../types/CurrentConfigRegion.h"
 
+#include "../config/decode/ValidateVer0.h"
+
 #include <iostream>
 
 /**
@@ -16,8 +18,8 @@
  */
 const shared_ptr<std::vector<uint8_t>> SrvGetRunningConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x20}));
 
-SrvGetRunningConfig::SrvGetRunningConfig(std::shared_ptr<Serial>  serial) : s(serial), currentRegion(UNDEF) {
-
+SrvGetRunningConfig::SrvGetRunningConfig(std::shared_ptr<Serial>  serial) : s(serial), currentRegion(UNDEF), expectedKissFrames(0) {
+	validate = std::make_shared<ValidateVer0>();
 }
 
 SrvGetRunningConfig::~SrvGetRunningConfig() {
@@ -61,18 +63,26 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
 	}
 	else {
 		// if transfer is initiated
-		uint8_t remainingFrames = frame.at(3);
-		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)remainingFrames  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
+		uint8_t currentFrame = frame.at(3);
+		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
 
-//		auto moveFrom = std::make_move_iterator(frame.begin() + 5);
-//		auto moveTo = std::make_move_iterator(frame.end());
-//
-//		// move data into output buffer
-//		configurationData.insert(configurationData.end(), moveFrom, moveTo);
 		auto copyFrom = frame.begin() + 4;
 		auto copyTo = frame.end();
 
 		configurationData.insert(configurationData.end(), copyFrom, copyTo);
+
+		if (currentFrame + 1 == expectedKissFrames) {
+
+			// terminate reception
+//			currentRegion = UNDEF;
+
+			// verify CRC
+			validate->checkValidate(configurationData);
+		}
+		else if (currentFrame + 1 > expectedKissFrames) {
+			std::cout << "E = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
+
+		}
 	}
 
 }

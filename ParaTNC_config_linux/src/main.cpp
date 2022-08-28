@@ -15,7 +15,7 @@ std::shared_ptr<Serial> s = std::make_shared<Serial>();
 
 SrvGetRunningConfig srvRunningConfig (s);
 
-int main() {
+int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
 	//ProgramConfig::readConfigFromFile("");
 #endif
@@ -34,8 +34,12 @@ int main() {
 	std::vector<uint8_t> testRx;
 	std::shared_ptr<std::vector<uint8_t>> pointerRxTest = std::make_shared<std::vector<uint8_t>>(testRx);
 
-
-	s->init("/dev/ttyUSB0", B9600);
+	if (argc > 1) {
+		s->init(argv[1], B9600);
+	}
+	else {
+		s->init("/dev/ttyUSB0", B9600);
+	}
 
 	worker.start();
 	s->transmitKissFrame(pointerTxTest);

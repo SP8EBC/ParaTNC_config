@@ -3,7 +3,9 @@ src/main.o: ../src/main.cpp ../src/ProgramConfig.h ../src/serial/Serial.h \
  ../src/serial/Serial.h ../src/serial/../services/IService.h \
  ../src/services/ServicesIds.h ../src/services/SrvGetRunningConfig.h \
  ../src/services/../serial/Serial.h \
- ../src/services/../types/CurrentConfigRegion.h \
+ ../src/services/../types/CurrentConfigRegion.h ../src/services/../CRC.h \
+ ../src/services/../config/decode/IConfigDecode.h \
+ ../src/services/../config/decode/IConfigValidate.h \
  ../src/services/IService.h
 
 ../src/ProgramConfig.h:
@@ -25,5 +27,11 @@ src/main.o: ../src/main.cpp ../src/ProgramConfig.h ../src/serial/Serial.h \
 ../src/services/../serial/Serial.h:
 
 ../src/services/../types/CurrentConfigRegion.h:
+
+../src/services/../CRC.h:
+
+../src/services/../config/decode/IConfigDecode.h:
+
+../src/services/../config/decode/IConfigValidate.h:
 
 ../src/services/IService.h:

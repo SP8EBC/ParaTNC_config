@@ -12,6 +12,10 @@
 
 #include "../serial/Serial.h"
 #include "../types/CurrentConfigRegion.h"
+#include "../CRC.h"
+
+#include "../config/decode/IConfigDecode.h"
+#include "../config/decode/IConfigValidate.h"
 
 #include "IService.h"
 
@@ -40,7 +44,12 @@ class SrvGetRunningConfig : public IService {
 	 */
 	uint16_t expectedKissFrames;
 
+	/*
+	 * Configuration data extacted from frames
+	 */
 	std::vector<uint8_t> configurationData;
+
+	std::shared_ptr<IConfigValidate> validate;
 
 	void reset();
 public:
