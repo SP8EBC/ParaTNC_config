@@ -12,7 +12,6 @@
 
 #include "../serial/Serial.h"
 #include "../types/CurrentConfigRegion.h"
-#include "../CRC.h"
 
 #include "../config/decode/IConfigDecode.h"
 #include "../config/decode/IConfigValidate.h"
