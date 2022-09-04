@@ -19,6 +19,7 @@
 #include "../../types/Rtu.h"
 #include "../../types/Digi.h"
 #include "../../types/DigiFilter.h"
+#include "../../types/ButtonFunction.h"
 
 
 class IConfigDecode {
@@ -45,6 +46,9 @@ public:
 	virtual bool getDigiAlwaysMessageAndStatus() = 0;	// reserved
 	virtual DigiFilter getDigiFilter() = 0;		// reserved
 	virtual std::string getDigiFilterPrefixList(uint8_t entry) = 0;		// reserved
+	virtual ButtonFunction getButtonOneFunction() = 0;
+	virtual ButtonFunction getButtonTwoFunction() = 0;
+
 
 	virtual void getCallsign(std::string & call) = 0;
 	virtual uint8_t getCallsign() = 0;
