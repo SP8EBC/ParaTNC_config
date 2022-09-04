@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED) {
+Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), i(0) {
 }
 
 void Serial::transmitKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
@@ -88,6 +88,12 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 			// try to receice single byte
 			rxLn = read(handle, &rxData, 1);
 
+			if (rxLn == 0) {
+				continue;
+			}
+
+			raw[i++]	= rxData;
+
 			// check if timeout
 			if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
 				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
@@ -115,7 +121,7 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 					frame->push_back(rxData);
 
 					if (rxData == FEND) {
-						std::cout << "E = serial::receiveKissFrame, unexpected 0xC0 (FEND)! current expectedRxLength: " << expectedRxLength << std::endl;
+						std::cout << "E = serial::receiveKissFrame, unexpected 0xC0 (FEND)! current expectedRxLength: " << expectedRxLength << ", i: " << i << std::endl;
 
 					}
 				}
@@ -198,6 +204,9 @@ bool Serial::init(string port, speed_t speed)
 	return true;
 }
 
+void Serial::waitForTransmissionDone() {
+	tcdrain(handle);
+}
 //void serial::test_transmit()
 //{
 //	for (uint8_t i = 0; i < 255; i++)

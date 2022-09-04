@@ -8,12 +8,14 @@
 
 #include "services/ServicesIds.h"
 #include "services/SrvGetRunningConfig.h"
+#include "services/SrvGetVersionAndId.h"
 
 std::map<uint8_t, IService*> callbackMap;
 
 std::shared_ptr<Serial> s = std::make_shared<Serial>();
 
 SrvGetRunningConfig srvRunningConfig (s);
+SrvGetVersionAndId srvGetVersion(s);
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -25,6 +27,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 
 	SerialWorker worker(s, callbackMap);
 
@@ -42,7 +45,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	worker.start();
-	s->transmitKissFrame(pointerTxTest);
+	srvRunningConfig.sendRequest();
+	s->waitForTransmissionDone();
+	srvGetVersion.sendRequest();
+//	s->transmitKissFrame(pointerTxTest);
 //	s->receiveKissFrame(pointerRxTest);
 	worker.terminate();
 

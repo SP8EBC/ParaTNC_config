@@ -31,10 +31,11 @@ SerialWorker::SerialWorker(SerialWorker &&other) : callbackMap(other.callbackMap
 }
 
 SerialWorker& SerialWorker::operator=(const SerialWorker &other) {
-
+	return * this;
 }
 
 SerialWorker& SerialWorker::operator=(SerialWorker &&other) {
+	return * this;
 
 }
 
@@ -73,6 +74,9 @@ void SerialWorker::worker(void) {
 			switch(frameType) {
 				case KISS_RUNNING_CONFIG:
 					serviceCallback = this->callbackMap.at(KISS_RUNNING_CONFIG);
+					break;
+				case KISS_VERSION_AND_ID:
+					serviceCallback = this->callbackMap.at(KISS_VERSION_AND_ID);
 					break;
 				default: break;
 			}
