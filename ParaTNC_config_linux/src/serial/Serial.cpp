@@ -24,7 +24,7 @@
 
 using namespace std;
 
-Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED) {
+Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), i(0) {
 }
 
 void Serial::transmitKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
@@ -88,6 +88,12 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 			// try to receice single byte
 			rxLn = read(handle, &rxData, 1);
 
+//			tcflush( handle, TCIFLUSH );
+
+			if (rxLn == 0) {
+				continue;
+			}
+
 			// check if timeout
 			if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
 				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
@@ -95,6 +101,8 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 				continue;
 				//throw TimeoutE();
 			}
+
+			rawArray[i++] = rxData;
 
 			if (receivingState == RX_ST_STARTED) {
 				// decrement amont of data to receive
@@ -139,6 +147,10 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 	}
 }
 
+void Serial::waitForTxComplete() {
+	tcdrain(handle);
+}
+
 Serial::~Serial() {
 	// TODO Auto-generated destructor stub
 }
@@ -173,13 +185,13 @@ bool Serial::init(string port, speed_t speed)
 	tty.c_lflag &= ~(ECHO|ECHOE|ECHOK|ECHONL|ICANON|ISIG|IEXTEN|NOFLSH|TOSTOP|PENDIN);
 	tty.c_cflag &= ~(CSIZE|PARENB);
 	tty.c_cflag |= CS8|CREAD;
-	tty.c_cc[VMIN] = 0;		// bylo 80
+	tty.c_cc[VMIN] = 1;		// bylo 80
 	tty.c_cc[VTIME] = 3;		// byo 3
 
 	cfsetospeed (&tty, speed);
 	cfsetispeed (&tty, speed);
 
-	/* Make raw */
+//	/* Make raw */
 //	cfmakeraw(&tty);
 
 	/* Flush Port, then applies attributes */

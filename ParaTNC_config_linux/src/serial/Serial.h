@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 
 #include "../types/SerialState.h"
 
@@ -33,7 +34,8 @@ class Serial {
 	struct termios tty;
 	struct termios tty_old;
 
-
+	std::array<uint8_t, 2048> rawArray;
+	int i;
 
 public:
 	bool init(string port, speed_t speed);
@@ -41,6 +43,8 @@ public:
 
 	void transmitKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
 	void receiveKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
+
+	void waitForTxComplete();
 
 	Serial();
 	virtual ~Serial();
