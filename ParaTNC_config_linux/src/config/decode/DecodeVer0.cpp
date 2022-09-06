@@ -6,6 +6,9 @@
  */
 
 #include "DecodeVer0.h"
+#include "../../exceptions/NotSupportedEx.h"
+
+#include <algorithm>
 
 #define CONFIG_MODE_PGM_CNTR	0x0
 #define CONFIG_MODE_OFSET		0x20			//	Current size: 0x10, free: 0x10
@@ -104,120 +107,398 @@
 	#define GSM_APRSIS_PORT_LN		2
 #define GSM_APRSIS_PASSCODE_OFFSET	0xF4
 
+DecodeVer0::DecodeVer0(const std::vector<uint8_t> &configData) : data(configData) {
+}
 
 DecodeVer0::~DecodeVer0() {
-	// TODO Auto-generated destructor stub
 }
 
 bool DecodeVer0::getMs5611orBmeSensor() {
+	bool output = false;
+
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_WX_MS5611_OR_BME_OFFSET );
+
+	output = (byte != 0) ? true : false;
+
+	return output;
 }
 
 DigiFilter DecodeVer0::getDigiFilter() {
+
+	DigiFilter out;
+
+	uint8_t only_ssid = data.at(CONFIG_MODE_OFSET + MODE_DIGI_ONLY_SSID_OFFSET);
+
+	if (only_ssid == 1) {
+		out = DIGI_FILTER_SSID789_ONLY;
+	}
+	else {
+		out = DIGI_FILTER_OFF;
+	}
+
+	return out;
 }
 
 uint8_t DecodeVer0::getWxTransmitPeriod() {
+	return data.at(CONFIG_BASIC_OFFSET + BASIC_WX_TRANSMIT_PERIOD);
 }
 
 ButtonFunction DecodeVer0::getButtonTwoFunction() {
+	throw NotSupportedEx(); // TODO: not yet available
 }
 
 bool DecodeVer0::getKeepGsmAlwaysOn() {
+	bool output = false;
+
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_POWERSAVE_KEEP_GSM_OFFSET );
+
+	output = (byte == 1) ? true : false;
+
+	return output;
 }
 
 bool DecodeVer0::getGsmApiEnable() {
+	bool output = false;
+
+	uint8_t byte = data.at(CONFIG_GSM_OFFSET + GSM_API_ENABLE_OFFSET );
+
+	output = (byte == 1) ? true : false;
+
+	return output;
 }
 
 uint8_t DecodeVer0::getAnemometerPulsesConstant() {
+	return data.at(CONFIG_MODE_OFSET + MODE_WX_ANEMOMETER_CONST_OFFSET);
+
 }
 
 uint8_t DecodeVer0::getRtuSlaveParity() {
+	return data.at(CONFIG_MODE_OFSET + MODE_WX_ANEMOMETER_CONST_OFFSET);
+
 }
 
-uint8_t DecodeVer0::getCallsign() {
+uint8_t DecodeVer0::getSsid() {
+	return data.at(CONFIG_BASIC_OFFSET + BASIC_SSID_OFFSET);
 }
 
 void DecodeVer0::getGsmApiBaseUrl(std::string &password) {
+	std::size_t offset = GSM_API_BASE_URL_OFFSET + CONFIG_GSM_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + GSM_API_BASE_URL_LEN;
+
+	password.clear();
+
+	std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
+
+
 }
 
 Digi DecodeVer0::getDigiEnabled() {
+	Digi out;
+
+	uint8_t digi_viscous = data.at(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_OFFSET);
+
+	uint8_t digi = data.at(CONFIG_MODE_OFSET + MODE_DIGI_OFFSET);
+
+	if (digi == 1 && digi_viscous == 0) {
+		out = DIGI_WIDE1;
+	}
+	else if (digi == 1 && digi_viscous == 1) {
+		out = DIGI_VISCOUS_WIDE1;
+	}
+	else {
+		out = DIGI_OFF;
+	}
+
+	return out;
 }
 
 Powersave DecodeVer0::getPowersave() {
+	Powersave out;
+
+	uint8_t pwsave = data.at(CONFIG_MODE_OFSET + MODE_POWERSAVE_OFFSET);
+
+	if (pwsave == 1) {
+		out = PWSAVE_NORMAL;
+	}
+	else if (pwsave == 2) {
+		out = PWSAVE_AGGRESV;
+	}
+	else {
+		out = PWSAVE_NONE;
+	}
+
+	return out;
 }
 
 AprsPath DecodeVer0::getPath() {
+	AprsPath out;
+
+	uint8_t path = data.at(CONFIG_BASIC_OFFSET + BASIC_PATHTYPE_OFFSET);
+
+	if (path == 1) {
+		out = PATH_WIDE11;
+	}
+	else if (path == 2) {
+		out = PATH_WIDE21;
+	}
+	else {
+		out = PATH_NOPATH;
+	}
+
+	return out;
 }
 
 uint8_t DecodeVer0::getRtuChannelWindgusts() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_GUSTS_OFFSET );
+
+	return byte;
 }
 
 bool DecodeVer0::getGsmAprsisEnable() {
+	uint8_t byte = data.at(CONFIG_GSM_OFFSET + GSM_APRSIS_ENABLE );
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool DecodeVer0::getNorS() {
+	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET );
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 std::string DecodeVer0::getDigiFilterPrefixList(uint8_t entry) {
+	throw NotSupportedEx();	// TODO: not yet available
 }
 
 uint16_t DecodeVer0::getUmbChannelWinddirection() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDDIRECTION );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDDIRECTION + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 uint8_t DecodeVer0::getRtuChannelWinddirection() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_DIR_OFFSET );
+
+	return byte;
 }
 
 uint8_t DecodeVer0::getBeaconTransmitPeriod() {
+	return data.at(CONFIG_BASIC_OFFSET + BASIC_BEACON_TRANSMIT_PERIOD);
+
 }
 
 uint8_t DecodeVer0::getDigiDelayInMsec() {
+	return data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET);
+
 }
 
 uint32_t DecodeVer0::getGsmPin() {
+	uint8_t lsb_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET);
+	uint8_t nd_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 1);
+	uint8_t rd_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 2);
+	uint8_t msb_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 3);
+
+
+	return lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24);
+
 }
 
 uint16_t DecodeVer0::getUmbChannelWindspeed() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDSPEED );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDSPEED + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 uint16_t DecodeVer0::getUmbChannelQnh() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_QNH );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_QNH + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 uint16_t DecodeVer0::getRtuSlaveSpeed() {
+	uint8_t lsb_byte = data.at(CONFIG_RTU_OFFSET + RTU_SLAVE_SPEED_OFFSET );
+	uint8_t msb_byte = data.at(CONFIG_RTU_OFFSET + RTU_SLAVE_SPEED_OFFSET + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 void DecodeVer0::getGsmApnName(std::string &apn) {
+	std::size_t offset = GSM_APN_OFFSET + CONFIG_GSM_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + GSM_APN_LENGHT;
+
+	apn.clear();
+
+	std::for_each(startIt, endIt, [&apn](uint8_t b) { apn.append(1, (char) b);});
 }
 
 void DecodeVer0::getCallsign(std::string &call) {
+	std::size_t offset = BASIC_CALLSIGN_OFFSET + CONFIG_BASIC_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + GSM_APN_LENGHT;
+
+	call.clear();
+
+	std::for_each(startIt, endIt, [&call](uint8_t b) { call.append(1, (char) b);});
 }
 
 uint16_t DecodeVer0::getUmbSlaveId() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_SLAVE_ID_OFFSET );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_SLAVE_ID_OFFSET + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 uint8_t DecodeVer0::getDigiRadiusFilter() {
+	throw NotSupportedEx(); // TODO: not yet available
+
 }
 
 bool DecodeVer0::getEorW() {
+	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 WeatherSource DecodeVer0::getWindSrc() {
+	WeatherSource out;
+
+	uint8_t byte = data.at(CONFIG_SOURCES_OFFSET + SOURCE_WIND_OFFSET);
+
+	if (byte == 2) {
+		out = WX_SOURCE_UMB;
+	}
+	else if (byte == 3) {
+		out = WX_SOURCE_RTU;
+	}
+	else if (byte == 4) {
+		out = WX_SOURCE_FULL_RTU;
+	}
+	else if (byte == 5) {
+		out = WX_SOURCE_DAVIS_SERIAL;
+	}
+	else {
+		out = WX_SOURCE_INTERNAL;
+	}
+
+	return out;
 }
 
 AprsSymbol DecodeVer0::getSymbol() {
+
+	AprsSymbol out;
+
+	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_SYMBOL_OFFSET);
+
+	if (byte == 1) {
+		out = SYMBOL_WIDE1_DIGI;
+	}
+	else if (byte == 2) {
+		out = SYMBOL_HOUSE;
+	}
+	else if (byte == 3) {
+		out = SYMBOL_RXIGATE;
+	}
+	else if (byte == 4) {
+		out = SYMBOL_IGATE;
+	}
+	else {
+		out = SYMBOL_DIGI;
+	}
+
+	return out;
+
 }
 
 bool DecodeVer0::getVictronEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_VICTRON_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool DecodeVer0::getGsmEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_GSM_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 uint8_t DecodeVer0::getVisvousDelayInSec() {
+	return data.at(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_DELAY_OFFSET);
+
 }
 
 bool DecodeVer0::getBeaconAtStartup() {
+	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_BEACON_BOOTUP_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 Rtu DecodeVer0::getRtuChannelConfig(uint8_t channel) {
+	/**
+	 * 	uint8_t busAddress;
+	uint8_t function;
+	uint16_t registerAddress;
+	uint16_t lenght;
+	uint8_t coeff_a;
+	uint8_t coeff_b;
+	uint8_t coeff_c;
+	uint8_t coeff_d;
+	bool unsignedSigned;
+	 */
+
+	Rtu out;
+
+	std::size_t channelOffset = CONFIG_RTU_OFFSET + RTU_SLAVE_CONFIG_BLOCK_OFFSET + (RTU_SLAVE_CONFIG_BLOCK_SIZE * channel);
+
+	out.function = data.at(RTU_X_FUNCTION + channelOffset);
+	out.coeff_a = data.at(RTU_X_SCALLING_A + channelOffset);
+	out.coeff_b = data.at(RTU_X_SCALLING_B + channelOffset);
+	out.coeff_c = data.at(RTU_X_SCALLING_C + channelOffset);
+	out.coeff_d = data.at(RTU_X_SCALLING_D + channelOffset);
+
+	out.lenght = data.at(RTU_X_LENGHT + channelOffset) | (data.at(RTU_X_LENGHT + channelOffset + 1) << 8);
+	out.registerAddress = data.at(RTU_X_REGUSTER_ADDR + channelOffset) | (data.at(RTU_X_REGUSTER_ADDR + channelOffset + 1) << 8);
+
+
+
+	return out;
 }
 
 uint8_t DecodeVer0::getRtuChannelTemperature() {
@@ -227,6 +508,8 @@ void DecodeVer0::getGsmApnUsername(std::string &username) {
 }
 
 ButtonFunction DecodeVer0::getButtonOneFunction() {
+	throw NotSupportedEx(); // TODO: not yet available
+
 }
 
 uint16_t DecodeVer0::getUmbSlaveClass() {

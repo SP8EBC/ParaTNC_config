@@ -11,7 +11,12 @@
 #include "IConfigDecode.h"
 
 class DecodeVer0: public IConfigDecode {
+
+	const std::vector<uint8_t> data;
+
 public:
+	DecodeVer0(const std::vector<uint8_t> & configData);
+
 	virtual ~DecodeVer0();
 	virtual bool getMs5611orBmeSensor() override;
 	virtual DigiFilter getDigiFilter() override;
@@ -21,7 +26,7 @@ public:
 	virtual bool getGsmApiEnable() override;
 	virtual uint8_t getAnemometerPulsesConstant() override;
 	virtual uint8_t getRtuSlaveParity() override;
-	virtual uint8_t getCallsign() override;
+	virtual uint8_t getSsid() override;
 	virtual void getGsmApiBaseUrl(std::string &password) override;
 	virtual Digi getDigiEnabled() override;
 	virtual Powersave getPowersave() override;

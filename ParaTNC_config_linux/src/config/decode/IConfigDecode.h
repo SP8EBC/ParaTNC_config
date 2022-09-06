@@ -51,7 +51,7 @@ public:
 
 
 	virtual void getCallsign(std::string & call) = 0;
-	virtual uint8_t getCallsign() = 0;
+	virtual uint8_t getSsid() = 0;
 	virtual float getLatitude() = 0;
 	virtual bool getNorS() = 0;
 	virtual float getLongitude() = 0;
