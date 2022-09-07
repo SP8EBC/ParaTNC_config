@@ -26,6 +26,11 @@ class SrvGetRunningConfig : public IService {
 	std::shared_ptr<Serial> s;
 
 	/**
+	 *
+	 */
+	std::shared_ptr<pthread_cond_t> conditionVariable;
+
+	/**
 	 * This is a content of 'GET_RUNNING_CONFIG' request. It is so damn awkward definition,
 	 * because functions for KISS frame transmission have only one overload. his overload expects
 	 * a pointer to vector
@@ -62,12 +67,26 @@ public:
 	 */
 	virtual void callback(const std::vector<uint8_t> & frame);
 
-	SrvGetRunningConfig(std::shared_ptr<Serial>  serial);
+
+	SrvGetRunningConfig();
 	virtual ~SrvGetRunningConfig();
 	SrvGetRunningConfig(const SrvGetRunningConfig &other);
 	SrvGetRunningConfig(SrvGetRunningConfig &&other);
 	SrvGetRunningConfig& operator=(const SrvGetRunningConfig &other);
 	SrvGetRunningConfig& operator=(SrvGetRunningConfig &&other);
+
+	void setSerialContext(const std::shared_ptr<Serial> &s) {
+		this->s = s;
+	}
+
+	void setConditionVariable(
+			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+		this->conditionVariable = conditionVariable;
+	}
+
+	const std::vector<uint8_t>& getConfigurationData() const {
+		return configurationData;
+	}
 };
 
 #endif /* SRC_SERVICES_SRVGETRUNNINGCONFIG_H_ */

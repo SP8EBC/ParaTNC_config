@@ -502,72 +502,259 @@ Rtu DecodeVer0::getRtuChannelConfig(uint8_t channel) {
 }
 
 uint8_t DecodeVer0::getRtuChannelTemperature() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_TEMPERATURE_SRC_OFFSET );
+
+	return byte;
 }
 
 void DecodeVer0::getGsmApnUsername(std::string &username) {
+	std::size_t offset = GSM_USERNAME_OFFSET + CONFIG_GSM_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + GSM_USERNAME_LEN;
+
+	if (*startIt == 0xFF || *startIt == 0x00) {
+		return;
+	}
+
+	username.clear();
+
+	std::for_each(startIt, endIt, [&username](uint8_t b) { username.append(1, (char) b);});
 }
 
 ButtonFunction DecodeVer0::getButtonOneFunction() {
-	throw NotSupportedEx(); // TODO: not yet available
+	throw NotSupportedEx();	// TODO:
 
 }
 
 uint16_t DecodeVer0::getUmbSlaveClass() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_SLAVE_CLASS_OFFSET );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_SLAVE_CLASS_OFFSET + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 void DecodeVer0::getDescritpion(std::string &description) {
+	std::size_t offset = BASIC_COMMENT_OFFSET + CONFIG_BASIC_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + BASIC_COMMENT_LENGHT;
+
+	if (*startIt == 0xFF || *startIt == 0x00) {
+		return;
+	}
+
+	description.clear();
+
+	std::for_each(startIt, endIt, [&description](uint8_t b) { description.append(1, (char) b);});
 }
 
 uint16_t DecodeVer0::getUmbChannelTemperature() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 uint16_t DecodeVer0::getUmbChannelWinggusts() {
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE + 1);
+
+	return lsb_byte | (msb_byte << 8);
 }
 
 WeatherSource DecodeVer0::getPressureSrc() {
+	WeatherSource out;
+
+	uint8_t byte = data.at(CONFIG_SOURCES_OFFSET + SOURCE_PRESSURE_OFFSET);
+
+	if (byte == 2) {
+		out = WX_SOURCE_UMB;
+	}
+	else if (byte == 3) {
+		out = WX_SOURCE_RTU;
+	}
+	else if (byte == 4) {
+		out = WX_SOURCE_FULL_RTU;
+	}
+	else if (byte == 5) {
+		out = WX_SOURCE_DAVIS_SERIAL;
+	}
+	else {
+		out = WX_SOURCE_INTERNAL;
+	}
+
+	return out;
 }
 
 bool DecodeVer0::getWxModbusEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_WX_MODBUS_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 float DecodeVer0::getLongitude() {
+	uint8_t lsb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS);
+	uint8_t nd_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS + 1);
+	uint8_t rd_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS + 2);
+	uint8_t msb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS + 3);
+
+
+	return (float)(lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
 }
 
 float DecodeVer0::getLatitude() {
+	uint8_t lsb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET);
+	uint8_t nd_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 1);
+	uint8_t rd_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 2);
+	uint8_t msb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 3);
+
+
+	return (float)(lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
 }
 
 WeatherSource DecodeVer0::getTemperatureSrc() {
+	WeatherSource out;
+
+	uint8_t byte = data.at(CONFIG_SOURCES_OFFSET + SOURCE_TEMPERATURE_OFFSET);
+
+	if (byte == 2) {
+		out = WX_SOURCE_UMB;
+	}
+	else if (byte == 3) {
+		out = WX_SOURCE_RTU;
+	}
+	else if (byte == 4) {
+		out = WX_SOURCE_FULL_RTU;
+	}
+	else if (byte == 5) {
+		out = WX_SOURCE_DAVIS_SERIAL;
+	}
+	else {
+		out = WX_SOURCE_INTERNAL;
+	}
+
+	return out;
 }
 
 bool DecodeVer0::getRtuFullWindData() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_USE_FULL_WIND_DATA_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 uint8_t DecodeVer0::getRtuSlaveStopBits() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_SLAVE_STOP_BITS_OFFSET );
+
+	return byte;
 }
 
 uint8_t DecodeVer0::getRtuChannelWindspeed() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_SPEED_OFFSET );
+
+	return byte;
 }
 
 bool DecodeVer0::getDigiAlwaysMessageAndStatus() {
+	throw NotSupportedEx();	// TODO:
+
 }
 
 bool DecodeVer0::getWxUmbEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_WX_UMB_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool DecodeVer0::getWxEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_WX_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool DecodeVer0::getWxDavisEnabled() {
+	uint8_t byte = data.at(CONFIG_MODE_OFSET + MODE_WX_DAVIS_OFFSET);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 uint8_t DecodeVer0::getRtuChannelQnh() {
+	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_PRESSURE_SRC_OFFSET );
+
+	return byte;
 }
 
 bool DecodeVer0::getWxDoubleTransmit() {
+	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_WX_DOUBLE_TRANSMIT);
+
+	if (byte == 1) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 WeatherSource DecodeVer0::getHumiditySrc() {
+	WeatherSource out;
+
+	uint8_t byte = data.at(CONFIG_SOURCES_OFFSET + SOURCE_HUMIDITY_OFFSET);
+
+	if (byte == 2) {
+		out = WX_SOURCE_UMB;
+	}
+	else if (byte == 3) {
+		out = WX_SOURCE_RTU;
+	}
+	else if (byte == 4) {
+		out = WX_SOURCE_FULL_RTU;
+	}
+	else if (byte == 5) {
+		out = WX_SOURCE_DAVIS_SERIAL;
+	}
+	else {
+		out = WX_SOURCE_INTERNAL;
+	}
+
+	return out;
 }
 
 void DecodeVer0::getGsmApnPassword(std::string &password) {
+	std::size_t offset = GSM_PASSWORD_OFFSET + CONFIG_GSM_OFFSET;
+
+	auto startIt = data.begin() + offset;
+	auto endIt = data.begin() + offset + GSM_USERNAME_LEN;
+
+	if (*startIt == 0xFF || *startIt == 0x00) {
+		return;
+	}
+
+	password.clear();
+
+	std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
 }

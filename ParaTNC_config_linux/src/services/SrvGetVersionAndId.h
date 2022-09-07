@@ -32,10 +32,14 @@ public:
 	SrvGetVersionAndId& operator=(const SrvGetVersionAndId &other);
 	SrvGetVersionAndId(SrvGetVersionAndId &&other);
 	SrvGetVersionAndId(const SrvGetVersionAndId &other);
-	SrvGetVersionAndId(std::shared_ptr<Serial>  serial);
+	SrvGetVersionAndId();
 	virtual void callback(
 			const std::vector<unsigned char, std::allocator<unsigned char> > &frame)
 					override;
+
+	void setSerialContext(const std::shared_ptr<Serial> &s) {
+		this->s = s;
+	}
 };
 
 #endif /* SRC_SERVICES_SRVGETVERSIONANDID_H_ */

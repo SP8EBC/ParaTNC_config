@@ -14,7 +14,8 @@ src/main.o: ../src/main.cpp ../src/ProgramConfig.h ../src/serial/Serial.h \
  ../src/services/../config/decode/../../types/DigiFilter.h \
  ../src/services/../config/decode/../../types/ButtonFunction.h \
  ../src/services/../config/decode/IConfigValidate.h \
- ../src/services/IService.h ../src/services/SrvGetVersionAndId.h
+ ../src/services/IService.h ../src/services/SrvGetVersionAndId.h \
+ ../src/config/decode/DecodeVer0.h ../src/config/decode/IConfigDecode.h
 
 ../src/ProgramConfig.h:
 
@@ -59,3 +60,7 @@ src/main.o: ../src/main.cpp ../src/ProgramConfig.h ../src/serial/Serial.h \
 ../src/services/IService.h:
 
 ../src/services/SrvGetVersionAndId.h:
+
+../src/config/decode/DecodeVer0.h:
+
+../src/config/decode/IConfigDecode.h:

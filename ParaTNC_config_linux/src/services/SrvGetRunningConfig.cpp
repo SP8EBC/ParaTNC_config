@@ -18,7 +18,7 @@
  */
 const shared_ptr<std::vector<uint8_t>> SrvGetRunningConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x20}));
 
-SrvGetRunningConfig::SrvGetRunningConfig(std::shared_ptr<Serial>  serial) : s(serial), currentRegion(UNDEF), expectedKissFrames(0) {
+SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
 	validate = std::make_shared<ValidateVer0>();
 }
 
@@ -78,6 +78,10 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
 
 			// verify CRC
 			validate->checkValidate(configurationData);
+
+			if (conditionVariable) {
+				pthread_cond_signal(conditionVariable.get());
+			}
 		}
 		else if (currentFrame + 1 > expectedKissFrames) {
 			std::cout << "E = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
@@ -95,6 +99,8 @@ SrvGetRunningConfig& SrvGetRunningConfig::operator=(SrvGetRunningConfig &&other)
 }
 
 void SrvGetRunningConfig::sendRequest() {
-	s->transmitKissFrame(SrvGetRunningConfig::requestData);
+	if (s) {
+		s->transmitKissFrame(SrvGetRunningConfig::requestData);
+	}
 
 }
