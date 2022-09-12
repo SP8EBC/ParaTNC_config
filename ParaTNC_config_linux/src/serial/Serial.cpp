@@ -71,7 +71,7 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 	// received byte
 	uint8_t rxData = 0;
 
-	// return from read function
+	// return from read functionbyte
 	ssize_t rxLn = 0;
 
 	// amount of data between
@@ -93,6 +93,9 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 			}
 
 			raw[i++]	= rxData;
+			if (i >= 2047) {
+				i = 0;
+			}
 
 			// check if timeout
 			if (currentTime.tv_sec - receivingStart.tv_sec > 1) {

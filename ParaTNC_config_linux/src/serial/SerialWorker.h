@@ -33,6 +33,13 @@ class SerialWorker {
 	pthread_t thread;
 
 	/**
+	 *
+	 */
+	pthread_cond_t workerStartSync;
+
+	pthread_mutex_t workerLock;
+
+	/**
 	 * Static wrapper to workaround static call to pthread_create
 	 */
 	static void * wrapper(void * object);
@@ -60,6 +67,8 @@ public:
 	bool start(void);
 
 	void terminate(void);
+
+	void waitForStartup(void);
 
 	SerialWorker(std::shared_ptr<Serial> serial, std::map<uint8_t, IService*> & callbcks);
 	virtual ~SerialWorker();

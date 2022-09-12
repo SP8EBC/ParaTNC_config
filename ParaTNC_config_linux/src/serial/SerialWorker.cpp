@@ -13,7 +13,9 @@
 
 
 SerialWorker::SerialWorker(std::shared_ptr<Serial> serial, std::map<uint8_t, IService*> & callbcks)
-																	: ctx(serial), callbackMap(callbcks) {
+																	: ctx(serial), callbackMap(callbcks),
+																	  workerStartSync(PTHREAD_COND_INITIALIZER),
+																	  workerLock(PTHREAD_MUTEX_INITIALIZER) {
 	pointerThis = std::shared_ptr<SerialWorker>(this);
 
 	workerLoop = true;
@@ -32,6 +34,10 @@ SerialWorker::SerialWorker(SerialWorker &&other) : callbackMap(other.callbackMap
 
 SerialWorker& SerialWorker::operator=(const SerialWorker &other) {
 	return * this;
+}
+
+void SerialWorker::waitForStartup(void) {
+
 }
 
 SerialWorker& SerialWorker::operator=(SerialWorker &&other) {
@@ -54,6 +60,9 @@ void * SerialWorker::wrapper(void * object) {
 void SerialWorker::worker(void) {
 	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
+	pthread_cond_signal(&this->workerStartSync);
+
+	// this vector is stripped from FEND!!!
 	std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
 
 	// pointer to callback
@@ -71,15 +80,7 @@ void SerialWorker::worker(void) {
 			// get frame type
 			uint8_t frameType = pointerToData->at(1);
 
-			switch(frameType) {
-				case KISS_RUNNING_CONFIG:
-					serviceCallback = this->callbackMap.at(KISS_RUNNING_CONFIG);
-					break;
-				case KISS_VERSION_AND_ID:
-					serviceCallback = this->callbackMap.at(KISS_VERSION_AND_ID);
-					break;
-				default: break;
-			}
+			serviceCallback = this->callbackMap.at(frameType);
 
 			if (serviceCallback != NULL) {
 				// invoke callback
@@ -97,7 +98,16 @@ bool SerialWorker::start(void) {
 
 	workerLoop = true;
 
+//    pthread_mutex_lock(&workerLock);
+
 	pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);
+
+//    // wait for configuration to be received
+//    pthread_cond_wait(&workerStartSync, &workerLock);
+//
+//    pthread_mutex_unlock(&workerLock);
+
+	std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
 
 	return true;
 }

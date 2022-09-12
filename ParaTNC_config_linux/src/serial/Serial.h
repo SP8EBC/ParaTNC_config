@@ -23,6 +23,23 @@
 
 #include "../types/SerialState.h"
 
+/**
+ * Due to some unfortunate omission there is a inconsistency in KISS extented protocol.
+ * Originally KISS frame with data received from RF channel looks like that:
+ * 		FEND, 0x00, data, data, data, data, FEND
+ * 	There is no frame ln anywhere. The second byte (first after FEND) is divided into two
+ * 	nibbles. High nibble is an id of TNC port which RX/TX the data, low nibble is a command.
+ *
+ * 	In this KISS protocol extension (or rather variant) 0x00 meand always data from/to radio channel.
+ * 	As there is always one, single radio port all other features of KISS proto all scraped. If second byte
+ * 	is non zero it means that this is an exntented frame and this byte is keeps frame lenght. BUT THIS
+ * 	ONLY APPLIES TO FRAMES TNC -> PC
+ *
+ * 	frames in opposite direction doesn't have size and second byte holds command ID
+ *
+ *
+ */
+
 using namespace std;
 
 class Serial {

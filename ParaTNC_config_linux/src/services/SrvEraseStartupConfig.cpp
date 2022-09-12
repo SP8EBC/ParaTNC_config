@@ -8,6 +8,7 @@
 #include "SrvEraseStartupConfig.h"
 
 #include <vector>
+#include <iostream>
 
 const shared_ptr<std::vector<uint8_t>> SrvEraseStartupConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x22}));
 
@@ -43,6 +44,19 @@ SrvEraseStartupConfig& SrvEraseStartupConfig::operator=(
 
 }
 
+void SrvEraseStartupConfig::sendRequest() {
+	if (s) {
+		s->transmitKissFrame(SrvEraseStartupConfig::requestData);
+	}
+}
+
 void SrvEraseStartupConfig::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> > &frame) {
+
+	int32_t result = (int32_t)frame.at(2);
+
+	operationResult = (erasing_programming_result_t)result;
+
+	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
+
 }

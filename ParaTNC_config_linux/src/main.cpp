@@ -10,6 +10,7 @@
 #include "services/ServicesIds.h"
 #include "services/SrvGetRunningConfig.h"
 #include "services/SrvGetVersionAndId.h"
+#include "services/SrvEraseStartupConfig.h"
 
 #include "config/decode/DecodeVer0.h"
 
@@ -19,6 +20,7 @@ std::shared_ptr<Serial> s;
 
 SrvGetRunningConfig srvRunningConfig;
 SrvGetVersionAndId srvGetVersion;
+SrvEraseStartupConfig srvEraseConfig;
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -41,11 +43,13 @@ int main(int argc, char *argv[]) {
 
 	srvRunningConfig.setSerialContext(s);
 	srvGetVersion.setSerialContext(s);
+	srvEraseConfig.setSerialContext(s);
 
 	srvRunningConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
 
 	SerialWorker worker(s, callbackMap);
 
@@ -63,9 +67,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	worker.start();
-	srvRunningConfig.sendRequest();
-	s->waitForTransmissionDone();
-	srvGetVersion.sendRequest();
+	worker.waitForStartup();
+//	srvRunningConfig.sendRequest();
+//	s->waitForTransmissionDone();
+//	srvGetVersion.sendRequest();
+//	s->waitForTransmissionDone();
+	srvEraseConfig.sendRequest();
 
     pthread_mutex_lock(&lock);
 
