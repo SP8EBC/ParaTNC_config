@@ -11,6 +11,7 @@
 #include "services/SrvGetRunningConfig.h"
 #include "services/SrvGetVersionAndId.h"
 #include "services/SrvEraseStartupConfig.h"
+#include "services/SrvSendStartupConfig.h"
 
 #include "config/decode/DecodeVer0.h"
 
@@ -21,6 +22,7 @@ std::shared_ptr<Serial> s;
 SrvGetRunningConfig srvRunningConfig;
 SrvGetVersionAndId srvGetVersion;
 SrvEraseStartupConfig srvEraseConfig;
+SrvSendStartupConfig srvSendStartupConfig(128);
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -44,20 +46,22 @@ int main(int argc, char *argv[]) {
 	srvRunningConfig.setSerialContext(s);
 	srvGetVersion.setSerialContext(s);
 	srvEraseConfig.setSerialContext(s);
+	srvSendStartupConfig.setSerialContext(s);
 
 	srvRunningConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
+	srvEraseConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
 
 	SerialWorker worker(s, callbackMap);
 
-	std::vector<uint8_t> test{0x20};
-	std::shared_ptr<std::vector<uint8_t>> pointerTxTest = std::make_shared<std::vector<uint8_t>>(test);
+	std::vector<uint8_t> test;
+	test.insert(test.begin(), 0x800, 0xAB);
+	std::shared_ptr<std::vector<uint8_t>> pointerTxTest = std::shared_ptr<std::vector<uint8_t>>(&test);
 
-	std::vector<uint8_t> testRx;
-	std::shared_ptr<std::vector<uint8_t>> pointerRxTest = std::make_shared<std::vector<uint8_t>>(testRx);
 
 	if (argc > 1) {
 		s->init(argv[1], B9600);
@@ -81,12 +85,15 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_unlock(&lock);
 
-    std::cout << "done" << std::endl;
+    std::cout << "erase done" << std::endl;
 
-    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
+    srvSendStartupConfig.setDataForDownload(std::move(test));
+    srvSendStartupConfig.sendRequest();
 
-    decode.getDescritpion(str);
-    std::cout << str << std::endl;
+//    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
+//
+//    decode.getDescritpion(str);
+//    std::cout << str << std::endl;
 
 //	s->transmitKissFrame(pointerTxTest);
 //	s->receiveKissFrame(pointerRxTest);

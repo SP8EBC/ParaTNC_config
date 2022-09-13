@@ -8,6 +8,10 @@
 #include "SrvSendStartupConfig.h"
 #include "ServicesIds.h"
 
+#include <iostream>
+
+#include <pthread.h>
+
 /**
  * How startup config is set to the controller:
  *
@@ -20,10 +24,9 @@
 	 * LN is a size of data to be flashed, not the size of the frame itself
  */
 
-SrvSendStartupConfig::SrvSendStartupConfig(std::vector<uint8_t> && configData, int singleFrameLn): currentOffset(0), singleFrameLn(singleFrameLn) {
+SrvSendStartupConfig::SrvSendStartupConfig(int singleFrameLn): currentOffset(0), singleFrameLn(singleFrameLn) {
 
-	dataForDownload = std::move(configData);
-
+	internalSync = PTHREAD_COND_INITIALIZER;
 
 }
 
@@ -55,6 +58,8 @@ SrvSendStartupConfig& SrvSendStartupConfig::operator=(
 
 void SrvSendStartupConfig::sendRequest() {
 
+	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
 	int howManyFrames = dataForDownload.size() / singleFrameLn;
 
 	auto begin = dataForDownload.begin();
@@ -68,11 +73,14 @@ void SrvSendStartupConfig::sendRequest() {
 	// transmit all frames one after another
 	for (int i = 0; i < howManyFrames; i++) {
 		// reinitialize and preallocate vector with segmented data
-		segmentedData = std::make_shared<std::vector<uint8_t>>(singleFrameLn + 3);
+		segmentedData = std::make_shared<std::vector<uint8_t>>();
+		segmentedData->reserve(singleFrameLn + 4);
 
-		segmentedData[0] = KISS_PROGRAM_STARTUP_CFG_RESP;
-		segmentedData[1] = singleFrameLn;
-		segmentedData[2] = this->currentOffset;
+		segmentedData->at(0) = KISS_PROGRAM_STARTUP_CFG;
+		segmentedData->at(1) = singleFrameLn;
+		segmentedData->at(2) = this->currentOffset & 0xFF;
+		segmentedData->at(3) = (this->currentOffset & 0xFF00) >> 8;
+
 
 		// check if this is last frame or not
 		if (i == howManyFrames) {
@@ -84,6 +92,8 @@ void SrvSendStartupConfig::sendRequest() {
 			segmentedData->insert(segmentedData->end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
 		}
 
+		std::cout << "I = SrvSendStartupConfig::sendRequest, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
+
 		// increase currrent offset
 		currentOffset += singleFrameLn;
 
@@ -92,6 +102,13 @@ void SrvSendStartupConfig::sendRequest() {
 			s->transmitKissFrame(segmentedData);
 		}
 
+	    pthread_mutex_lock(&lock);
+
+	    // wait for configuration to be received
+	    pthread_cond_wait(&internalSync, &lock);
+
+	    pthread_mutex_unlock(&lock);
+
 
 	}
 
@@ -99,4 +116,16 @@ void SrvSendStartupConfig::sendRequest() {
 
 void SrvSendStartupConfig::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> > &frame) {
+
+	int32_t result = (int32_t)frame.at(2);
+
+	operationResult = (erasing_programming_result_t)result;
+
+	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
+
+	pthread_cond_signal(&internalSync);
+
+	if (conditionVariable) {
+		pthread_cond_signal(conditionVariable.get());
+	}
 }

@@ -59,4 +59,8 @@ void SrvEraseStartupConfig::callback(
 
 	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
 
+	if (conditionVariable) {
+		pthread_cond_signal(conditionVariable.get());
+	}
+
 }

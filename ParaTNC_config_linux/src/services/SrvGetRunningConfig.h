@@ -26,7 +26,8 @@ class SrvGetRunningConfig : public IService {
 	std::shared_ptr<Serial> s;
 
 	/**
-	 *
+	 *	Condition variable used to synchronize threads and wait for all configuration to be
+	 *	received from TNC
 	 */
 	std::shared_ptr<pthread_cond_t> conditionVariable;
 

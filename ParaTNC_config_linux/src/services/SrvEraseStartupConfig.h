@@ -23,6 +23,12 @@ class SrvEraseStartupConfig: public IService {
 	std::shared_ptr<Serial> s;
 
 	/**
+	 * Condition variable used to synchronize and lock another thread until
+	 * memory erase is done. TNC sends ACK after flash operation is done.
+	 */
+	std::shared_ptr<pthread_cond_t> conditionVariable;
+
+	/**
 	 *
 	 */
 	erasing_programming_result_t operationResult;
@@ -57,6 +63,11 @@ public:
 
 	virtual void callback(
 			const std::vector<unsigned char, std::allocator<unsigned char> > &frame);
+
+	void setConditionVariable(
+			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+		this->conditionVariable = conditionVariable;
+	}
 };
 
 #endif /* SRC_SERVICES_SRVERASESTARTUPCONFIG_H_ */
