@@ -19,6 +19,12 @@ class SrvGetVersionAndId: public IService {
 	 */
 	std::shared_ptr<Serial> s;
 
+	/**
+	 * Condition variable used to synchronize and lock another thread until
+	 * memory erase is done. TNC sends ACK after flash operation is done.
+	 */
+	std::shared_ptr<pthread_cond_t> conditionVariable;
+
 	const static shared_ptr<std::vector<uint8_t>> requestData;
 
 public:
@@ -39,6 +45,11 @@ public:
 
 	void setSerialContext(const std::shared_ptr<Serial> &s) {
 		this->s = s;
+	}
+
+	void setConditionVariable(
+			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+		this->conditionVariable = conditionVariable;
 	}
 };
 

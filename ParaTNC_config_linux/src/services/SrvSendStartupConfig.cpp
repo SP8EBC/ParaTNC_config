@@ -75,11 +75,12 @@ void SrvSendStartupConfig::sendRequest() {
 		// reinitialize and preallocate vector with segmented data
 		segmentedData = std::make_shared<std::vector<uint8_t>>();
 		segmentedData->reserve(singleFrameLn + 4);
+		auto iterator = segmentedData->begin();
 
-		segmentedData->at(0) = KISS_PROGRAM_STARTUP_CFG;
-		segmentedData->at(1) = singleFrameLn;
-		segmentedData->at(2) = this->currentOffset & 0xFF;
-		segmentedData->at(3) = (this->currentOffset & 0xFF00) >> 8;
+		segmentedData->insert(iterator, KISS_PROGRAM_STARTUP_CFG);
+		segmentedData->insert(iterator + 1, singleFrameLn);
+		segmentedData->insert(iterator + 2, this->currentOffset & 0xFF);
+		segmentedData->insert(iterator + 3, (this->currentOffset & 0xFF00) >> 8);
 
 
 		// check if this is last frame or not

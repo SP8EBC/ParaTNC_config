@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 	srvEraseConfig.setSerialContext(s);
 	srvSendStartupConfig.setSerialContext(s);
 
+	srvGetVersion.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
 	srvRunningConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
 	srvEraseConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
 
@@ -67,22 +68,26 @@ int main(int argc, char *argv[]) {
 		s->init(argv[1], B9600);
 	}
 	else {
-		s->init("/dev/ttyUSB0", B9600);
+		s->init("/dev/ttyUSB1", B9600);
 	}
 
 	worker.start();
 	worker.waitForStartup();
 //	srvRunningConfig.sendRequest();
 //	s->waitForTransmissionDone();
-//	srvGetVersion.sendRequest();
-//	s->waitForTransmissionDone();
+	srvGetVersion.sendRequest();
+	s->waitForTransmissionDone();
+
+	// wait for software version
+    pthread_mutex_lock(&lock);
+    pthread_cond_wait(&cond1, &lock);
+    pthread_mutex_unlock(&lock);
+
 	srvEraseConfig.sendRequest();
 
     pthread_mutex_lock(&lock);
-
     // wait for configuration to be received
     pthread_cond_wait(&cond1, &lock);
-
     pthread_mutex_unlock(&lock);
 
     std::cout << "erase done" << std::endl;

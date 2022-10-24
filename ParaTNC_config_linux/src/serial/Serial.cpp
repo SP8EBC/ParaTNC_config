@@ -22,6 +22,11 @@
 	#define TFEND	(uint8_t)0xDC
 	#define TFESC	(uint8_t)0xDD
 
+	#define NONSTANDARD	(uint8_t)0x0F
+
+
+#define FRAME_LN_OFFSET 2
+
 using namespace std;
 
 Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), i(0) {
@@ -130,9 +135,9 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 				}
 			}
 
-			// the next byte after FEND holds a frame size (from FEND to FEND)
+			// the next byte after NONSTANDARD holds a frame size (from FEND to FEND)
 			if (receivingState == RX_ST_STARTED_WAITING_FOR_LN) {
-				expectedRxLength = rxData - 2;		// exclude FEND at the start and this byte
+				expectedRxLength = rxData - 3;		// exclude FEND at the start and this byte
 				receivingState = RX_ST_STARTED;
 
 				std::cout << "D = serial::receiveKissFrame, expectedRxLength: " << expectedRxLength << std::endl;
@@ -140,8 +145,16 @@ void Serial::receiveKissFrame(std::shared_ptr<std::vector<uint8_t> > frame) {
 				frame->push_back(rxData);
 			}
 
+			if (receivingState == RX_ST_STARTED_WAITING_FOR_NONSTANDARD) {
+				if (rxData == NONSTANDARD) {
+					//std::cout << "D = serial::receiveKissFrame, NONSTANDARD received" << std::endl;
+
+					receivingState = RX_ST_STARTED_WAITING_FOR_LN;
+				}
+			}
+
 			if (receivingState == RX_ST_WAITING_FOR_FEND && rxData == FEND) {
-				receivingState = RX_ST_STARTED_WAITING_FOR_LN;
+				receivingState = RX_ST_STARTED_WAITING_FOR_NONSTANDARD;
 			}
 		} while(receivingState != RX_ST_DONE);
 

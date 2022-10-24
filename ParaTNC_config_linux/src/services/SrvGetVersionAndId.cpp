@@ -73,5 +73,8 @@ void SrvGetVersionAndId::callback(
 
 	std::cout << "I = SrvGetVersionAndId::callback, splited[0]: " << splited[0] << ", splited[1]: " << splited[1] << ", splited[2]: " << splited[2] <<  std::endl;
 
+	if (conditionVariable) {
+		pthread_cond_signal(conditionVariable.get());
+	}
 
 }

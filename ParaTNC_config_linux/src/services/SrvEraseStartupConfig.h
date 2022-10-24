@@ -39,7 +39,7 @@ class SrvEraseStartupConfig: public IService {
 		switch(res) {
 		case RESULT_IDLE:		return "RESULT_IDLE";
 		case RESULT_PENDING:	return "RESULT_PENDING";
-		case RESULT_ERASED:		return "RESULT_ERASED";
+		case RESULT_DONE:		return "RESULT_ERASED";
 		case RESULT_ERROR:		return "RESULT_ERROR";
 		}
 

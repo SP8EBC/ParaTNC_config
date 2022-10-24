@@ -12,7 +12,7 @@
 typedef enum erasing_programming_result_t {
 	RESULT_IDLE		= 0xAA,
 	RESULT_PENDING	= 0xAB,
-	RESULT_ERASED	= 0xAC,
+	RESULT_DONE		= 0xAC,
 	RESULT_ERROR	= 0xAD
 }erasing_programming_result_t;
 
