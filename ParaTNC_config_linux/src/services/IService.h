@@ -9,7 +9,7 @@
 #define SRC_SERVICES_ISERVICE_H_
 
 #include <vector>
-#include <cstdint>
+#include <stdint.h>
 
 class IService {
 

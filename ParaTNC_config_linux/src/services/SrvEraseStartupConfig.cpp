@@ -6,6 +6,7 @@
  */
 
 #include "SrvEraseStartupConfig.h"
+#include "../shared/kiss_communication_service_ids.h"
 
 #include <vector>
 #include <iostream>

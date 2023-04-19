@@ -19,7 +19,7 @@
 
 #include <memory>
 #include <vector>
-#include <array>
+#include <stdint.h>
 
 #include "../types/SerialState.h"
 
@@ -32,7 +32,7 @@
  *
  * 	In this KISS protocol extension (or rather variant) 0x00 meand always data from/to radio channel.
  * 	As there is always one, single radio port all other features of KISS proto all scraped. If second byte
- * 	is non zero it means that this is an exntented frame and this byte is keeps frame lenght. BUT THIS
+ * 	is non zero it means that this is an extended frame and this byte is keeps frame lenght. BUT THIS
  * 	ONLY APPLIES TO FRAMES TNC -> PC
  *
  * 	frames in opposite direction doesn't have size and second byte holds command ID
@@ -40,29 +40,74 @@
  *
  */
 
-using namespace std;
+#define SERIAL_RAW_ARRAY_SIZE	2048
 
+/**
+ * Class implementing communication through serial port
+ */
 class Serial {
 
+	/**
+	 * Current state of serial prot
+	 */
 	SerialState serialState;
 
+	/**
+	 * Handle to serial port
+	 */
 	int handle;
 
+	/**
+	 * Linux stuff
+	 */
 	struct termios tty;
 	struct termios tty_old;
 
-	std::array<uint8_t, 2048> raw;
-	int i;
+	/**
+	 * Array which holds data received from device connected to serial port
+	 */
+	uint8_t raw[SERIAL_RAW_ARRAY_SIZE];
+
+	/**
+	 * Iterator used to go through array of raw data
+	 */
+	int rawArrayIterator;
+
+	const static uint8_t FEND[1];		//!< FEND control byte
+	const static uint8_t FESC[1];		//!< FESC control byte
+	const static uint8_t TFEND[1];		//!< TFEND control byte
+	const static uint8_t TFESC[1];		//!< TFESC control byte
 
 
 public:
-	bool init(string port, speed_t speed);
+
+	/**
+	 * Initializes and opens serial port
+	 * @param port
+	 * @param speed
+	 * @return
+	 */
+	bool init(std::string port, speed_t speed);
 	void testTransmit();
 
+	/**
+	 * Flush serial port FIFO and synchronously wait for all bytes to be sent
+	 * on serial port
+	 */
 	void waitForTransmissionDone();
 
-	void transmitKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
-	void receiveKissFrame(std::shared_ptr<std::vector<uint8_t>> frame);
+	/**
+	 * Transmits KISS frame through serial port. Trailing and leading FEND are
+	 * automatically added
+	 * @param frame
+	 */
+	void transmitKissFrame(std::vector<uint8_t> & frame);
+
+	/**
+	 * Synchronously waits and receives so called >>extended<< kiss frame
+	 * @param frame
+	 */
+	void receiveKissFrame(std::vector<uint8_t> & frame);
 
 	Serial();
 	virtual ~Serial();

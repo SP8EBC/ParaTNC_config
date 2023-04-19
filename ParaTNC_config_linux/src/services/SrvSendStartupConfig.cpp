@@ -12,6 +12,8 @@
 
 #include <pthread.h>
 
+#include "../shared/kiss_communication_service_ids.h"
+
 /**
  * How startup config is set to the controller:
  *

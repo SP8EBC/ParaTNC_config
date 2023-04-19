@@ -11,6 +11,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "../shared/kiss_communication_service_ids.h"
+
 const shared_ptr<std::vector<uint8_t>> SrvGetVersionAndId::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({KISS_GET_VERSION_AND_ID}));
 
 SrvGetVersionAndId::~SrvGetVersionAndId() {
