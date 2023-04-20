@@ -25,7 +25,7 @@ class SerialWorker {
 	/**
 	 * Serial used to receive data in background
 	 */
-	std::shared_ptr<Serial> ctx;
+	Serial * ctx;
 
 	/**
 	 * Handle to thread worker
@@ -57,11 +57,11 @@ class SerialWorker {
 	/**
 	 * Map pointing to
 	 */
-	std::map<uint8_t, IService*> & callbackMap;
+	std::map<uint8_t, IService*> * callbackMap;
 
 	bool workerLoop;
 
-	std::shared_ptr<SerialWorker> pointerThis;
+	SerialWorker * pointerThis;
 
 public:
 	bool start(void);
@@ -70,12 +70,10 @@ public:
 
 	void waitForStartup(void);
 
-	SerialWorker(std::shared_ptr<Serial> serial, std::map<uint8_t, IService*> & callbcks);
+	SerialWorker(Serial * serial, std::map<uint8_t, IService*> * callbcks);
 	virtual ~SerialWorker();
-	SerialWorker(const SerialWorker &other);
-	SerialWorker(SerialWorker &&other);
+
 	SerialWorker& operator=(const SerialWorker &other);
-	SerialWorker& operator=(SerialWorker &&other);
 };
 
 #endif /* SRC_SERIAL_SERIALWORKER_H_ */

@@ -18,33 +18,29 @@
  * GET_RUNNING_CONFIG has a constant request content so it can be embedded in this
  * a little bit complicated initialization
  */
-const shared_ptr<std::vector<uint8_t>> SrvGetRunningConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x20}));
+//const shared_ptr<std::vector<uint8_t>> SrvGetRunningConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x20}));
+
+const std::vector<uint8_t> SrvGetRunningConfig::requestData;
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
-	validate = std::make_shared<ValidateVer0>();
+	//validate = std::make_shared<ValidateVer0>();
+
+	requestData.push_back(KISS_GET_RUNNING_CONFIG);
 }
 
 SrvGetRunningConfig::~SrvGetRunningConfig() {
-}
-
-SrvGetRunningConfig::SrvGetRunningConfig(const SrvGetRunningConfig &other) {
-
-}
-
-SrvGetRunningConfig::SrvGetRunningConfig(SrvGetRunningConfig &&other) {
-
 }
 
 SrvGetRunningConfig& SrvGetRunningConfig::operator=(const SrvGetRunningConfig &other) {
 	return * this;
 }
 
-void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
+void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 
 	// data payload size - this is a size of data read from flash memory
-	uint8_t dataSize = frame.size() - 4;
+	uint8_t dataSize = frame->size() - 4;
 
-	CurrentConfigRegion receivedCurrentRegion = (CurrentConfigRegion)frame.at(2);
+	CurrentConfigRegion receivedCurrentRegion = (CurrentConfigRegion)frame->at(2);
 
 	// if currently no data transfer is in progress
 	if (currentRegion == UNDEF) {
@@ -54,7 +50,7 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
 			currentRegion = receivedCurrentRegion;
 
 			// how many KISS packets is expected
-			expectedKissFrames = frame.at(3);
+			expectedKissFrames = frame->at(3);
 
 			std::cout << "I = SrvGetRunningConfig::callback, transfer started, expectedKissFrames: " << (int)expectedKissFrames  << ", currentRegion: " << (int)currentRegion << std::endl;
 		}
@@ -65,11 +61,11 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> &frame) {
 	}
 	else {
 		// if transfer is initiated
-		uint8_t currentFrame = frame.at(3);
-		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
+		uint8_t currentFrame = frame->at(3);
+		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame->size() << " (0x" << std::hex << frame->size() << std::dec << ")" << std::endl;
 
-		auto copyFrom = frame.begin() + 4;
-		auto copyTo = frame.end();
+		std::vector<uint8_t>::iterator copyFrom = frame.begin() + 4;
+		std::vector<uint8_t>::iterator copyTo = frame.end();
 
 		configurationData.insert(configurationData.end(), copyFrom, copyTo);
 

@@ -8,8 +8,6 @@
 #ifndef SRC_SERVICES_SRVGETRUNNINGCONFIG_H_
 #define SRC_SERVICES_SRVGETRUNNINGCONFIG_H_
 
-#include <memory>
-
 #include "../serial/Serial.h"
 #include "../types/CurrentConfigRegion.h"
 
@@ -23,20 +21,13 @@ class SrvGetRunningConfig : public IService {
 	/**
 	 * Pointer to serial port context used to talk with TNC
 	 */
-	std::shared_ptr<Serial> s;
+	Serial * s;
 
 	/**
 	 *	Condition variable used to synchronize threads and wait for all configuration to be
 	 *	received from TNC
 	 */
-	std::shared_ptr<pthread_cond_t> conditionVariable;
-
-	/**
-	 * This is a content of 'GET_RUNNING_CONFIG' request. It is so damn awkward definition,
-	 * because functions for KISS frame transmission have only one overload. his overload expects
-	 * a pointer to vector
-	 */
-	const static shared_ptr<std::vector<uint8_t>> requestData;
+	pthread_cond_t * conditionVariable;
 
 	/**
 	 * Current memory area which is received from the TNC + and information if any reception is
@@ -54,9 +45,11 @@ class SrvGetRunningConfig : public IService {
 	 */
 	std::vector<uint8_t> configurationData;
 
-	std::shared_ptr<IConfigValidate> validate;
+	IConfigValidate * validate;
 
 	void reset();
+
+	static const std::vector<uint8_t> requestData;
 public:
 	/**
 	 * Sends a request to upload current running configuration
@@ -66,22 +59,20 @@ public:
 	/**
 	 * Callback to be used when a frame of type
 	 */
-	virtual void callback(const std::vector<uint8_t> & frame);
+	virtual void callback(const std::vector<uint8_t> * frame);
 
 
 	SrvGetRunningConfig();
 	virtual ~SrvGetRunningConfig();
 	SrvGetRunningConfig(const SrvGetRunningConfig &other);
-	SrvGetRunningConfig(SrvGetRunningConfig &&other);
 	SrvGetRunningConfig& operator=(const SrvGetRunningConfig &other);
-	SrvGetRunningConfig& operator=(SrvGetRunningConfig &&other);
 
-	void setSerialContext(const std::shared_ptr<Serial> &s) {
+	void setSerialContext(const Serial * s) {
 		this->s = s;
 	}
 
 	void setConditionVariable(
-			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+			const pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 

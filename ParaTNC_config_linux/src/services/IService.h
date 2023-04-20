@@ -21,7 +21,7 @@ public:
 	 * Callback invoked after successful reception of full frame from TNC. Please note that a
 	 * vector which is passed here doesn't have FEND at the first and the last position.
 	 */
-	virtual void callback(const std::vector<uint8_t> & frame) = 0;
+	virtual void callback(const std::vector<uint8_t> * frame) = 0;
 
 };
 

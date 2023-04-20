@@ -12,24 +12,23 @@
 #include <iostream>
 
 
-SerialWorker::SerialWorker(std::shared_ptr<Serial> serial, std::map<uint8_t, IService*> & callbcks)
-																	: ctx(serial), callbackMap(callbcks),
-																	  workerStartSync(PTHREAD_COND_INITIALIZER),
-																	  workerLock(PTHREAD_MUTEX_INITIALIZER) {
-	pointerThis = std::shared_ptr<SerialWorker>(this);
+SerialWorker::SerialWorker(Serial * serial, std::map<uint8_t, IService*> * callbcks)
+																	: ctx(serial),
+																	  callbackMap(callbcks)
+{
+	workerStartSync = PTHREAD_COND_INITIALIZER;
+
+	workerLock = PTHREAD_MUTEX_INITIALIZER;
+
+	thread = -1;
+
+	pointerThis = this;
 
 	workerLoop = true;
 
 }
 
 SerialWorker::~SerialWorker() {
-}
-
-SerialWorker::SerialWorker(const SerialWorker &other) : callbackMap(other.callbackMap) {
-}
-
-SerialWorker::SerialWorker(SerialWorker &&other) : callbackMap(other.callbackMap) {
-
 }
 
 SerialWorker& SerialWorker::operator=(const SerialWorker &other) {
@@ -40,18 +39,11 @@ void SerialWorker::waitForStartup(void) {
 
 }
 
-SerialWorker& SerialWorker::operator=(SerialWorker &&other) {
-	return * this;
-
-}
-
 void * SerialWorker::wrapper(void * object) {
 
-	std::shared_ptr<SerialWorker> * pointer = (std::shared_ptr<SerialWorker> *)object;
+	SerialWorker * pointer = static_cast<SerialWorker *>(object);
 
-	auto callable = std::bind(&SerialWorker::worker, *pointer);
-
-	callable();
+	pointer->worker();
 
 	return NULL;
 }
@@ -63,28 +55,28 @@ void SerialWorker::worker(void) {
 	pthread_cond_signal(&this->workerStartSync);
 
 	// this vector is stripped from FEND!!!
-	std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
+	//std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
 
 	// pointer to callback
 	IService * serviceCallback = NULL;
 
 	do {
 		// clean buffer
-		pointerToData->clear();
+		receivedData.clear();
 
 		// receive KISS packet from controller
-		ctx->receiveKissFrame(pointerToData);
+		ctx->receiveKissFrame(receivedData);
 
 		// check if anything has been recieved
-		if (pointerToData->size() > 0) {
+		if (receivedData.size() > 0) {
 			// get frame type
-			uint8_t frameType = pointerToData->at(1);
+			uint8_t frameType = receivedData.at(1);
 
-			serviceCallback = this->callbackMap.at(frameType);
+			serviceCallback = this->callbackMap->at(frameType);
 
 			if (serviceCallback != NULL) {
 				// invoke callback
-				serviceCallback->callback(*pointerToData);
+				serviceCallback->callback(&receivedData);
 			}
 		}
 	}	while (workerLoop);
@@ -96,20 +88,20 @@ void SerialWorker::worker(void) {
 
 bool SerialWorker::start(void) {
 
-	workerLoop = true;
+	if (callbackMap != NULL) {
+		workerLoop = true;
 
-//    pthread_mutex_lock(&workerLock);
+		pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);
 
-	pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);
+		std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
 
-//    // wait for configuration to be received
-//    pthread_cond_wait(&workerStartSync, &workerLock);
-//
-//    pthread_mutex_unlock(&workerLock);
+		return true;
+	}
+	else {
+		return false;
+	}
 
-	std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
 
-	return true;
 }
 
 void SerialWorker::terminate(void) {

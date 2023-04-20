@@ -11,44 +11,18 @@
 #include <vector>
 #include <iostream>
 
-const shared_ptr<std::vector<uint8_t>> SrvEraseStartupConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x22}));
+//const shared_ptr<std::vector<uint8_t>> SrvEraseStartupConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x22}));
 
-SrvEraseStartupConfig::SrvEraseStartupConfig() {
-	// TODO Auto-generated constructor stub
-
-}
-
-SrvEraseStartupConfig::~SrvEraseStartupConfig() {
-	// TODO Auto-generated destructor stub
-}
-
-SrvEraseStartupConfig::SrvEraseStartupConfig(
-		const SrvEraseStartupConfig &other) {
-	// TODO Auto-generated constructor stub
-
-}
-
-SrvEraseStartupConfig::SrvEraseStartupConfig(SrvEraseStartupConfig &&other) {
-	// TODO Auto-generated constructor stub
-
-}
-
-SrvEraseStartupConfig& SrvEraseStartupConfig::operator=(
-		const SrvEraseStartupConfig &other) {
-	//return other;
-
-}
-
-SrvEraseStartupConfig& SrvEraseStartupConfig::operator=(
-		SrvEraseStartupConfig &&other) {
-	//return * other;
-
-}
+std::vector<uint8_t> SrvEraseStartupConfig::requestData;
 
 void SrvEraseStartupConfig::sendRequest() {
 	if (s) {
 		s->transmitKissFrame(SrvEraseStartupConfig::requestData);
 	}
+}
+
+SrvEraseStartupConfig::SrvEraseStartupConfig() {
+	SrvEraseStartupConfig::requestData->push_back(KISS_ERASE_STARTUP_CFG);
 }
 
 void SrvEraseStartupConfig::callback(
@@ -60,8 +34,8 @@ void SrvEraseStartupConfig::callback(
 
 	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
 
-	if (conditionVariable) {
-		pthread_cond_signal(conditionVariable.get());
+	if (conditionVariable != 0x00) {
+		pthread_cond_signal(conditionVariable);
 	}
 
 }

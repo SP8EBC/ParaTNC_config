@@ -26,8 +26,8 @@
 #define KISS_PROGRAM_STARTUP_CFG		(uint8_t) 0x34
 #define KISS_PROGRAM_STARTUP_CFG_RESP	(uint8_t) 0x74
 
-#define KISS_GET_RUNNING_CONFIG 	(uint8_t) 0x35
-#define KISS_RUNNING_CONFIG			(uint8_t) 0x75
+#define KISS_GET_RUNNING_CONFIG 	(const uint8_t) 0x35
+#define KISS_RUNNING_CONFIG			(const uint8_t) 0x75
 
 #define KISS_ERASE_STARTUP_CFG		(uint8_t) 0x37
 #define KISS_ERASE_STARTUP_CFG_RESP	(uint8_t) 0x77
