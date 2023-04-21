@@ -17,16 +17,17 @@ class SrvGetVersionAndId: public IService {
 	/**
 	 * Pointer to serial port context used to talk with TNC
 	 */
-	std::shared_ptr<Serial> s;
+	Serial * s;
 
 	/**
 	 * Condition variable used to synchronize and lock another thread until
 	 * memory erase is done. TNC sends ACK after flash operation is done.
 	 */
-	std::shared_ptr<pthread_cond_t> conditionVariable;
+	pthread_cond_t * conditionVariable;
 
-	const static shared_ptr<std::vector<uint8_t>> requestData;
+	const static std::vector<uint8_t> requestData;
 
+	static bool hyphenCheck(char x);
 public:
 	/**
 	 * Sends a request to upload current running configuration
@@ -34,21 +35,17 @@ public:
 	void sendRequest();
 
 	virtual ~SrvGetVersionAndId();
-	SrvGetVersionAndId& operator=(SrvGetVersionAndId &&other);
 	SrvGetVersionAndId& operator=(const SrvGetVersionAndId &other);
-	SrvGetVersionAndId(SrvGetVersionAndId &&other);
 	SrvGetVersionAndId(const SrvGetVersionAndId &other);
 	SrvGetVersionAndId();
-	virtual void callback(
-			const std::vector<unsigned char, std::allocator<unsigned char> > &frame)
-					override;
 
-	void setSerialContext(const std::shared_ptr<Serial> &s) {
+	virtual void callback(const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
+
+	void setSerialContext(Serial * s) {
 		this->s = s;
 	}
 
-	void setConditionVariable(
-			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 };

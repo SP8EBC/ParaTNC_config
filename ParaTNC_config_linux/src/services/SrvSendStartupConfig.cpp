@@ -6,7 +6,6 @@
  */
 
 #include "SrvSendStartupConfig.h"
-#include "ServicesIds.h"
 
 #include <iostream>
 
@@ -26,36 +25,37 @@
 	 * LN is a size of data to be flashed, not the size of the frame itself
  */
 
-SrvSendStartupConfig::SrvSendStartupConfig(int singleFrameLn): currentOffset(0), singleFrameLn(singleFrameLn) {
+SrvSendStartupConfig::SrvSendStartupConfig(int _singleFrameLn) : singleFrameLn(_singleFrameLn) {
+
+	currentOffset = 0;
 
 	internalSync = PTHREAD_COND_INITIALIZER;
+	conditionVariable = 0;
+	operationResult = RESULT_ERROR;
+	s = 0;
 
 }
 
 SrvSendStartupConfig::~SrvSendStartupConfig() {
-	// TODO Auto-generated destructor stub
 }
 
-SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : singleFrameLn(other.singleFrameLn),
-																				currentOffset(0) {
-	;
+SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : singleFrameLn(other.singleFrameLn)
+{
+	currentOffset = 0;
+
+	internalSync = PTHREAD_COND_INITIALIZER;
+	conditionVariable = 0;
+	operationResult = RESULT_ERROR;
+	s = 0;
 }
 
-SrvSendStartupConfig::SrvSendStartupConfig(SrvSendStartupConfig &&other) : singleFrameLn(other.singleFrameLn),
-																			currentOffset(0) {
 
-}
 
 SrvSendStartupConfig& SrvSendStartupConfig::operator=(
 		const SrvSendStartupConfig &other) {
 	// TODO Auto-generated method stub
 
-}
-
-SrvSendStartupConfig& SrvSendStartupConfig::operator=(
-		SrvSendStartupConfig &&other) {
-	// TODO Auto-generated method stub
-
+	return * this;
 }
 
 void SrvSendStartupConfig::sendRequest() {
@@ -64,8 +64,7 @@ void SrvSendStartupConfig::sendRequest() {
 
 	int howManyFrames = dataForDownload.size() / singleFrameLn;
 
-	auto begin = dataForDownload.begin();
-	auto end = dataForDownload.end();
+	std::vector<uint8_t>::iterator begin = dataForDownload.begin();
 
 	// if a size of configuration block is not divisible by
 	if ((dataForDownload.size() % singleFrameLn) != 0) {
@@ -75,24 +74,24 @@ void SrvSendStartupConfig::sendRequest() {
 	// transmit all frames one after another
 	for (int i = 0; i < howManyFrames; i++) {
 		// reinitialize and preallocate vector with segmented data
-		segmentedData = std::make_shared<std::vector<uint8_t>>();
-		segmentedData->reserve(singleFrameLn + 4);
-		auto iterator = segmentedData->begin();
+		segmentedData = std::vector<uint8_t>();
+		segmentedData.reserve(singleFrameLn + 4);
+		std::vector<uint8_t>::iterator iterator = segmentedData.begin();
 
-		segmentedData->insert(iterator, KISS_PROGRAM_STARTUP_CFG);
-		segmentedData->insert(iterator + 1, singleFrameLn);
-		segmentedData->insert(iterator + 2, this->currentOffset & 0xFF);
-		segmentedData->insert(iterator + 3, (this->currentOffset & 0xFF00) >> 8);
+		segmentedData.insert(iterator, KISS_PROGRAM_STARTUP_CFG);
+		segmentedData.insert(iterator + 1, singleFrameLn);
+		segmentedData.insert(iterator + 2, this->currentOffset & 0xFF);
+		segmentedData.insert(iterator + 3, (this->currentOffset & 0xFF00) >> 8);
 
 
 		// check if this is last frame or not
 		if (i == howManyFrames) {
 			int lastDataLn = dataForDownload.size() - i * singleFrameLn;
 
-			segmentedData->insert(segmentedData->end(), begin + currentOffset, begin + currentOffset + lastDataLn);
+			segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + lastDataLn);
 		}
 		else {
-			segmentedData->insert(segmentedData->end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
+			segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
 		}
 
 		std::cout << "I = SrvSendStartupConfig::sendRequest, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
@@ -101,7 +100,7 @@ void SrvSendStartupConfig::sendRequest() {
 		currentOffset += singleFrameLn;
 
 		// transmit fame to TNC
-		if (s) {
+		if (s != 0) {
 			s->transmitKissFrame(segmentedData);
 		}
 
@@ -118,9 +117,9 @@ void SrvSendStartupConfig::sendRequest() {
 }
 
 void SrvSendStartupConfig::callback(
-		const std::vector<unsigned char, std::allocator<unsigned char> > &frame) {
+		const std::vector<unsigned char, std::allocator<unsigned char> > *frame) {
 
-	int32_t result = (int32_t)frame.at(2);
+	int32_t result = (int32_t)frame->at(2);
 
 	operationResult = (erasing_programming_result_t)result;
 
@@ -129,6 +128,6 @@ void SrvSendStartupConfig::callback(
 	pthread_cond_signal(&internalSync);
 
 	if (conditionVariable) {
-		pthread_cond_signal(conditionVariable.get());
+		pthread_cond_signal(conditionVariable);
 	}
 }

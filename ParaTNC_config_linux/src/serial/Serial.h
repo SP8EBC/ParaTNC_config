@@ -101,7 +101,7 @@ public:
 	 * automatically added
 	 * @param frame
 	 */
-	void transmitKissFrame(std::vector<uint8_t> & frame);
+	void transmitKissFrame(const std::vector<uint8_t> & frame);
 
 	/**
 	 * Synchronously waits and receives so called >>extended<< kiss frame

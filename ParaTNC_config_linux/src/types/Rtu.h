@@ -8,7 +8,7 @@
 #ifndef SRC_TYPES_RTU_H_
 #define SRC_TYPES_RTU_H_
 
-#include <cstdint>
+#include <stdint.h>
 
 class Rtu {
 public:

@@ -6,37 +6,25 @@
  */
 
 #include "SrvGetVersionAndId.h"
-#include "ServicesIds.h"
 
 #include <iostream>
 #include <algorithm>
 
 #include "../shared/kiss_communication_service_ids.h"
 
-const shared_ptr<std::vector<uint8_t>> SrvGetVersionAndId::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({KISS_GET_VERSION_AND_ID}));
+const std::vector<uint8_t> SrvGetVersionAndId::requestData((size_t)0x1, KISS_GET_VERSION_AND_ID);
+
 
 SrvGetVersionAndId::~SrvGetVersionAndId() {
 }
 
-SrvGetVersionAndId& SrvGetVersionAndId::operator=(SrvGetVersionAndId &&other) {
+SrvGetVersionAndId& SrvGetVersionAndId::operator=(const SrvGetVersionAndId &other) {
 	return * this;
-}
-
-SrvGetVersionAndId& SrvGetVersionAndId::operator=(
-		const SrvGetVersionAndId &other) {
-	return * this;
-}
-
-SrvGetVersionAndId::SrvGetVersionAndId(SrvGetVersionAndId &&other) {
-
-}
-
-SrvGetVersionAndId::SrvGetVersionAndId(const SrvGetVersionAndId &other) {
-
 }
 
 SrvGetVersionAndId::SrvGetVersionAndId() {
-
+	conditionVariable = 0;
+	s = 0;
 }
 
 void SrvGetVersionAndId::sendRequest() {
@@ -46,8 +34,12 @@ void SrvGetVersionAndId::sendRequest() {
 
 }
 
+bool SrvGetVersionAndId::hyphenCheck(char x) {
+	 if (x == '-') return true; else return false;
+}
+
 void SrvGetVersionAndId::callback(
-		const std::vector<unsigned char, std::allocator<unsigned char> > &frame) {
+		const std::vector<unsigned char, std::allocator<unsigned char> > * frame) {
 
 	int i = 0;
 
@@ -55,17 +47,19 @@ void SrvGetVersionAndId::callback(
 	std::string id;
 
 	// array to store
-	std::array<std::string, 3> splited;
+	std::string splited[3];
 
 	// extract ID string
-	std::for_each(frame.begin() + 2, frame.end(), [&id](auto x)  {id.append(1, x);});
+	for (size_t i = 0; i < frame->size(); i++) {
+		id.append(1, frame->at(i));
+	}
 
-	auto startIt = id.begin();
-	auto foundIt = id.begin();
+	std::string::iterator startIt = id.begin();
+	std::string::iterator foundIt = id.begin();
 
 	// split string per '-'
 	do {
-		foundIt = std::find_if(startIt, id.end(), [](char x) { if (x == '-') return true; else return false;});
+		foundIt = std::find_if(startIt, id.end(), SrvGetVersionAndId::hyphenCheck);
 
 		splited[i] = std::string(startIt, foundIt);
 
@@ -75,8 +69,8 @@ void SrvGetVersionAndId::callback(
 
 	std::cout << "I = SrvGetVersionAndId::callback, splited[0]: " << splited[0] << ", splited[1]: " << splited[1] << ", splited[2]: " << splited[2] <<  std::endl;
 
-	if (conditionVariable) {
-		pthread_cond_signal(conditionVariable.get());
+	if (conditionVariable != 0) {
+		pthread_cond_signal(conditionVariable);
 	}
 
 }

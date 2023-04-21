@@ -33,7 +33,7 @@ class SrvEraseStartupConfig: public IService {
 	 */
 	erasing_programming_result_t operationResult;
 
-	const static std::vector<uint8_t> * requestData;
+	const static std::vector<uint8_t> requestData;
 
 	const static std::string resultToString(erasing_programming_result_t res) {
 		switch(res) {
@@ -58,7 +58,7 @@ public:
 	}
 
 	virtual void callback(
-			const std::vector<unsigned char, std::allocator<unsigned char> > &frame);
+			const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
 
 	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;

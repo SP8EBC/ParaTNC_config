@@ -67,12 +67,11 @@ public:
 	SrvGetRunningConfig(const SrvGetRunningConfig &other);
 	SrvGetRunningConfig& operator=(const SrvGetRunningConfig &other);
 
-	void setSerialContext(const Serial * s) {
+	void setSerialContext(Serial * s) {
 		this->s = s;
 	}
 
-	void setConditionVariable(
-			const pthread_cond_t * conditionVariable) {
+	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 

@@ -29,7 +29,7 @@ class SrvSendStartupConfig: public IService {
 	 * This vector holds single chunk of config data to be transferred to TNC,
 	 * just a single KISS frame
 	 */
-	std::shared_ptr<std::vector<uint8_t>> segmentedData;
+	std::vector<uint8_t>  segmentedData;
 
 	/**
 	 * Current offset through data to be send to TNC. In other words this is
@@ -39,13 +39,13 @@ class SrvSendStartupConfig: public IService {
 	/**
 	 * Pointer to serial port context used to talk with TNC
 	 */
-	std::shared_ptr<Serial> s;
+	Serial * s;
 
 	/**
 	 * Condition variable used to synchronize and lock another thread until
 	 * memory erase is done. TNC sends ACK after flash operation is done.
 	 */
-	std::shared_ptr<pthread_cond_t> conditionVariable;
+	pthread_cond_t * conditionVariable;
 
 	/**
 	 * This condition variable is used to lock flashing thread internally until
@@ -80,24 +80,21 @@ public:
 	SrvSendStartupConfig(int singleFrameLn);
 	virtual ~SrvSendStartupConfig();
 	SrvSendStartupConfig(const SrvSendStartupConfig &other);
-	SrvSendStartupConfig(SrvSendStartupConfig &&other);
 	SrvSendStartupConfig& operator=(const SrvSendStartupConfig &other);
-	SrvSendStartupConfig& operator=(SrvSendStartupConfig &&other);
 
 	virtual void callback(
-			const std::vector<unsigned char, std::allocator<unsigned char> > &frame)
-					override;
+			const std::vector<unsigned char, std::allocator<unsigned char> > *frame);
 
-	void setSerialContext(const std::shared_ptr<Serial> &s) {
+	void setSerialContext( Serial * s) {
 		this->s = s;
 	}
 
-	void setDataForDownload(std::vector<uint8_t> &&_dataForDownload) {
-		this->dataForDownload = std::move(_dataForDownload);
+	void setDataForDownload(std::vector<uint8_t> & _dataForDownload) {
+		this->dataForDownload = std::vector<uint8_t>(_dataForDownload);
 	}
 
 	void setConditionVariable(
-			const std::shared_ptr<pthread_cond_t> &conditionVariable) {
+			pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 };

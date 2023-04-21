@@ -46,9 +46,10 @@ const uint8_t Serial::TFEND[] = {_TFEND};
 const uint8_t Serial::TFESC[] = {_TFESC};
 
 Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), rawArrayIterator(0) {
+	handle = 0;
 }
 
-void Serial::transmitKissFrame(std::vector<uint8_t> & frame) {
+void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
 	ssize_t transmissionResult;
 
@@ -64,7 +65,7 @@ void Serial::transmitKissFrame(std::vector<uint8_t> & frame) {
 		write(handle, FEND, 1);
 
 		// send the content itself
-		for (std::vector<uint8_t>::iterator it = frame.begin(); it != frame.end(); it++) {
+		for (std::vector<uint8_t>::const_iterator it = frame.begin(); it != frame.end(); it++) {
 
 			// get byte fron the iterator
 			const uint8_t byte = *it;

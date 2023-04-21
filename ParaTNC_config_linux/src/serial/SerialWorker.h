@@ -57,7 +57,7 @@ class SerialWorker {
 	/**
 	 * Map pointing to
 	 */
-	std::map<uint8_t, IService*> * callbackMap;
+	std::map<uint8_t, IService*> callbackMap;
 
 	bool workerLoop;
 
@@ -70,7 +70,7 @@ public:
 
 	void waitForStartup(void);
 
-	SerialWorker(Serial * serial, std::map<uint8_t, IService*> * callbcks);
+	SerialWorker(Serial * serial, std::map<uint8_t, IService*> callbcks);
 	virtual ~SerialWorker();
 
 	SerialWorker& operator=(const SerialWorker &other);

@@ -6,13 +6,12 @@
  */
 
 #include "SerialWorker.h"
-#include "../services/ServicesIds.h"
 #include <pthread.h>
 
 #include <iostream>
 
 
-SerialWorker::SerialWorker(Serial * serial, std::map<uint8_t, IService*> * callbcks)
+SerialWorker::SerialWorker(Serial * serial, std::map<uint8_t, IService*> callbcks)
 																	: ctx(serial),
 																	  callbackMap(callbcks)
 {
@@ -72,7 +71,7 @@ void SerialWorker::worker(void) {
 			// get frame type
 			uint8_t frameType = receivedData.at(1);
 
-			serviceCallback = this->callbackMap->at(frameType);
+			serviceCallback = this->callbackMap.at(frameType);
 
 			if (serviceCallback != NULL) {
 				// invoke callback
@@ -88,7 +87,7 @@ void SerialWorker::worker(void) {
 
 bool SerialWorker::start(void) {
 
-	if (callbackMap != NULL) {
+	if (callbackMap.size() > 0) {
 		workerLoop = true;
 
 		pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);

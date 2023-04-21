@@ -11,24 +11,27 @@
 #include <vector>
 #include <iostream>
 
-//const shared_ptr<std::vector<uint8_t>> SrvEraseStartupConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x22}));
-
-std::vector<uint8_t> SrvEraseStartupConfig::requestData;
+const std::vector<uint8_t> SrvEraseStartupConfig::requestData((size_t)1, KISS_ERASE_STARTUP_CFG);
 
 void SrvEraseStartupConfig::sendRequest() {
-	if (s) {
+	if (s != 0) {
 		s->transmitKissFrame(SrvEraseStartupConfig::requestData);
 	}
 }
 
 SrvEraseStartupConfig::SrvEraseStartupConfig() {
-	SrvEraseStartupConfig::requestData->push_back(KISS_ERASE_STARTUP_CFG);
+	operationResult = RESULT_IDLE;
+	s = 0;
+	conditionVariable = 0;
+}
+
+SrvEraseStartupConfig::~SrvEraseStartupConfig() {
 }
 
 void SrvEraseStartupConfig::callback(
-		const std::vector<unsigned char, std::allocator<unsigned char> > &frame) {
+		const std::vector<unsigned char, std::allocator<unsigned char> >  * frame) {
 
-	int32_t result = (int32_t)frame.at(2);
+	int32_t result = (int32_t)frame->at(2);
 
 	operationResult = (erasing_programming_result_t)result;
 

@@ -187,12 +187,18 @@ uint8_t DecodeVer0::getSsid() {
 void DecodeVer0::getGsmApiBaseUrl(std::string &password) {
 	std::size_t offset = GSM_API_BASE_URL_OFFSET + CONFIG_GSM_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + GSM_API_BASE_URL_LEN;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_API_BASE_URL_LEN;
 
 	password.clear();
 
-	std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
+	do {
+		password.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
+
+	//std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
 
 
 }
@@ -343,23 +349,35 @@ uint16_t DecodeVer0::getRtuSlaveSpeed() {
 void DecodeVer0::getGsmApnName(std::string &apn) {
 	std::size_t offset = GSM_APN_OFFSET + CONFIG_GSM_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + GSM_APN_LENGHT;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_APN_LENGHT;
 
 	apn.clear();
 
-	std::for_each(startIt, endIt, [&apn](uint8_t b) { apn.append(1, (char) b);});
+	do {
+		apn.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
+
+	//std::for_each(startIt, endIt, [&apn](uint8_t b) { apn.append(1, (char) b);});
 }
 
 void DecodeVer0::getCallsign(std::string &call) {
 	std::size_t offset = BASIC_CALLSIGN_OFFSET + CONFIG_BASIC_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + GSM_APN_LENGHT;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_APN_LENGHT;
 
 	call.clear();
 
-	std::for_each(startIt, endIt, [&call](uint8_t b) { call.append(1, (char) b);});
+	do {
+		call.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
+
+	//std::for_each(startIt, endIt, [&call](uint8_t b) { call.append(1, (char) b);});
 }
 
 uint16_t DecodeVer0::getUmbSlaveId() {
@@ -513,8 +531,8 @@ uint8_t DecodeVer0::getRtuChannelTemperature() {
 void DecodeVer0::getGsmApnUsername(std::string &username) {
 	std::size_t offset = GSM_USERNAME_OFFSET + CONFIG_GSM_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + GSM_USERNAME_LEN;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_USERNAME_LEN;
 
 	if (*startIt == 0xFF || *startIt == 0x00) {
 		return;
@@ -522,7 +540,7 @@ void DecodeVer0::getGsmApnUsername(std::string &username) {
 
 	username.clear();
 
-	std::for_each(startIt, endIt, [&username](uint8_t b) { username.append(1, (char) b);});
+	//std::for_each(startIt, endIt, [&username](uint8_t b) { username.append(1, (char) b);});
 }
 
 ButtonFunction DecodeVer0::getButtonOneFunction() {
@@ -540,8 +558,8 @@ uint16_t DecodeVer0::getUmbSlaveClass() {
 void DecodeVer0::getDescritpion(std::string &description) {
 	std::size_t offset = BASIC_COMMENT_OFFSET + CONFIG_BASIC_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + BASIC_COMMENT_LENGHT;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + BASIC_COMMENT_LENGHT;
 
 	if (*startIt == 0xFF || *startIt == 0x00) {
 		return;
@@ -549,7 +567,13 @@ void DecodeVer0::getDescritpion(std::string &description) {
 
 	description.clear();
 
-	std::for_each(startIt, endIt, [&description](uint8_t b) { description.append(1, (char) b);});
+	do {
+		description.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
+
+	//std::for_each(startIt, endIt, [&description](uint8_t b) { description.append(1, (char) b);});
 }
 
 uint16_t DecodeVer0::getUmbChannelTemperature() {
@@ -750,8 +774,8 @@ WeatherSource DecodeVer0::getHumiditySrc() {
 void DecodeVer0::getGsmApnPassword(std::string &password) {
 	std::size_t offset = GSM_PASSWORD_OFFSET + CONFIG_GSM_OFFSET;
 
-	auto startIt = data.begin() + offset;
-	auto endIt = data.begin() + offset + GSM_USERNAME_LEN;
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_USERNAME_LEN;
 
 	if (*startIt == 0xFF || *startIt == 0x00) {
 		return;
@@ -759,5 +783,11 @@ void DecodeVer0::getGsmApnPassword(std::string &password) {
 
 	password.clear();
 
-	std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
+	do {
+		password.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
+
+	//std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
 }

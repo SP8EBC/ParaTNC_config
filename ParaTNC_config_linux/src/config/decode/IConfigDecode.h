@@ -10,7 +10,7 @@
 
 #include <vector>
 #include <string>
-#include <cstdint>
+#include <stdint.h>
 
 #include "../../types/AprsSymbol.h"
 #include "../../types/AprsPath.h"

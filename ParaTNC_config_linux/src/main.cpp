@@ -7,7 +7,6 @@
 #include "serial/Serial.h"
 #include "serial/SerialWorker.h"
 
-#include "services/ServicesIds.h"
 #include "services/SrvGetRunningConfig.h"
 #include "services/SrvGetVersionAndId.h"
 #include "services/SrvEraseStartupConfig.h"
@@ -15,9 +14,11 @@
 
 #include "config/decode/DecodeVer0.h"
 
+#include "shared/kiss_communication_service_ids.h"
+
 std::map<uint8_t, IService*> callbackMap;
 
-std::shared_ptr<Serial> s;
+Serial s;
 
 SrvGetRunningConfig srvRunningConfig;
 SrvGetVersionAndId srvGetVersion;
@@ -41,34 +42,33 @@ int main(int argc, char *argv[]) {
 	ProgramConfig::manualConfig();
 #endif
 
-	s = std::make_shared<Serial>();
+	//s = std::make_shared<Serial>();
 
-	srvRunningConfig.setSerialContext(s);
-	srvGetVersion.setSerialContext(s);
-	srvEraseConfig.setSerialContext(s);
-	srvSendStartupConfig.setSerialContext(s);
+	srvRunningConfig.setSerialContext(&s);
+	srvGetVersion.setSerialContext(&s);
+	srvEraseConfig.setSerialContext(&s);
+	srvSendStartupConfig.setSerialContext(&s);
 
-	srvGetVersion.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
-	srvRunningConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
-	srvEraseConfig.setConditionVariable(std::shared_ptr<pthread_cond_t>(&cond1));
+	srvGetVersion.setConditionVariable(&cond1);
+	srvRunningConfig.setConditionVariable(&cond1);
+	srvEraseConfig.setConditionVariable(&cond1);
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
 
-	SerialWorker worker(s, callbackMap);
+	SerialWorker worker(&s, callbackMap);
 
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
-	std::shared_ptr<std::vector<uint8_t>> pointerTxTest = std::shared_ptr<std::vector<uint8_t>>(&test);
 
 
 	if (argc > 1) {
-		s->init(argv[1], B9600);
+		s.init(argv[1], B9600);
 	}
 	else {
-		s->init("/dev/ttyUSB1", B9600);
+		s.init("/dev/ttyUSB1", B9600);
 	}
 
 	worker.start();
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 //	srvRunningConfig.sendRequest();
 //	s->waitForTransmissionDone();
 	srvGetVersion.sendRequest();
-	s->waitForTransmissionDone();
+	s.waitForTransmissionDone();
 
 	// wait for software version
     pthread_mutex_lock(&lock);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "erase done" << std::endl;
 
-    srvSendStartupConfig.setDataForDownload(std::move(test));
+    srvSendStartupConfig.setDataForDownload(test);
     srvSendStartupConfig.sendRequest();
 
 //    DecodeVer0 decode(srvRunningConfig.getConfigurationData());

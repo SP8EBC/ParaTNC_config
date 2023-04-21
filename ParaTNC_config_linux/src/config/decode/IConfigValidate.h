@@ -9,7 +9,7 @@
 #define SRC_CONFIG_DECODE_ICONFIGVALIDATE_H_
 
 #include <vector>
-#include <cstdint>
+#include <stdint.h>
 
 class IConfigValidate {
 public:
@@ -17,7 +17,7 @@ public:
 
 	}
 
-	virtual bool checkValidate(std::vector<uint8_t> dataFromTnc) = 0;
+	virtual bool checkValidate(std::vector<uint8_t> & dataFromTnc) = 0;
 
 };
 

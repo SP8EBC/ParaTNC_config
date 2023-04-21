@@ -14,18 +14,12 @@
 
 #include <iostream>
 
-/**
- * GET_RUNNING_CONFIG has a constant request content so it can be embedded in this
- * a little bit complicated initialization
- */
-//const shared_ptr<std::vector<uint8_t>> SrvGetRunningConfig::requestData = std::make_shared<std::vector<uint8_t>>(std::vector<uint8_t>({0x20}));
-
-const std::vector<uint8_t> SrvGetRunningConfig::requestData;
+const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)0x1, KISS_GET_RUNNING_CONFIG);
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
-	//validate = std::make_shared<ValidateVer0>();
-
-	requestData.push_back(KISS_GET_RUNNING_CONFIG);
+	conditionVariable = 0;
+	s = 0;
+	validate = 0;
 }
 
 SrvGetRunningConfig::~SrvGetRunningConfig() {
@@ -64,8 +58,8 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 		uint8_t currentFrame = frame->at(3);
 		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame->size() << " (0x" << std::hex << frame->size() << std::dec << ")" << std::endl;
 
-		std::vector<uint8_t>::iterator copyFrom = frame.begin() + 4;
-		std::vector<uint8_t>::iterator copyTo = frame.end();
+		std::vector<uint8_t>::const_iterator copyFrom = frame->begin() + 4;
+		std::vector<uint8_t>::const_iterator copyTo = frame->end();
 
 		configurationData.insert(configurationData.end(), copyFrom, copyTo);
 
@@ -78,11 +72,11 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 			validate->checkValidate(configurationData);
 
 			if (conditionVariable) {
-				pthread_cond_signal(conditionVariable.get());
+				pthread_cond_signal(conditionVariable);
 			}
 		}
 		else if (currentFrame + 1 > expectedKissFrames) {
-			std::cout << "E = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame.size() << " (0x" << std::hex << frame.size() << std::dec << ")" << std::endl;
+			std::cout << "E = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame->size() << " (0x" << std::hex << frame->size() << std::dec << ")" << std::endl;
 
 		}
 	}
@@ -90,10 +84,6 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 }
 
 void SrvGetRunningConfig::reset() {
-}
-
-SrvGetRunningConfig& SrvGetRunningConfig::operator=(SrvGetRunningConfig &&other) {
-	return * this;
 }
 
 void SrvGetRunningConfig::sendRequest() {
