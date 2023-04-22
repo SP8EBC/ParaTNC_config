@@ -94,8 +94,11 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 	ReceivingState receivingState = RX_ST_WAITING_FOR_FEND;
 
 	if (serialState == SERIAL_NOT_CONFIGURED) {
+		std::cout << "E = serial::receiveKissFrame, serial port not configured" << std::endl;
 		return;
 	}
+
+	std::cout << "D = serial::receiveKissFrame, receiving started..." << std::endl;
 
 	// received byte
 	uint8_t rxData = 0;

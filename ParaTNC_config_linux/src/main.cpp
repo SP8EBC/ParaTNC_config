@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 		s.init(argv[1], B9600);
 	}
 	else {
-		s.init("/dev/ttyUSB1", B9600);
+		s.init("/dev/ttyUSB0", B9600);
 	}
 
 	worker.start();

@@ -35,7 +35,9 @@ SerialWorker& SerialWorker::operator=(const SerialWorker &other) {
 }
 
 void SerialWorker::waitForStartup(void) {
-
+    pthread_mutex_lock(&this->workerLock);
+    pthread_cond_wait(&this->workerStartSync, &this->workerLock);
+    pthread_mutex_unlock(&this->workerLock);
 }
 
 void * SerialWorker::wrapper(void * object) {
@@ -51,7 +53,9 @@ void * SerialWorker::wrapper(void * object) {
 void SerialWorker::worker(void) {
 	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
+    pthread_mutex_lock(&this->workerLock);
 	pthread_cond_signal(&this->workerStartSync);
+    pthread_mutex_unlock(&this->workerLock);
 
 	// this vector is stripped from FEND!!!
 	//std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
@@ -90,11 +94,20 @@ bool SerialWorker::start(void) {
 	if (callbackMap.size() > 0) {
 		workerLoop = true;
 
-		pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)&pointerThis);
+		const int mutex_init_result = pthread_mutex_init(&workerLock, NULL);
 
-		std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
+		const int cond_init_result = pthread_cond_init(&workerStartSync, NULL);
 
-		return true;
+		if (cond_init_result == 0 && mutex_init_result == 0) {
+			pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)pointerThis);
+
+			std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
+
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 	else {
 		return false;
