@@ -61,6 +61,11 @@ class SerialWorker {
 
 	bool workerLoop;
 
+	/**
+	 * Set to true by worker after startup
+	 */
+	bool workerStarted;
+
 	SerialWorker * pointerThis;
 
 public:

@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	worker.start();
-	worker.waitForStartup();
+	//worker.waitForStartup();
 //	srvRunningConfig.sendRequest();
 //	s->waitForTransmissionDone();
 	srvGetVersion.sendRequest();
