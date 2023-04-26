@@ -13,13 +13,14 @@
 #include "../shared/kiss_communication_service_ids.h"
 
 #include <iostream>
+#include <stdio.h>
 
 const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)0x1, KISS_GET_RUNNING_CONFIG);
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
 	conditionVariable = 0;
 	s = 0;
-	validate = 0;
+	validate = new ValidateVer0();
 }
 
 SrvGetRunningConfig::~SrvGetRunningConfig() {
@@ -91,4 +92,26 @@ void SrvGetRunningConfig::sendRequest() {
 		s->transmitKissFrame(SrvGetRunningConfig::requestData);
 	}
 
+}
+
+bool SrvGetRunningConfig::storeToBinaryFile(std::string _in) {
+
+	bool output = false;
+
+	// open file for writing in binary mode
+	FILE * f = fopen(_in.c_str(), "wb");
+
+	// if file has been opened
+	if (f != NULL) {
+		fwrite(this->configurationData.data(), this->configurationData.size(), 1, f);
+
+		fflush(f);
+
+		fclose(f);
+
+		output = true;
+	}
+
+
+	return output;
 }

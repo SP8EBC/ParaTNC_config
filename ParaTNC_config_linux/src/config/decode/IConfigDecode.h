@@ -28,6 +28,8 @@ public:
 		;
 	}
 
+	virtual bool decodeToFile(std::string _fn) = 0;
+
 	virtual Digi getDigiEnabled() = 0;
 	virtual uint8_t getVisvousDelayInSec() = 0;
 	virtual uint8_t getDigiDelayInMsec() = 0;
@@ -81,12 +83,12 @@ public:
 	virtual uint8_t getRtuSlaveParity() = 0;
 	virtual uint8_t getRtuSlaveStopBits() = 0;
 	virtual bool getRtuFullWindData() = 0;
-	virtual uint8_t getRtuChannelWindspeed() = 0;
-	virtual uint8_t getRtuChannelWindgusts() = 0;
-	virtual uint8_t getRtuChannelWinddirection() = 0;
-	virtual uint8_t getRtuChannelTemperature() = 0;
-	virtual uint8_t getRtuChannelQnh() = 0;
-	virtual Rtu getRtuChannelConfig(uint8_t channel) = 0;
+	virtual uint8_t getRtuConfiguredSourceWindspeed() = 0;
+	virtual uint8_t getRtuConfiguredSourceWindgusts() = 0;
+	virtual uint8_t getRtuConfiguredSourceWinddirection() = 0;
+	virtual uint8_t getRtuConfiguredSourceTemperature() = 0;
+	virtual uint8_t getRtuConfiguredSourceQnh() = 0;
+	virtual Rtu getRtuSourceConfig(uint8_t sourceIdx) = 0;
 
 	virtual uint32_t getGsmPin() = 0;
 	virtual void getGsmApnName(std::string & apn) = 0;

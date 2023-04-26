@@ -15,7 +15,7 @@ ValidateVer0::~ValidateVer0() {
 	// TODO Auto-generated destructor stub
 }
 
-bool ValidateVer0::checkValidate(std::vector<uint8_t> dataFromTnc) {
+bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 
 	uint32_t calculatedCrc = 0;
 

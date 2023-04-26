@@ -39,6 +39,10 @@ public:
 	SrvGetVersionAndId(const SrvGetVersionAndId &other);
 	SrvGetVersionAndId();
 
+	/**
+	 * Callback used when frame with version has been received from TNC
+	 * @param frame
+	 */
 	virtual void callback(const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
 
 	void setSerialContext(Serial * s) {

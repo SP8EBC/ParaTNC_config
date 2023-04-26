@@ -25,6 +25,7 @@ OBJS :=
 SUBDIRS := \
 src \
 src/config/decode \
+src/config/encode \
 src/exceptions \
 src/serial \
 src/services \

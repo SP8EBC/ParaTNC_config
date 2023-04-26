@@ -6,114 +6,49 @@
  */
 
 #include "DecodeVer0.h"
+#include "../Ver0Map.h"
 #include "../../exceptions/NotSupportedEx.h"
 
 #include <algorithm>
+#include <fstream>
 
-#define CONFIG_MODE_PGM_CNTR	0x0
-#define CONFIG_MODE_OFSET		0x20			//	Current size: 0x10, free: 0x10
-#define CONFIG_BASIC_OFFSET		0x40			//	Current size: 0x9C, free: 0x44
-#define CONFIG_SOURCES_OFFSET	0x120			//	Current size: 0x4,  free: 0x1C
-#define CONFIG_UMB_OFFSET		0x140			//	Current size: 0x10, free: 0x10
-#define CONFIG_RTU_OFFSET		0x160			//	Current size: 0x54, free: 0x4C
-#define CONFIG_GSM_OFFSET		0x200			//	Current size: 0xF8,
-#define CONFIG__END__OFFSET		0x300
+#include <sys/time.h>
+#include <time.h>
 
-#define BASIC_CALLSIGN_OFFSET			0x0
-#define BASIC_SSID_OFFSET				0x7
-#define BASIC_LATITUDE_OFFSET			0x8
-#define BASIC_NS_OFFSET					0xC
-#define BASIC_LONGITUDE_OFFS			0x10
-#define BASIC_WE_OFFSET					0x14
-#define BASIC_COMMENT_OFFSET			0x15		// ln 128
-	#define BASIC_COMMENT_LENGHT		128
-#define BASIC_SYMBOL_OFFSET				0x95
-#define BASIC_PATHTYPE_OFFSET			0x96
-#define BASIC_BEACON_BOOTUP_OFFSET		0x97
-#define BASIC_WX_TRANSMIT_PERIOD		0x98
-#define BASIC_BEACON_TRANSMIT_PERIOD	0x99
-#define BASIC_WX_DOUBLE_TRANSMIT		0x9A
 
-#define MODE_DIGI_OFFSET				0x0
-#define MODE_WX_OFFSET					0x1
-#define MODE_WX_UMB_OFFSET				0x2
-#define MODE_WX_MODBUS_OFFSET			0x3
-#define MODE_WX_DAVIS_OFFSET			0x4
-#define MODE_WX_MS5611_OR_BME_OFFSET	0x5
-#define MODE_WX_ANEMOMETER_CONST_OFFSET	0x6
-#define MODE_WX_DUST_SENSOR_OFFSET		0x7
-#define MODE_WX_PT_SENSOR_OFFSET		0x8
-#define MODE_VICTRON_OFFSET				0x9
-#define MODE_DIGI_VISCOUS_OFFSET		0xA
-#define MODE_DIGI_ONLY_SSID_OFFSET		0xB
-#define MODE_DIGI_VISCOUS_DELAY_OFFSET	0xC
-#define MODE_DIGI_DELAY_100MSEC_OFFSET	0xD
-#define MODE_POWERSAVE_OFFSET			0xE
-#define MODE_POWERSAVE_KEEP_GSM_OFFSET	0xF
-#define MODE_GSM_OFFSET					0x10
-
-#define SOURCE_TEMPERATURE_OFFSET		0x0
-#define SOURCE_PRESSURE_OFFSET			0x1
-#define SOURCE_HUMIDITY_OFFSET			0x2
-#define SOURCE_WIND_OFFSET				0x3
-
-#define UMB_SLAVE_CLASS_OFFSET			0x0
-#define UMB_SLAVE_ID_OFFSET				0x2
-#define UMB_CHANNEL_WINDSPEED			0x4
-#define UMB_CHANNEL_WINDGUST			0x6
-#define UMB_CHANNEL_WINDDIRECTION		0x8
-#define UMB_CHANNEL_TEMPERATURE			0xA
-#define UMB_CHANNEL_QNH					0xC
-
-#define RTU_SLAVE_SPEED_OFFSET			0x0
-#define RTU_SLAVE_PARITY_SPEED			0x2
-#define RTU_SLAVE_STOP_BITS_OFFSET		0x3
-#define RTU_USE_FULL_WIND_DATA_OFFSET	0x4
-#define RTU_TEMPERATURE_SRC_OFFSET		0x5
-#define RTU_HUMIDITY_SRC_OFFSET			0x6
-#define RTU_PRESSURE_SRC_OFFSET			0x7
-#define RTU_WIND_DIR_OFFSET				0x8
-#define RTU_WIND_SPEED_OFFSET			0x9
-#define RTU_WIND_GUSTS_OFFSET			0xA
-
-#define RTU_SLAVE_CONFIG_BLOCK_OFFSET	0xE
-#define RTU_SLAVE_CONFIG_BLOCK_SIZE		0xC
-
-#define RTU_X_BUS_ADDRESS			0x0
-#define RTU_X_FUNCTION				0x1
-#define RTU_X_REGUSTER_ADDR			0x3
-#define RTU_X_LENGHT				0x5
-#define RTU_X_SCALLING_A			0x7
-#define RTU_X_SCALLING_B			0x8
-#define RTU_X_SCALLING_C			0x9
-#define RTU_X_SCALLING_D			0xA
-#define RTU_X_UNSIGNED_SIGNED		0xB
-
-#define GSM_PIN_OFFSET				0x0
-		#define GSM_PIN_LENGHT		5
-#define GSM_APN_OFFSET				0x5
-		#define GSM_APN_LENGHT		24
-#define GSM_USERNAME_OFFSET			0x1D
-		#define GSM_USERNAME_LEN	24
-#define GSM_PASSWORD_OFFSET			0x35
-		#define GSM_PASSWORD_LEN	24
-#define GSM_API_ENABLE_OFFSET		0x4D
-#define GSM_API_BASE_URL_OFFSET		0x4E
-	#define GSM_API_BASE_URL_LEN	64
-#define GSM_API_STATION_NAME_OFFSET	0x8E
-	#define GSM_API_STATION_NAME_LN	32
-#define GSM_APRSIS_ENABLE			0xAE
-#define GSM_APRSIS_SERVER_OFFSET	0xAF
-	#define GSM_APRSIS_SERVER_LN	64
-#define GSM_APRSIS_PORT_OFFSET		0xF0
-	#define GSM_APRSIS_PORT_LN		2
-#define GSM_APRSIS_PASSCODE_OFFSET	0xF4
-#define GSM_SMS_WX_OFFSET
 
 DecodeVer0::DecodeVer0(const std::vector<uint8_t> &configData) : data(configData) {
 }
 
 DecodeVer0::~DecodeVer0() {
+
+}
+
+bool DecodeVer0::decodeToFile(std::string _fn) {
+
+	bool out = false;
+
+	std::fstream outputTextFile;
+
+	char datetime_buffer[80];
+
+	// get current time
+    time_t t = time(0);   // get time now
+    tm* now = localtime(&t);
+
+    strftime(datetime_buffer, sizeof(datetime_buffer), "%Y-%m-%d %HH:%MM", now);
+
+	// open file and wipe it's content
+	outputTextFile.open(_fn.c_str(), std::ios::out);
+
+	// check if file has been opened
+	if (outputTextFile.is_open()) {
+		outputTextFile << "--------------------------------------------------------" << std::endl;
+		outputTextFile << "--- Configuration dump generated at: " << datetime_buffer << " --- " << std::endl;
+		outputTextFile << "--------------------------------------------------------" << std::endl;
+	}
+
+	return out;
 }
 
 bool DecodeVer0::getMs5611orBmeSensor() {
@@ -259,7 +194,7 @@ AprsPath DecodeVer0::getPath() {
 	return out;
 }
 
-uint8_t DecodeVer0::getRtuChannelWindgusts() {
+uint8_t DecodeVer0::getRtuConfiguredSourceWindgusts() {
 	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_GUSTS_OFFSET );
 
 	return byte;
@@ -298,7 +233,7 @@ uint16_t DecodeVer0::getUmbChannelWinddirection() {
 	return lsb_byte | (msb_byte << 8);
 }
 
-uint8_t DecodeVer0::getRtuChannelWinddirection() {
+uint8_t DecodeVer0::getRtuConfiguredSourceWinddirection() {
 	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_DIR_OFFSET );
 
 	return byte;
@@ -367,7 +302,7 @@ void DecodeVer0::getCallsign(std::string &call) {
 	std::size_t offset = BASIC_CALLSIGN_OFFSET + CONFIG_BASIC_OFFSET;
 
 	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
-	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_APN_LENGHT;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + 6;
 
 	call.clear();
 
@@ -491,7 +426,7 @@ bool DecodeVer0::getBeaconAtStartup() {
 	}
 }
 
-Rtu DecodeVer0::getRtuChannelConfig(uint8_t channel) {
+Rtu DecodeVer0::getRtuSourceConfig(uint8_t channel) {
 	/**
 	 * 	uint8_t busAddress;
 	uint8_t function;
@@ -522,7 +457,7 @@ Rtu DecodeVer0::getRtuChannelConfig(uint8_t channel) {
 	return out;
 }
 
-uint8_t DecodeVer0::getRtuChannelTemperature() {
+uint8_t DecodeVer0::getRtuConfiguredSourceTemperature() {
 	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_TEMPERATURE_SRC_OFFSET );
 
 	return byte;
@@ -573,7 +508,6 @@ void DecodeVer0::getDescritpion(std::string &description) {
 		startIt++;
 	} while(startIt != endIt);
 
-	//std::for_each(startIt, endIt, [&description](uint8_t b) { description.append(1, (char) b);});
 }
 
 uint16_t DecodeVer0::getUmbChannelTemperature() {
@@ -632,7 +566,11 @@ float DecodeVer0::getLongitude() {
 	uint8_t msb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS + 3);
 
 
-	return (float)(lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
+	uint32_t out = (lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
+
+	float out_float = *(float*)&out;
+
+	return out_float;
 }
 
 float DecodeVer0::getLatitude() {
@@ -641,8 +579,11 @@ float DecodeVer0::getLatitude() {
 	uint8_t rd_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 2);
 	uint8_t msb_byte = data.at(CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 3);
 
+	uint32_t out = (lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
 
-	return (float)(lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24));
+	float out_float = *(float*)&out;
+
+	return out_float;
 }
 
 WeatherSource DecodeVer0::getTemperatureSrc() {
@@ -686,7 +627,7 @@ uint8_t DecodeVer0::getRtuSlaveStopBits() {
 	return byte;
 }
 
-uint8_t DecodeVer0::getRtuChannelWindspeed() {
+uint8_t DecodeVer0::getRtuConfiguredSourceWindspeed() {
 	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_WIND_SPEED_OFFSET );
 
 	return byte;
@@ -730,7 +671,7 @@ bool DecodeVer0::getWxDavisEnabled() {
 	}
 }
 
-uint8_t DecodeVer0::getRtuChannelQnh() {
+uint8_t DecodeVer0::getRtuConfiguredSourceQnh() {
 	uint8_t byte = data.at(CONFIG_RTU_OFFSET + RTU_PRESSURE_SRC_OFFSET );
 
 	return byte;
@@ -789,5 +730,4 @@ void DecodeVer0::getGsmApnPassword(std::string &password) {
 		startIt++;
 	} while(startIt != endIt);
 
-	//std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
 }

@@ -40,8 +40,8 @@ class SrvGetRunningConfig : public IService {
 	 */
 	uint16_t expectedKissFrames;
 
-	/*
-	 * Configuration data extacted from frames
+	/**
+	 * Configuration data extracted from frames
 	 */
 	std::vector<uint8_t> configurationData;
 
@@ -57,10 +57,17 @@ public:
 	void sendRequest();
 
 	/**
-	 * Callback to be used when a frame of type
+	 * Callback to be used when a portion of configuration data
+	 * is received from TNC by host pc
 	 */
 	virtual void callback(const std::vector<uint8_t> * frame);
 
+	/**
+	 * Save configuration into binary file
+	 * @param _in filename
+	 * @return
+	 */
+	bool storeToBinaryFile(std::string _in);
 
 	SrvGetRunningConfig();
 	virtual ~SrvGetRunningConfig();

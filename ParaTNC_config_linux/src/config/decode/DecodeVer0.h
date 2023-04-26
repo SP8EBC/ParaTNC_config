@@ -16,8 +16,10 @@ class DecodeVer0: public IConfigDecode {
 
 public:
 	DecodeVer0(const std::vector<uint8_t> & configData);
-
 	virtual ~DecodeVer0();
+
+	virtual bool decodeToFile(std::string _fn);
+
 	virtual bool getMs5611orBmeSensor()  ;
 	virtual DigiFilter getDigiFilter()  ;
 	virtual uint8_t getWxTransmitPeriod()  ;
@@ -31,12 +33,12 @@ public:
 	virtual Digi getDigiEnabled()  ;
 	virtual Powersave getPowersave()  ;
 	virtual AprsPath getPath()  ;
-	virtual uint8_t getRtuChannelWindgusts()  ;
+	virtual uint8_t getRtuConfiguredSourceWindgusts()  ;
 	virtual bool getGsmAprsisEnable()  ;
 	virtual bool getNorS()  ;
 	virtual std::string getDigiFilterPrefixList(uint8_t entry)  ;
 	virtual uint16_t getUmbChannelWinddirection()  ;
-	virtual uint8_t getRtuChannelWinddirection()  ;
+	virtual uint8_t getRtuConfiguredSourceWinddirection()  ;
 	virtual uint8_t getBeaconTransmitPeriod()  ;
 	virtual uint8_t getDigiDelayInMsec()  ;
 	virtual uint32_t getGsmPin()  ;
@@ -54,8 +56,8 @@ public:
 	virtual bool getGsmEnabled()  ;
 	virtual uint8_t getVisvousDelayInSec()  ;
 	virtual bool getBeaconAtStartup()  ;
-	virtual Rtu getRtuChannelConfig(uint8_t channel)  ;
-	virtual uint8_t getRtuChannelTemperature()  ;
+	virtual Rtu getRtuSourceConfig(uint8_t channelConfig)  ;
+	virtual uint8_t getRtuConfiguredSourceTemperature()  ;
 	virtual void getGsmApnUsername(std::string &username)  ;
 	virtual ButtonFunction getButtonOneFunction()  ;
 	virtual uint16_t getUmbSlaveClass()  ;
@@ -69,12 +71,12 @@ public:
 	virtual WeatherSource getTemperatureSrc()  ;
 	virtual bool getRtuFullWindData()  ;
 	virtual uint8_t getRtuSlaveStopBits()  ;
-	virtual uint8_t getRtuChannelWindspeed()  ;
+	virtual uint8_t getRtuConfiguredSourceWindspeed()  ;
 	virtual bool getDigiAlwaysMessageAndStatus()  ;
 	virtual bool getWxUmbEnabled()  ;
 	virtual bool getWxEnabled()  ;
 	virtual bool getWxDavisEnabled()  ;
-	virtual uint8_t getRtuChannelQnh()  ;
+	virtual uint8_t getRtuConfiguredSourceQnh()  ;
 	virtual bool getWxDoubleTransmit()  ;
 	virtual WeatherSource getHumiditySrc()  ;
 	virtual void getGsmApnPassword(std::string &password)  ;

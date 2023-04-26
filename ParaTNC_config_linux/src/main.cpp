@@ -33,6 +33,8 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 std::string str;
 
+IConfigDecode * decode;
+
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
 	//ProgramConfig::readConfigFromFile("");
@@ -83,10 +85,31 @@ int main(int argc, char *argv[]) {
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 
-	srvEraseConfig.sendRequest();
+	srvRunningConfig.sendRequest();
+	s.waitForTransmissionDone();
 
     pthread_mutex_lock(&lock);
     // wait for configuration to be received
+    pthread_cond_wait(&cond1, &lock);
+    pthread_mutex_unlock(&lock);
+
+    srvRunningConfig.storeToBinaryFile("config.bin");
+
+    std::string callsign;
+    std::string description;
+    float lat, lon;
+
+	decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
+	decode->getCallsign(callsign);
+	decode->getDescritpion(description);
+	lon = decode->getLongitude();
+	lat = decode->getLatitude();
+
+	srvEraseConfig.sendRequest();
+	s.waitForTransmissionDone();
+
+    pthread_mutex_lock(&lock);
+    // wait for erase to be done
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 

@@ -38,10 +38,13 @@ SerialWorker& SerialWorker::operator=(const SerialWorker &other) {
 
 void SerialWorker::waitForStartup(void) {
 
+	// check if worker is running already
 	if (workerStarted) {
+		// and return immediately if is.
 		return;
 	}
 
+	// if not wait on condition variable
     pthread_mutex_lock(&this->workerLock);
     pthread_cond_wait(&this->workerStartSync, &this->workerLock);
     pthread_mutex_unlock(&this->workerLock);
@@ -60,14 +63,14 @@ void * SerialWorker::wrapper(void * object) {
 void SerialWorker::worker(void) {
 	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
+	// signalize a waiting thread that this worker has started
     pthread_mutex_lock(&this->workerLock);
 	pthread_cond_signal(&this->workerStartSync);
     pthread_mutex_unlock(&this->workerLock);
 
+    // set flag which is then used by waiting thread to check if worker
+    // had started before that thread
     workerStarted = true;
-
-	// this vector is stripped from FEND!!!
-	//std::shared_ptr<std::vector<uint8_t>> pointerToData = std::shared_ptr<std::vector<uint8_t>>(&receivedData);
 
 	// pointer to callback
 	IService * serviceCallback = NULL;
@@ -100,16 +103,23 @@ void SerialWorker::worker(void) {
 
 bool SerialWorker::start(void) {
 
+	// check if callback have been set
 	if (callbackMap.size() > 0) {
+		// set to keep worker looping
 		workerLoop = true;
 
+		// initialize mutex
 		const int mutex_init_result = pthread_mutex_init(&workerLock, NULL);
 
+		// initialize condition variable
 		const int cond_init_result = pthread_cond_init(&workerStartSync, NULL);
 
+		// check and proceed only if all things were initialized correctly
 		if (cond_init_result == 0 && mutex_init_result == 0) {
+			// create and start working thread.
 			pthread_create(&this->thread, NULL, &SerialWorker::wrapper, (void*)pointerThis);
 
+			// wait for thread to statup and became ready
 			waitForStartup();
 
 			std::cout << "I = SerialWorker::start, started and sychronized " << std::endl;
