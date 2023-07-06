@@ -11,6 +11,9 @@
 #include <vector>
 #include <stdint.h>
 
+#define NONSTANDARD	(uint8_t)0x0F
+
+
 class IService {
 
 public:
@@ -23,6 +26,8 @@ public:
 	 */
 	virtual void callback(const std::vector<uint8_t> * frame) = 0;
 
+
+	virtual void sendRequest() = 0;
 };
 
 #endif /* SRC_SERVICES_ISERVICE_H_ */

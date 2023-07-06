@@ -15,7 +15,7 @@
 #include <iostream>
 #include <stdio.h>
 
-const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)0x1, KISS_GET_RUNNING_CONFIG);
+const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)1, KISS_GET_RUNNING_CONFIG);
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
 	conditionVariable = 0;

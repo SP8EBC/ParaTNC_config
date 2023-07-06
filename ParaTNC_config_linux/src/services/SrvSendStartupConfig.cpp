@@ -31,7 +31,7 @@ SrvSendStartupConfig::SrvSendStartupConfig(int _singleFrameLn) : singleFrameLn(_
 
 	internalSync = PTHREAD_COND_INITIALIZER;
 	conditionVariable = 0;
-	operationResult = RESULT_ERROR;
+	operationResult = NRC_POSITIVE;
 	s = 0;
 
 }
@@ -45,7 +45,7 @@ SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : 
 
 	internalSync = PTHREAD_COND_INITIALIZER;
 	conditionVariable = 0;
-	operationResult = RESULT_ERROR;
+	operationResult = NRC_POSITIVE;
 	s = 0;
 }
 
@@ -121,9 +121,9 @@ void SrvSendStartupConfig::callback(
 
 	int32_t result = (int32_t)frame->at(2);
 
-	operationResult = (erasing_programming_result_t)result;
+	operationResult = (kiss_communication_nrc_t)result;
 
-	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
+	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
 
 	pthread_cond_signal(&internalSync);
 

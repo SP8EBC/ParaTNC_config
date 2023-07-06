@@ -11,6 +11,7 @@
 #include "services/SrvGetVersionAndId.h"
 #include "services/SrvEraseStartupConfig.h"
 #include "services/SrvSendStartupConfig.h"
+#include "services/SrvReadDid.h"
 
 #include "config/decode/DecodeVer0.h"
 
@@ -24,6 +25,7 @@ SrvGetRunningConfig srvRunningConfig;
 SrvGetVersionAndId srvGetVersion;
 SrvEraseStartupConfig srvEraseConfig;
 SrvSendStartupConfig srvSendStartupConfig(128);
+SrvReadDid srvReadDid;
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -50,15 +52,18 @@ int main(int argc, char *argv[]) {
 	srvGetVersion.setSerialContext(&s);
 	srvEraseConfig.setSerialContext(&s);
 	srvSendStartupConfig.setSerialContext(&s);
+	srvReadDid.setSerialContext(&s);
 
 	srvGetVersion.setConditionVariable(&cond1);
 	srvRunningConfig.setConditionVariable(&cond1);
 	srvEraseConfig.setConditionVariable(&cond1);
+	srvReadDid.setConditionVariable(&cond1);
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
 
 	SerialWorker worker(&s, callbackMap);
 
@@ -70,7 +75,7 @@ int main(int argc, char *argv[]) {
 		s.init(argv[1], B9600);
 	}
 	else {
-		s.init("/dev/ttyUSB0", B9600);
+		s.init("/dev/ttyS0", B9600);
 	}
 
 	worker.start();
@@ -82,6 +87,15 @@ int main(int argc, char *argv[]) {
 
 	// wait for software version
     pthread_mutex_lock(&lock);
+    pthread_cond_wait(&cond1, &lock);
+    pthread_mutex_unlock(&lock);
+
+    // 0x1234U
+    srvReadDid.sendRequestForDid(0x1234U);
+    s.waitForTransmissionDone();
+
+    pthread_mutex_lock(&lock);
+    // wait for configuration to be received
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 

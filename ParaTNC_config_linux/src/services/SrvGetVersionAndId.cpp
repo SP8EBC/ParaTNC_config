@@ -12,7 +12,10 @@
 
 #include "../shared/kiss_communication_service_ids.h"
 
-const std::vector<uint8_t> SrvGetVersionAndId::requestData((size_t)0x1, KISS_GET_VERSION_AND_ID);
+/**
+ * Request
+ */
+const std::vector<uint8_t> SrvGetVersionAndId::requestData((size_t)1, KISS_GET_VERSION_AND_ID);
 
 
 SrvGetVersionAndId::~SrvGetVersionAndId() {

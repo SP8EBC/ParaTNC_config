@@ -6,6 +6,7 @@
  */
 
 #include "SrvEraseStartupConfig.h"
+#include "../types/NRC.h"
 #include "../shared/kiss_communication_service_ids.h"
 
 #include <vector>
@@ -20,7 +21,7 @@ void SrvEraseStartupConfig::sendRequest() {
 }
 
 SrvEraseStartupConfig::SrvEraseStartupConfig() {
-	operationResult = RESULT_IDLE;
+	operationResult = NRC_POSITIVE;
 	s = 0;
 	conditionVariable = 0;
 }
@@ -33,9 +34,9 @@ void SrvEraseStartupConfig::callback(
 
 	int32_t result = (int32_t)frame->at(2);
 
-	operationResult = (erasing_programming_result_t)result;
+	operationResult = (kiss_communication_nrc_t)result;
 
-	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << resultToString(operationResult) << std::endl;
+	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
 
 	if (conditionVariable != 0x00) {
 		pthread_cond_signal(conditionVariable);

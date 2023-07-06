@@ -12,6 +12,8 @@
 
 #include "../serial/Serial.h"
 #include "../types/ErasingProgrammingRes.h"
+#include "../types/NRC.h"
+
 
 #include <memory>
 
@@ -31,24 +33,13 @@ class SrvEraseStartupConfig: public IService {
 	/**
 	 *
 	 */
-	erasing_programming_result_t operationResult;
+	kiss_communication_nrc_t operationResult;
 
 	const static std::vector<uint8_t> requestData;
 
-	const static std::string resultToString(erasing_programming_result_t res) {
-		switch(res) {
-		case RESULT_IDLE:		return "RESULT_IDLE";
-		case RESULT_PENDING:	return "RESULT_PENDING";
-		case RESULT_DONE:		return "RESULT_ERASED";
-		case RESULT_ERROR:		return "RESULT_ERROR";
-		}
-
-		return "";
-	}
-
 public:
 
-	void sendRequest();
+	virtual void sendRequest();
 
 	SrvEraseStartupConfig();
 	virtual ~SrvEraseStartupConfig();

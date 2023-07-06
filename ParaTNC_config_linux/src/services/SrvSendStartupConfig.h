@@ -15,6 +15,8 @@
 
 #include "../serial/Serial.h"
 #include "../types/ErasingProgrammingRes.h"
+#include "../types/NRC.h"
+
 
 class SrvSendStartupConfig: public IService {
 
@@ -56,18 +58,7 @@ class SrvSendStartupConfig: public IService {
 	/**
 	 *
 	 */
-	erasing_programming_result_t operationResult;
-
-	const static std::string resultToString(erasing_programming_result_t res) {
-		switch(res) {
-		case RESULT_IDLE:		return "RESULT_IDLE";
-		case RESULT_PENDING:	return "RESULT_PENDING";
-		case RESULT_DONE:		return "RESULT_PROGRAMMED";
-		case RESULT_ERROR:		return "RESULT_ERROR";
-		}
-
-		return "";
-	}
+	kiss_communication_nrc_t operationResult;
 
 public:
 	/**
@@ -75,7 +66,7 @@ public:
 	 * this function will send only first part of configuration block.
 	 * The rest will be handled by callback
 	 */
-	void sendRequest();
+	virtual void sendRequest();
 
 	SrvSendStartupConfig(int singleFrameLn);
 	virtual ~SrvSendStartupConfig();

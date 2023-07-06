@@ -54,7 +54,7 @@ public:
 	/**
 	 * Sends a request to upload current running configuration
 	 */
-	void sendRequest();
+	virtual void sendRequest();
 
 	/**
 	 * Callback to be used when a portion of configuration data
