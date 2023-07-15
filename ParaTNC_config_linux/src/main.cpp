@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <memory>
 #include <pthread.h>
@@ -36,6 +37,12 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 std::string str;
 
 IConfigDecode * decode;
+
+const uint16_t did_list[] = {
+						0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
+						0x1500U, 0x1501U, 0x1502U, 0x1503U, 0x1504U, 0x1505U,
+						0x2000U, 0x2001U, 0x2002U, 0x2003U, 0x2004U, 0x2005U,
+						0x2006U, 0x2007U};
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -90,14 +97,17 @@ int main(int argc, char *argv[]) {
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 
-    // 0x1234U
-    srvReadDid.sendRequestForDid(0x1234U);
-    s.waitForTransmissionDone();
+    for (int i = 0; i < (int)sizeof(did_list); i++) {
+    	std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;
 
-    pthread_mutex_lock(&lock);
-    // wait for configuration to be received
-    pthread_cond_wait(&cond1, &lock);
-    pthread_mutex_unlock(&lock);
+        srvReadDid.sendRequestForDid(did_list[i]);
+        s.waitForTransmissionDone();
+
+        pthread_mutex_lock(&lock);
+        // wait for configuration to be received
+        pthread_cond_wait(&cond1, &lock);
+        pthread_mutex_unlock(&lock);
+    }
 
 	srvRunningConfig.sendRequest();
 	s.waitForTransmissionDone();

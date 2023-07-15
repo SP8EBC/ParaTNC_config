@@ -49,10 +49,49 @@ void SrvReadDid::sendRequestForDid(uint16_t did) {
 void SrvReadDid::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> > *frame) {
 
-	std::cout << "I = SrvReadDid::callback," << std::endl;
+	std::vector<uint8_t>::const_iterator it = frame->begin();
+
+	std::cout << "I = SrvReadDid::callback";
+
+	for (int i = 0; i < frame->size(); i++) {
+		std::cout << ", 0x" << std::hex << (int)frame->at(i);
+	}
+
+	std::cout << std::dec << std::endl;
+
+	if (it != frame->end()) {
+		it += 2;
+
+		const uint8_t size_byte = *it;
+
+		const bool is_string = ((size_byte & 0x80) == 0) ? true : false;
+
+		if (is_string) {
+			std::string content;
+
+			do {
+				content.push_back(*it);
+
+				std::cout << "I = SrvReadDid::callback, string: " << content << std::endl;
+			}while (++it != frame->end());
+
+		}
+		else {
+			const uint8_t first_size = size_byte & 0x03;
+			const uint8_t second_size = (size_byte & 0x0C) >> 2;
+			const uint8_t third_size = (size_byte & 0x30) >> 4;
+
+			std::cout << "I = SrvReadDid::callback, " <<
+						"first_size: " 	<< 	(int)first_size 	<< ", " <<
+						"second_size: " << 	(int)second_size 	<< ", " <<
+						"third_size: " 	<< 	(int)third_size 	<< ", " << std::endl;
+
+		}
+	}
 
 
 	if (conditionVariable != 0x00) {
+
 		pthread_cond_signal(conditionVariable);
 	}
 }
