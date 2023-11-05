@@ -6,6 +6,8 @@
  */
 
 #include "SerialWorker.h"
+#include "../AuxStuff.h"
+#include "../shared/kiss_communication_service_ids.h"
 #include <pthread.h>
 
 #include <iostream>
@@ -87,12 +89,18 @@ void SerialWorker::worker(void) {
 			// get frame type
 			uint8_t frameType = receivedData.at(1);
 
-			serviceCallback = this->callbackMap.at(frameType);
-
-			if (serviceCallback != NULL) {
-				// invoke callback
-				serviceCallback->callback(&receivedData);
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
+				std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(receivedData.at(2)) << std::endl;
 			}
+			else {
+				serviceCallback = this->callbackMap.at(frameType);
+
+				if (serviceCallback != NULL) {
+					// invoke callback
+					serviceCallback->callback(&receivedData);
+				}
+			}
+
 		}
 	}	while (workerLoop);
 

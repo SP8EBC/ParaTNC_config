@@ -53,6 +53,10 @@ void SrvReadDid::callback(
 
 	std::cout << "I = SrvReadDid::callback";
 
+	int8_t generic_8;
+	int16_t generic_16;
+	int32_t generic_32;
+
 	for (int i = 0; i < frame->size(); i++) {
 		std::cout << ", 0x" << std::hex << (int)frame->at(i);
 	}
@@ -62,9 +66,19 @@ void SrvReadDid::callback(
 	if (it != frame->end()) {
 		it += 2;
 
+		const uint8_t did_lsb = *it;
+		it++;
+
+		const uint8_t did_msb = *it;
+		it++;
+
 		const uint8_t size_byte = *it;
 
 		const bool is_string = ((size_byte & 0x80) == 0) ? true : false;
+
+		const bool is_float = ((size_byte & 0xC0) == 0) ? true : false;
+
+		it++;
 
 		if (is_string) {
 			std::string content;
@@ -76,6 +90,9 @@ void SrvReadDid::callback(
 			}while (++it != frame->end());
 
 		}
+		else if (is_float) {
+
+		}
 		else {
 			const uint8_t first_size = size_byte & 0x03;
 			const uint8_t second_size = (size_byte & 0x0C) >> 2;
@@ -85,6 +102,29 @@ void SrvReadDid::callback(
 						"first_size: " 	<< 	(int)first_size 	<< ", " <<
 						"second_size: " << 	(int)second_size 	<< ", " <<
 						"third_size: " 	<< 	(int)third_size 	<< ", " << std::endl;
+
+			switch (first_size) {
+			case 1:	// int8_t
+				generic_8 = *it++;
+				std::cout << "I = SrvReadDid::callback, generic_8: " << generic_8 << std::endl;
+
+				break;
+			case 2:	// int16_t
+				generic_16 = *it++;
+				generic_16 |= ((*it++) << 8);
+				std::cout << "I = SrvReadDid::callback, generic_16: " << generic_16 << std::endl;
+
+				break;
+			case 3:	// int32_t
+				generic_32 = *it++;
+				generic_32 |= ((*it++) << 8);
+				generic_32 |= ((*it++) << 16);
+				generic_32 |= ((*it++) << 24);
+				std::cout << "I = SrvReadDid::callback, generic_32: " << generic_32 << std::endl;
+
+
+				break;
+			}
 
 		}
 	}

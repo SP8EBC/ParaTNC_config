@@ -129,18 +129,18 @@ int main(int argc, char *argv[]) {
 	lon = decode->getLongitude();
 	lat = decode->getLatitude();
 
-	srvEraseConfig.sendRequest();
-	s.waitForTransmissionDone();
-
-    pthread_mutex_lock(&lock);
-    // wait for erase to be done
-    pthread_cond_wait(&cond1, &lock);
-    pthread_mutex_unlock(&lock);
-
-    std::cout << "erase done" << std::endl;
-
-    srvSendStartupConfig.setDataForDownload(test);
-    srvSendStartupConfig.sendRequest();
+//	srvEraseConfig.sendRequest();
+//	s.waitForTransmissionDone();
+//
+//    pthread_mutex_lock(&lock);
+//    // wait for erase to be done
+//    pthread_cond_wait(&cond1, &lock);
+//    pthread_mutex_unlock(&lock);
+//
+//    std::cout << "erase done" << std::endl;
+//
+//    srvSendStartupConfig.setDataForDownload(test);
+//    srvSendStartupConfig.sendRequest();
 
 //    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
 //
