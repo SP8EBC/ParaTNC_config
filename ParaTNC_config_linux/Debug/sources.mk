@@ -27,6 +27,7 @@ src \
 src/serial \
 src/shared/config/decode \
 src/shared/config/encode \
+src/shared/crc \
 src/shared/exceptions \
 src/shared/services \
 

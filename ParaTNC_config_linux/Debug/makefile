@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include src/shared/services/subdir.mk
 -include src/shared/exceptions/subdir.mk
+-include src/shared/crc/subdir.mk
 -include src/shared/config/encode/subdir.mk
 -include src/shared/config/decode/subdir.mk
 -include src/serial/subdir.mk
