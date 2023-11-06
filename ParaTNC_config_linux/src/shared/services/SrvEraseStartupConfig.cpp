@@ -7,7 +7,7 @@
 
 #include "SrvEraseStartupConfig.h"
 #include "../types/NRC.h"
-#include "../shared/kiss_communication_service_ids.h"
+#include "../kiss_communication_service_ids.h"
 
 #include <vector>
 #include <iostream>

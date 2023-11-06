@@ -146,6 +146,7 @@ bool SerialWorker::start(void) {
 }
 
 void SerialWorker::terminate(void) {
+	pthread_cancel(thread);
 	pthread_join(this->thread, NULL);
 
 }

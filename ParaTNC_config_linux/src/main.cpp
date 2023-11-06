@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 
-    for (int i = 0; i < (int)sizeof(did_list); i++) {
+    for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
     	std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;
 
         srvReadDid.sendRequestForDid(did_list[i]);
@@ -128,6 +128,12 @@ int main(int argc, char *argv[]) {
 	decode->getDescritpion(description);
 	lon = decode->getLongitude();
 	lat = decode->getLatitude();
+
+	std::cout << "I = main, callsign " << callsign << std::endl;
+	std::cout << "I = main, description " << description << std::endl;
+	std::cout << "I = main, lon " << lon << std::endl;
+	std::cout << "I = main, lat " << lat << std::endl;
+
 
 //	srvEraseConfig.sendRequest();
 //	s.waitForTransmissionDone();

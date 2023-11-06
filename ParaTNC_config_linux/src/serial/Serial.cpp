@@ -11,10 +11,10 @@
 
 #include "../ProgramConfig.h"
 
-#include "../exceptions/TimeoutE.h"
-#include "../exceptions/TransmissionFailedEx.h"
+#include "../shared/exceptions/TimeoutE.h"
+#include "../shared/exceptions/TransmissionFailedEx.h"
 
-#include "../types/ReceivingState.h"
+#include "../shared/types/ReceivingState.h"
 
 #define _FEND	(uint8_t)0xC0
 #define _FESC	(uint8_t)0xDB
