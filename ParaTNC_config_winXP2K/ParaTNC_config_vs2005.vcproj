@@ -39,15 +39,19 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/I $(InputDir)"
 				Optimization="0"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
+				AssemblerOutput="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
+				ForcedIncludeFiles=""
+				ShowIncludes="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -115,12 +119,16 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/I $(InputDir)"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
+				AssemblerOutput="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
+				ForcedIncludeFiles="$(InputDir)\stdint.h"
+				ShowIncludes="true"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -171,7 +179,7 @@
 	<Files>
 		<Filter
 			Name="Source Files"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			Filter="h;cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
@@ -198,6 +206,274 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\stdint.h"
+				>
+			</File>
+			<Filter
+				Name="shared"
+				>
+				<File
+					RelativePath="..\shared\kiss_callback.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_communication.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_communication_nrc_t.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_communication_service_ids.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_did.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_nrc_response.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\kiss_xmacro_helpers.h"
+					>
+				</File>
+				<Filter
+					Name="config"
+					>
+					<File
+						RelativePath="..\shared\config\Ver0Map.h"
+						>
+					</File>
+					<Filter
+						Name="decode"
+						>
+						<File
+							RelativePath="..\shared\config\decode\DecodeVer0.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\decode\DecodeVer0.h"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\decode\IConfigDecode.h"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\decode\IConfigValidate.h"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\decode\ValidateVer0.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\decode\ValidateVer0.h"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="encode"
+						>
+						<File
+							RelativePath="..\shared\config\encode\EncodeVer0.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\encode\EncodeVer0.h"
+							>
+						</File>
+						<File
+							RelativePath="..\shared\config\encode\IConfigEncode.h"
+							>
+						</File>
+					</Filter>
+				</Filter>
+				<Filter
+					Name="crc"
+					>
+					<File
+						RelativePath="..\shared\crc\crc_.c"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\crc\crc_.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="exception"
+					>
+					<File
+						RelativePath="..\shared\exceptions\NotSupportedEx.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\NotSupportedEx.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\TimeoutE.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\TimeoutE.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\TimeoutE_test.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\TransmissionFailedEx.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\exceptions\TransmissionFailedEx.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="services"
+					>
+					<File
+						RelativePath="..\shared\services\IService.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\IService.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvEraseStartupConfig.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvEraseStartupConfig.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvGetRunningConfig.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvGetRunningConfig.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvGetVersionAndId.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvGetVersionAndId.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvReadDid.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvReadDid.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvReadDid_test.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvSendStartupConfig.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\services\SrvSendStartupConfig.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="types"
+					>
+					<File
+						RelativePath="..\shared\types\AprsPath.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\AprsSymbol.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\ButtonFunction.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\CurrentConfigRegion.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\Digi.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\DigiFilter.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\ErasingProgrammingRes.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\NRC.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\Powersave.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\ReceivingState.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\Rtu.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\SerialState.h"
+						>
+					</File>
+					<File
+						RelativePath="..\shared\types\WeatherSource.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="bits"
+				>
+				<File
+					RelativePath=".\bits\libc-header-start.h"
+					>
+				</File>
+				<File
+					RelativePath=".\bits\timesize.h"
+					>
+				</File>
+				<File
+					RelativePath=".\bits\types.h"
+					>
+				</File>
+				<File
+					RelativePath=".\bits\wchar.h"
+					>
+				</File>
+				<File
+					RelativePath=".\bits\wordsize.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
