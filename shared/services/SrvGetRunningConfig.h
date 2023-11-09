@@ -8,7 +8,7 @@
 #ifndef SRC_SERVICES_SRVGETRUNNINGCONFIG_H_
 #define SRC_SERVICES_SRVGETRUNNINGCONFIG_H_
 
-#include "../serial/Serial.h"
+#include "serial/Serial.h"
 #include "../types/CurrentConfigRegion.h"
 
 #include "../config/decode/IConfigDecode.h"

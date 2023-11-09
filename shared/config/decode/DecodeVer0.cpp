@@ -5,6 +5,8 @@
  *      Author: mateusz
  */
 
+#include "stdafx.h"
+
 #include "DecodeVer0.h"
 #include "../Ver0Map.h"
 #include "../../exceptions/NotSupportedEx.h"
@@ -12,7 +14,6 @@
 #include <algorithm>
 #include <fstream>
 
-#include <sys/time.h>
 #include <time.h>
 
 

@@ -8,15 +8,15 @@
 #include "serial/Serial.h"
 #include "serial/SerialWorker.h"
 
-#include "services/SrvGetRunningConfig.h"
-#include "services/SrvGetVersionAndId.h"
-#include "services/SrvEraseStartupConfig.h"
-#include "services/SrvSendStartupConfig.h"
-#include "services/SrvReadDid.h"
+#include "../shared/services/SrvGetRunningConfig.h"
+#include "../shared/services/SrvGetVersionAndId.h"
+#include "../shared/services/SrvEraseStartupConfig.h"
+#include "../shared/services/SrvSendStartupConfig.h"
+#include "../shared/services/SrvReadDid.h"
 
-#include "config/decode/DecodeVer0.h"
+#include "../shared/config/decode/DecodeVer0.h"
 
-#include "shared/kiss_communication_service_ids.h"
+#include "../shared/kiss_communication_service_ids.h"
 
 std::map<uint8_t, IService*> callbackMap;
 

@@ -13,7 +13,7 @@
 #include <vector>
 #include <memory>
 
-#include "../serial/Serial.h"
+#include "./serial/Serial.h"
 #include "../types/ErasingProgrammingRes.h"
 #include "../types/NRC.h"
 

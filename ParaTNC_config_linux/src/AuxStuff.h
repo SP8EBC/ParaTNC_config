@@ -11,7 +11,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "shared/kiss_communication_nrc_t.h"
+#include "../shared/kiss_communication_nrc_t.h"
 
 class AuxStuff {
 public:

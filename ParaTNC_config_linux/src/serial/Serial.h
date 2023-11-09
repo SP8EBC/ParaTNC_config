@@ -21,7 +21,7 @@
 #include <vector>
 #include <stdint.h>
 
-#include "./types/SerialState.h"
+#include "../shared/types/SerialState.h"
 
 /**
  * Due to some unfortunate omission there is a inconsistency in KISS extented protocol.

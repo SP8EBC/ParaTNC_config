@@ -8,13 +8,13 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/shared/services/subdir.mk
--include src/shared/exceptions/subdir.mk
--include src/shared/crc/subdir.mk
--include src/shared/config/encode/subdir.mk
--include src/shared/config/decode/subdir.mk
 -include src/serial/subdir.mk
 -include src/subdir.mk
+-include shared/services/subdir.mk
+-include shared/exceptions/subdir.mk
+-include shared/crc/subdir.mk
+-include shared/config/encode/subdir.mk
+-include shared/config/decode/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)
 -include $(C++_DEPS)

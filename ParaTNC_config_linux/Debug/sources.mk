@@ -23,11 +23,11 @@ OBJS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+shared/config/decode \
+shared/config/encode \
+shared/crc \
+shared/exceptions \
+shared/services \
 src \
 src/serial \
-src/shared/config/decode \
-src/shared/config/encode \
-src/shared/crc \
-src/shared/exceptions \
-src/shared/services \
 

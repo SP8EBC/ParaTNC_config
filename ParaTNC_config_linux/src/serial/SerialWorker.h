@@ -14,7 +14,7 @@
 
 #include "Serial.h"
 
-#include "./services/IService.h"
+#include "../shared/services/IService.h"
 
 /**
  * This is serial worker class which is used to receive data

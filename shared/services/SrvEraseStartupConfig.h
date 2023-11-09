@@ -11,8 +11,8 @@
 #include "IService.h"
 
 #include "./serial/Serial.h"
-#include "./types/ErasingProgrammingRes.h"
-#include "./types/NRC.h"
+#include "../types/ErasingProgrammingRes.h"
+#include "../types/NRC.h"
 
 
 #include <memory>
