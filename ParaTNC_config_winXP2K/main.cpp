@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "ParaTNC_config_vs2005.h"
+#include "main.h"
 
 #include <iostream>
 

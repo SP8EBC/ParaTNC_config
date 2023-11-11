@@ -5,6 +5,8 @@
  *      Author: mateusz
  */
 
+#include "stdafx.h"
+
 #include "EncodeVer0.h"
 
 #include "../Ver0Map.h"
@@ -199,6 +201,7 @@ void EncodeVer0::setDigiDelayInMsec(uint8_t _delayInMsec) {
 }
 
 bool EncodeVer0::decodeToFile(std::string _fn) {
+	return false;
 }
 
 void EncodeVer0::setUmbChannelQnh(uint16_t _channelQnhPressure) {

@@ -7,6 +7,8 @@
  *      Author: mateusz
  */
 
+#include "stdafx.h"
+
 #include "crc_.h"
 
 uint8_t reflect8(uint8_t val)

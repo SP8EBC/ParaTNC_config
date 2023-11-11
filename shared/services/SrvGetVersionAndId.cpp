@@ -4,6 +4,7 @@
  *  Created on: Sep 4, 2022
  *      Author: mateusz
  */
+#include "stdafx.h"
 
 #include "SrvGetVersionAndId.h"
 

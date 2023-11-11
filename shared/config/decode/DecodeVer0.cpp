@@ -35,7 +35,12 @@ bool DecodeVer0::decodeToFile(std::string _fn) {
 
 	// get current time
     time_t t = time(0);   // get time now
-    tm* now = localtime(&t);
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	tm* now = localtime(&t);
+#else
+	tm* now = localtime(&t);
+#endif
+
 
     strftime(datetime_buffer, sizeof(datetime_buffer), "%Y-%m-%d %HH:%MM", now);
 

@@ -4,6 +4,7 @@
  *  Created on: Sep 8, 2022
  *      Author: mateusz
  */
+#include "stdafx.h"
 
 #include "SrvEraseStartupConfig.h"
 #include "../types/NRC.h"

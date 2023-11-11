@@ -5,10 +5,13 @@
  *      Author: mateusz
  */
 
+#include "stdafx.h"
+
 #include "ValidateVer0.h"
 #include "../../crc/crc_.h"
 
 #include <iostream>
+#include <vector>
 
 ValidateVer0::~ValidateVer0() {
 	// TODO Auto-generated destructor stub
@@ -31,8 +34,11 @@ bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 								(dataFromTnc.at(crcAreaLn + 6) << 16) |
 								(dataFromTnc.at(crcAreaLn + 7) << 24);
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	calculatedCrc = calcCRC32std(&dataFromTnc[0], crcAreaLn, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
+#else
 	calculatedCrc = calcCRC32std(dataFromTnc.data(), crcAreaLn, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
-
+#endif
 	std::cout << "D = ValidateVer0::checkValidate, calculatedCrc: 0x" << std::hex << (int)calculatedCrc  << ", frame crcFromFrame: 0x" << crcFromFrame << std::dec << std::endl;
 
 	if (calculatedCrc == crcFromFrame) {

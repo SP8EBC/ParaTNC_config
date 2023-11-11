@@ -229,7 +229,10 @@ typedef __uintmax_t		uintmax_t;
 #  if __WORDSIZE32_SIZE_ULONG
 #   define SIZE_MAX		(4294967295UL)
 #  else
-#   define SIZE_MAX		(4294967295U)
+// commented out to rub out warnings like that
+// p:\paratnc_config_winxp2k\stdint.h(232) : warning C4005: 'SIZE_MAX' : macro redefinition
+//
+//#   define SIZE_MAX		(4294967295U)
 #  endif
 # endif
 

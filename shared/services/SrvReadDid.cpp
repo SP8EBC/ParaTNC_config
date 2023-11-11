@@ -4,6 +4,7 @@
  *  Created on: Jul 6, 2023
  *      Author: mateusz
  */
+#include "stdafx.h"
 
 #include "SrvReadDid.h"
 #include "../shared/kiss_communication_service_ids.h"

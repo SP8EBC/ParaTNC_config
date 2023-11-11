@@ -4,6 +4,7 @@
  *  Created on: Aug 21, 2022
  *      Author: mateusz
  */
+#include "stdafx.h"
 
 #include "SrvGetRunningConfig.h"
 
