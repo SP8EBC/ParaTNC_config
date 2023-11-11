@@ -1,4 +1,5 @@
 
+#include "stdafx.h"
 #include "Serial.h"
 
 #include <iostream>
@@ -39,7 +40,6 @@ Serial::Serial() {
 void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
 		std::cout << "I = serial::transmitKissFrame, transmission done " << std::endl;
-	}
 }
 
 void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {

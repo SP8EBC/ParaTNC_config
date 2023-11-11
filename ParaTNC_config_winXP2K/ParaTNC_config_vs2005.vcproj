@@ -424,6 +424,14 @@
 				<File
 					RelativePath="..\shared\crc\crc_.c"
 					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							UsePrecompiledHeader="0"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\shared\crc\crc_.h"

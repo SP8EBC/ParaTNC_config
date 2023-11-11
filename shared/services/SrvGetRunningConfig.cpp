@@ -19,7 +19,11 @@
 const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)1, KISS_GET_RUNNING_CONFIG);
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	conditionVariable = 0;
+#endif
 	s = 0;
 	validate = new ValidateVer0();
 }
@@ -73,9 +77,13 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 			// verify CRC
 			validate->checkValidate(configurationData);
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 			if (conditionVariable) {
 				pthread_cond_signal(conditionVariable);
 			}
+#endif
 		}
 		else if (currentFrame + 1 > expectedKissFrames) {
 			std::cout << "E = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame->size() << " (0x" << std::hex << frame->size() << std::dec << ")" << std::endl;
@@ -104,8 +112,11 @@ bool SrvGetRunningConfig::storeToBinaryFile(std::string _in) {
 
 	// if file has been opened
 	if (f != NULL) {
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+		fwrite(&this->configurationData[0], this->configurationData.size(), 1, f);
+#else
 		fwrite(this->configurationData.data(), this->configurationData.size(), 1, f);
-
+#endif
 		fflush(f);
 
 		fclose(f);

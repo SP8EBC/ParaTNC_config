@@ -12,6 +12,12 @@
 
 #include "serial/Serial.h"
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 class SrvGetVersionAndId: public IService {
 
 	/**
@@ -19,11 +25,15 @@ class SrvGetVersionAndId: public IService {
 	 */
 	Serial * s;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	/**
 	 * Condition variable used to synchronize and lock another thread until
 	 * memory erase is done. TNC sends ACK after flash operation is done.
 	 */
 	pthread_cond_t * conditionVariable;
+#endif
 
 	const static std::vector<uint8_t> requestData;
 
@@ -49,9 +59,14 @@ public:
 		this->s = s;
 	}
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
+#endif
+
 };
 
 #endif /* SRC_SERVICES_SRVGETVERSIONANDID_H_ */

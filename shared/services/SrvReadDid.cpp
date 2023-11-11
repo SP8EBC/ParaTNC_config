@@ -12,8 +12,11 @@
 #include <iostream>
 
 SrvReadDid::SrvReadDid() {
-	// TODO Auto-generated constructor stub
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
 
+#else
+	conditionVariable = 0;
+#endif
 }
 
 SrvReadDid::~SrvReadDid() {
@@ -29,7 +32,7 @@ void SrvReadDid::sendRequest() {
 void SrvReadDid::sendRequestForDid(uint16_t did) {
 
 	// check if all variables are set correctly
-	if (this->s != NULL && this->conditionVariable != NULL) {
+	if (this->s != NULL) {
 		// wipe content of request buffer
 		requestData.clear();
 
@@ -130,9 +133,12 @@ void SrvReadDid::callback(
 		}
 	}
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
 
+#else
 	if (conditionVariable != 0x00) {
 
 		pthread_cond_signal(conditionVariable);
 	}
+#endif
 }

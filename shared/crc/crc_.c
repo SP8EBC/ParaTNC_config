@@ -15,7 +15,8 @@ uint8_t reflect8(uint8_t val)
 {
     uint8_t resVal = 0;
 
-    for(int i = 0; i < 8; i++)
+	int i;
+    for(i = 0; i < 8; i++)
     {
         if ((val & (1 << i)) != 0)
         {
@@ -30,7 +31,8 @@ uint32_t reflect32(uint32_t val)
 {
     uint32_t resVal = 0;
 
-    for(int i = 0; i < 32; i++)
+	int i;
+    for(i = 0; i < 32; i++)
     {
         if ((val & (1 << i)) != 0)
         {
@@ -47,6 +49,7 @@ uint32_t calcCRC32stm(void *data, uint32_t len,
     const uint8_t *buffer = (const uint8_t*) data;
     uint32_t crc = seed;
     uint8_t byte;
+	int bit;
 
     while( len-- )
     {
@@ -55,7 +58,7 @@ uint32_t calcCRC32stm(void *data, uint32_t len,
             byte = reflect8(byte);
         }
         crc = crc ^ (byte << 24);
-        for( int bit = 0; bit < 8; bit++ )
+        for(bit = 0; bit < 8; bit++ )
         {
             if( crc & (1L << 31)) crc = (crc << 1) ^ poly;
             else                  crc = (crc << 1);
@@ -74,6 +77,7 @@ uint32_t calcCRC32std(void *data, uint32_t len,
     uint32_t crc;
     uint8_t* current = (uint8_t*) data;
     uint8_t byte;
+	unsigned int j;
 
     crc = seed;
 
@@ -83,7 +87,7 @@ uint32_t calcCRC32std(void *data, uint32_t len,
             byte = reflect8(byte);
         }
         crc ^= byte;
-        for (unsigned int j = 0; j < 8; j++) {
+        for (j = 0; j < 8; j++) {
             if (crc & 1)
                 crc = (crc >> 1) ^ poly;
             else

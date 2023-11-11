@@ -10,8 +10,6 @@
 
 #include <iostream>
 
-#include <pthread.h>
-
 #include "../shared/kiss_communication_service_ids.h"
 
 /**
@@ -30,8 +28,14 @@ SrvSendStartupConfig::SrvSendStartupConfig(int _singleFrameLn) : singleFrameLn(_
 
 	currentOffset = 0;
 
+
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	internalSync = PTHREAD_COND_INITIALIZER;
+
 	conditionVariable = 0;
+#endif
 	operationResult = NRC_POSITIVE;
 	s = 0;
 
@@ -44,8 +48,13 @@ SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : 
 {
 	currentOffset = 0;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	internalSync = PTHREAD_COND_INITIALIZER;
+
 	conditionVariable = 0;
+#endif
 	operationResult = NRC_POSITIVE;
 	s = 0;
 }
@@ -61,7 +70,11 @@ SrvSendStartupConfig& SrvSendStartupConfig::operator=(
 
 void SrvSendStartupConfig::sendRequest() {
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+#endif
 
 	int howManyFrames = dataForDownload.size() / singleFrameLn;
 
@@ -105,13 +118,16 @@ void SrvSendStartupConfig::sendRequest() {
 			s->transmitKissFrame(segmentedData);
 		}
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	    pthread_mutex_lock(&lock);
 
 	    // wait for configuration to be received
 	    pthread_cond_wait(&internalSync, &lock);
 
 	    pthread_mutex_unlock(&lock);
-
+#endif
 
 	}
 
@@ -126,9 +142,13 @@ void SrvSendStartupConfig::callback(
 
 	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	pthread_cond_signal(&internalSync);
 
 	if (conditionVariable) {
 		pthread_cond_signal(conditionVariable);
 	}
+#endif
 }

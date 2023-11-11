@@ -27,7 +27,11 @@ SrvGetVersionAndId& SrvGetVersionAndId::operator=(const SrvGetVersionAndId &othe
 }
 
 SrvGetVersionAndId::SrvGetVersionAndId() {
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	conditionVariable = 0;
+#endif
 	s = 0;
 }
 
@@ -73,8 +77,12 @@ void SrvGetVersionAndId::callback(
 
 	std::cout << "I = SrvGetVersionAndId::callback, splited[0]: " << splited[0] << ", splited[1]: " << splited[1] << ", splited[2]: " << splited[2] <<  std::endl;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	if (conditionVariable != 0) {
 		pthread_cond_signal(conditionVariable);
 	}
+#endif
 
 }

@@ -16,6 +16,12 @@
 
 #include "IService.h"
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 class SrvGetRunningConfig : public IService {
 
 	/**
@@ -23,11 +29,15 @@ class SrvGetRunningConfig : public IService {
 	 */
 	Serial * s;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	/**
 	 *	Condition variable used to synchronize threads and wait for all configuration to be
 	 *	received from TNC
 	 */
 	pthread_cond_t * conditionVariable;
+#endif
 
 	/**
 	 * Current memory area which is received from the TNC + and information if any reception is
@@ -78,9 +88,13 @@ public:
 		this->s = s;
 	}
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
+#endif
 
 	const std::vector<uint8_t>& getConfigurationData() const {
 		return configurationData;

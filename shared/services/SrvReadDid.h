@@ -12,6 +12,11 @@
 
 #include "./serial/Serial.h"
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
 
 class SrvReadDid: public IService {
 
@@ -20,11 +25,15 @@ class SrvReadDid: public IService {
 	 */
 	Serial * s;
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	/**
 	 * Condition variable used to synchronize and lock another thread until
 	 * memory erase is done. TNC sends ACK after flash operation is done.
 	 */
 	pthread_cond_t * conditionVariable;
+#endif
 
 	/**
 	 * Request data send to the controller, it is not const nor static as
@@ -64,9 +73,13 @@ public:
 		this->s = s;
 	}
 
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+
+#else
 	void setConditionVariable(pthread_cond_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
+#endif
 
 
 };
