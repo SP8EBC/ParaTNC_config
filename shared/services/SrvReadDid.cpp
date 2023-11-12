@@ -13,7 +13,7 @@
 
 SrvReadDid::SrvReadDid() {
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 #else
 	conditionVariable = 0;
 #endif
@@ -61,7 +61,7 @@ void SrvReadDid::callback(
 	int16_t generic_16;
 	int32_t generic_32;
 
-	for (int i = 0; i < frame->size(); i++) {
+	for (size_t i = 0; i < frame->size(); i++) {
 		std::cout << ", 0x" << std::hex << (int)frame->at(i);
 	}
 
@@ -110,13 +110,13 @@ void SrvReadDid::callback(
 			switch (first_size) {
 			case 1:	// int8_t
 				generic_8 = *it++;
-				std::cout << "I = SrvReadDid::callback, generic_8: " << generic_8 << std::endl;
+				std::cout << "I = SrvReadDid::callback, first_generic_8: " << generic_8;
 
 				break;
 			case 2:	// int16_t
 				generic_16 = *it++;
 				generic_16 |= ((*it++) << 8);
-				std::cout << "I = SrvReadDid::callback, generic_16: " << generic_16 << std::endl;
+				std::cout << "I = SrvReadDid::callback, first_generic_16: " << generic_16;
 
 				break;
 			case 3:	// int32_t
@@ -124,17 +124,63 @@ void SrvReadDid::callback(
 				generic_32 |= ((*it++) << 8);
 				generic_32 |= ((*it++) << 16);
 				generic_32 |= ((*it++) << 24);
-				std::cout << "I = SrvReadDid::callback, generic_32: " << generic_32 << std::endl;
+				std::cout << "I = SrvReadDid::callback, first_generic_32: " << generic_32;
 
 
 				break;
 			}
 
+			switch (second_size) {
+			case 1:	// int8_t
+				generic_8 = *it++;
+				std::cout << ", second_generic_8: " << generic_8;
+
+				break;
+			case 2:	// int16_t
+				generic_16 = *it++;
+				generic_16 |= ((*it++) << 8);
+				std::cout << ", second_generic_16: " << generic_16;
+
+				break;
+			case 3:	// int32_t
+				generic_32 = *it++;
+				generic_32 |= ((*it++) << 8);
+				generic_32 |= ((*it++) << 16);
+				generic_32 |= ((*it++) << 24);
+				std::cout << ", second_generic_32: " << generic_32;
+
+
+				break;
+			}
+
+			switch (third_size) {
+			case 1:	// int8_t
+				generic_8 = *it++;
+				std::cout << ", third_generic_8: " << generic_8;
+
+				break;
+			case 2:	// int16_t
+				generic_16 = *it++;
+				generic_16 |= ((*it++) << 8);
+				std::cout << ", third_generic_16: " << generic_16;
+
+				break;
+			case 3:	// int32_t
+				generic_32 = *it++;
+				generic_32 |= ((*it++) << 8);
+				generic_32 |= ((*it++) << 16);
+				generic_32 |= ((*it++) << 24);
+				std::cout << ", third_generic_32: " << generic_32;
+
+
+				break;
+			}
+			std::cout << std::endl;
 		}
 	}
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	SetEvent(syncEvent);
 #else
 	if (conditionVariable != 0x00) {
 

@@ -104,7 +104,11 @@ public:
 	void transmitKissFrame(const std::vector<uint8_t> & frame);
 
 	/**
-	 * Synchronously waits and receives so called >>extended<< kiss frame
+	 * Synchronously waits and receives so called >>extended<< kiss frame. It
+	 * returns when a complete frame is received. It is called by SerialWorker
+	 * (separate thread) in a loop one received frame after another.
+	 * Internally it checks for a timeout in case that communication with
+	 * the controlled stalled for some reason.
 	 * @param frame
 	 */
 	void receiveKissFrame(std::vector<uint8_t> & frame);

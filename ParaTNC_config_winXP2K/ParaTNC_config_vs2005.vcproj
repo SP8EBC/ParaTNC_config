@@ -439,7 +439,7 @@
 				</File>
 			</Filter>
 			<Filter
-				Name="exception"
+				Name="exceptions"
 				>
 				<File
 					RelativePath="..\shared\exceptions\NotSupportedEx.cpp"

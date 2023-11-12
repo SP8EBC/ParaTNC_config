@@ -25,7 +25,7 @@ SrvEraseStartupConfig::SrvEraseStartupConfig() {
 	operationResult = NRC_POSITIVE;
 	s = 0;
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 #else
 	conditionVariable = 0;
 #endif
@@ -44,7 +44,7 @@ void SrvEraseStartupConfig::callback(
 	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	SetEvent(syncEvent);
 #else
 	if (conditionVariable != 0x00) {
 		pthread_cond_signal(conditionVariable);

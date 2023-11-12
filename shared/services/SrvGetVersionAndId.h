@@ -26,7 +26,11 @@ class SrvGetVersionAndId: public IService {
 	Serial * s;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	/**
+	 * Event used to synchronize and lock another thread until
+	 * memory erase is done. TNC sends ACK after flash operation is done.
+	 */
+	HANDLE syncEvent;
 #else
 	/**
 	 * Condition variable used to synchronize and lock another thread until

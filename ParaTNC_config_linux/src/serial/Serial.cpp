@@ -49,6 +49,11 @@ Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), rawArrayIterator(0) {
 	handle = 0;
 }
 
+/**
+ * Transmits KISS frame through serial port. Trailing and leading FEND are
+ * automatically added
+ * @param frame
+ */
 void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
 	ssize_t transmissionResult;
@@ -88,6 +93,14 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 	}
 }
 
+/**
+ * Synchronously waits and receives so called >>extended<< kiss frame. It
+ * returns when a complete frame is received. It is called by SerialWorker
+ * (separate thread) in a loop one received frame after another.
+ * Internally it checks for a timeout in case that communication with
+ * the controlled stalled for some reason.
+ * @param frame
+ */
 void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 	struct timeval receivingStart, currentTime;
 
@@ -134,6 +147,9 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		}
 
 		// check if timeout
+		// TODO: must be fixed, the method shall returns
+		// with an error in case of timeout instead of looping here
+		// for no sense.
 		if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
 			std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
 
@@ -193,6 +209,12 @@ Serial::~Serial() {
 	// TODO Auto-generated destructor stub
 }
 
+/**
+ * Initializes and opens serial port
+ * @param port
+ * @param speed
+ * @return
+ */
 bool Serial::init(string port, speed_t speed)
 {
 	struct termios tty;

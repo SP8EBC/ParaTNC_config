@@ -30,7 +30,11 @@ class SrvGetRunningConfig : public IService {
 	Serial * s;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	/**
+	 *	Event used to synchronize threads and wait for all configuration to be
+	 *	received from TNC
+	 */
+	HANDLE syncEvent;
 #else
 	/**
 	 *	Condition variable used to synchronize threads and wait for all configuration to be

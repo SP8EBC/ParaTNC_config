@@ -129,10 +129,10 @@ int main(int argc, char *argv[]) {
 	lon = decode->getLongitude();
 	lat = decode->getLatitude();
 
-	std::cout << "I = main, callsign " << callsign << std::endl;
-	std::cout << "I = main, description " << description << std::endl;
-	std::cout << "I = main, lon " << lon << std::endl;
-	std::cout << "I = main, lat " << lat << std::endl;
+	std::cout << "I = main, callsign: " << callsign << std::endl;
+	std::cout << "I = main, description: " << description << std::endl;
+	std::cout << "I = main, lon: " << lon << std::endl;
+	std::cout << "I = main, lat: " << lat << std::endl;
 
 
 //	srvEraseConfig.sendRequest();

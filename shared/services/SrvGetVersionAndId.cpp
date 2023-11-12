@@ -28,7 +28,7 @@ SrvGetVersionAndId& SrvGetVersionAndId::operator=(const SrvGetVersionAndId &othe
 
 SrvGetVersionAndId::SrvGetVersionAndId() {
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 #else
 	conditionVariable = 0;
 #endif
@@ -78,7 +78,7 @@ void SrvGetVersionAndId::callback(
 	std::cout << "I = SrvGetVersionAndId::callback, splited[0]: " << splited[0] << ", splited[1]: " << splited[1] << ", splited[2]: " << splited[2] <<  std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	SetEvent(syncEvent);
 #else
 	if (conditionVariable != 0) {
 		pthread_cond_signal(conditionVariable);

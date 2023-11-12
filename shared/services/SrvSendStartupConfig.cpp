@@ -30,7 +30,9 @@ SrvSendStartupConfig::SrvSendStartupConfig(int _singleFrameLn) : singleFrameLn(_
 
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 
+	internalSync = CreateEvent(NULL, false, false, L"SendConfigSyncEv");
 #else
 	internalSync = PTHREAD_COND_INITIALIZER;
 
@@ -49,7 +51,9 @@ SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : 
 	currentOffset = 0;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 
+	internalSync = CreateEvent(NULL, false, false, L"SendConfigSyncEv");
 #else
 	internalSync = PTHREAD_COND_INITIALIZER;
 
@@ -76,7 +80,7 @@ void SrvSendStartupConfig::sendRequest() {
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
-	int howManyFrames = dataForDownload.size() / singleFrameLn;
+	size_t howManyFrames = dataForDownload.size() / singleFrameLn;
 
 	std::vector<uint8_t>::iterator begin = dataForDownload.begin();
 
@@ -86,7 +90,7 @@ void SrvSendStartupConfig::sendRequest() {
 	}
 
 	// transmit all frames one after another
-	for (int i = 0; i < howManyFrames; i++) {
+	for (size_t i = 0; i < howManyFrames; i++) {
 		// reinitialize and preallocate vector with segmented data
 		segmentedData = std::vector<uint8_t>();
 		segmentedData.reserve(singleFrameLn + 4);
@@ -100,7 +104,7 @@ void SrvSendStartupConfig::sendRequest() {
 
 		// check if this is last frame or not
 		if (i == howManyFrames) {
-			int lastDataLn = dataForDownload.size() - i * singleFrameLn;
+			size_t lastDataLn = dataForDownload.size() - i * singleFrameLn;
 
 			segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + lastDataLn);
 		}
@@ -119,7 +123,8 @@ void SrvSendStartupConfig::sendRequest() {
 		}
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+		// TODO: Do not ignore return value here
+		WaitForSingleObject(internalSync, (DWORD)1234u);
 #else
 	    pthread_mutex_lock(&lock);
 
@@ -143,7 +148,9 @@ void SrvSendStartupConfig::callback(
 	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	SetEvent(internalSync);
 
+	SetEvent(syncEvent);
 #else
 	pthread_cond_signal(&internalSync);
 

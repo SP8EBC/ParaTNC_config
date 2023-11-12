@@ -26,7 +26,7 @@ class SrvReadDid: public IService {
 	Serial * s;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	HANDLE syncEvent;
 #else
 	/**
 	 * Condition variable used to synchronize and lock another thread until

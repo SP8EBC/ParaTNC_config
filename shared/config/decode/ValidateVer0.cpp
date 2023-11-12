@@ -26,7 +26,7 @@ bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 	// which is not included into CRC calculation.
 	// four bytes AFTER a crc is not used at all and is kept due to
 	// STM32L4xx target limitations which require 64 bit aligned write block size
-	uint16_t crcAreaLn = dataFromTnc.size() - 12;
+	uint32_t crcAreaLn = (uint32_t)(dataFromTnc.size() - 12) & 0x7FFFFFFFU;
 
 	// data are stored in litte endian order
 	uint32_t crcFromFrame = 	(dataFromTnc.at(crcAreaLn + 4)) |

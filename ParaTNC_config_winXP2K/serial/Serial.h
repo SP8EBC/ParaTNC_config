@@ -13,7 +13,9 @@
 #include <memory>
 #include <vector>
 #include <stdint.h>
+#include "windows.h"
 
+#include "../shared/types/SerialState.h"
 
 /**
  * Due to some unfortunate omission there is a inconsistency in KISS extented protocol.
@@ -27,17 +29,33 @@
  * 	is non zero it means that this is an extended frame and this byte is keeps frame lenght. BUT THIS
  * 	ONLY APPLIES TO FRAMES TNC -> PC
  *
- * 	frames in opposite direction doesn't have size and second byte holds command ID
+ * 	frames in opposite direction doesn't have size and second byte holds command ID, for more information
+ *	plese look into file ./src/kiss_protocol/kiss_communication.c in ParaTNC source project.
  *
  *
  */
 
-#define SERIAL_RAW_ARRAY_SIZE	2048
+#define SERIAL_RAW_ARRAY_SIZE		2048
+
+#define SERIAL_MILISECONDS_PER_DAY		(DWORD)86400000UL
+#define SERIAL_MILISECONDS_PER_HOUR		(DWORD)3600000UL
+#define SERIAL_MILISECONDS_PER_MINUTE	(DWORD)60000UL
+#define SERIAL_MILISECONDS_PER_SECOND	(DWORD)1000UL
 
 /**
  * Class implementing communication through serial port
  */
 class Serial {
+
+	/**
+	 * Current state of serial prot
+	 */
+	SerialState serialState;
+
+	/**
+	 * Handle to serial port
+	 */
+	HANDLE serialPort;
 
 	/**
 	 * Array which holds data received from device connected to serial port
@@ -54,6 +72,35 @@ class Serial {
 	const static uint8_t TFEND[1];		//!< TFEND control byte
 	const static uint8_t TFESC[1];		//!< TFESC control byte
 
+	const static wchar_t* COM1;
+	const static wchar_t* COM2;
+	const static wchar_t* COM3;
+	const static wchar_t* COM4;
+	const static wchar_t* COM5;
+	const static wchar_t* COM6;
+
+	/**
+	 * Compares two SYSTEMTIME structures and returns difference in miliseconds.
+	 * Positive number means that time represend by 'to' is in future in relation to 'from' 
+	 */
+	static DWORD compareTime(const SYSTEMTIME from, const SYSTEMTIME to) {
+		DWORD fromMs = 0UL;
+		DWORD toMs = 0UL;
+
+		fromMs =	from.wDay * SERIAL_MILISECONDS_PER_DAY +
+			from.wHour * SERIAL_MILISECONDS_PER_HOUR +
+			from.wMinute * SERIAL_MILISECONDS_PER_MINUTE +
+			from.wSecond * SERIAL_MILISECONDS_PER_SECOND +
+			from.wMilliseconds;
+
+		toMs = to.wDay * SERIAL_MILISECONDS_PER_DAY +
+			to.wHour * SERIAL_MILISECONDS_PER_HOUR +
+			to.wMinute * SERIAL_MILISECONDS_PER_MINUTE +
+			to.wSecond * SERIAL_MILISECONDS_PER_SECOND +
+			to.wMilliseconds;
+
+		return toMs - fromMs;
+	}
 
 public:
 
@@ -80,7 +127,11 @@ public:
 	void transmitKissFrame(const std::vector<uint8_t> & frame);
 
 	/**
-	 * Synchronously waits and receives so called >>extended<< kiss frame
+	 * Synchronously waits and receives so called >>extended<< kiss frame. It
+	 * returns when a complete frame is received. It is called by SerialWorker
+	 * (separate thread) in a loop one received frame after another.
+	 * Internally it checks for a timeout in case that communication with
+	 * the controlled stalled for some reason.
 	 * @param frame
 	 */
 	void receiveKissFrame(std::vector<uint8_t> & frame);

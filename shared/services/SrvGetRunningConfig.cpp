@@ -20,7 +20,7 @@ const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)1, KISS_GET_
 
 SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 #else
 	conditionVariable = 0;
 #endif
@@ -38,7 +38,7 @@ SrvGetRunningConfig& SrvGetRunningConfig::operator=(const SrvGetRunningConfig &o
 void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 
 	// data payload size - this is a size of data read from flash memory
-	uint8_t dataSize = frame->size() - 4;
+	size_t dataSize = frame->size() - 4;
 
 	CurrentConfigRegion receivedCurrentRegion = (CurrentConfigRegion)frame->at(2);
 
@@ -78,7 +78,7 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 			validate->checkValidate(configurationData);
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
-
+			SetEvent(syncEvent);
 #else
 			if (conditionVariable) {
 				pthread_cond_signal(conditionVariable);
