@@ -3,6 +3,8 @@
 
 #include "stdafx.h"
 #include "main.h"
+#include "./serial/Serial.h"
+#include "./serial/SerialBackgroundThread.h"
 
 #include <iostream>
 
@@ -12,7 +14,7 @@
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
-   HWND hWnd;
+HWND hWnd;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -120,7 +122,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    //hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
    //   CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
-   hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), 0, (DLGPROC)MainDialogProc);
+   hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), 0, (DLGPROC)MainDialogProc);
 
    if (!hWnd)
    {
@@ -157,6 +159,8 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		// Parse the menu selections:
 		switch (wmId)
 		{
+		case IDC_START_SERIAL:
+			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
 			break;

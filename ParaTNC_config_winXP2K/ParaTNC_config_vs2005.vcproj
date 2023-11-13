@@ -217,6 +217,10 @@
 					RelativePath=".\serial\Serial.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\serial\SerialBackgroundThread.cpp"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -313,6 +317,10 @@
 				>
 				<File
 					RelativePath=".\serial\Serial.h"
+					>
+				</File>
+				<File
+					RelativePath=".\serial\SerialBackgroundThread.h"
 					>
 				</File>
 			</Filter>
