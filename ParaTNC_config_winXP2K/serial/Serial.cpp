@@ -58,12 +58,18 @@ bool Serial::init()
 	bool out = true;			// return value
 	DCB serialParams = {0u};	// keeps port config, like speed, databits, parity etc.
 	COMMTIMEOUTS tout = {0u};	// timeouts for read / write etc
+	WCHAR errorMessage[256U];
 
 	// try to open serial port
 	serialPort = CreateFile(COM1, GENERIC_READ | GENERIC_WRITE, NULL, NULL, OPEN_EXISTING, NULL, NULL);
 
+	std::cout << "I = Serial::init" << std::endl;
+
 	// check if open was successfull
 	if (serialPort == INVALID_HANDLE_VALUE) {
+		const DWORD lastError = GetLastError();
+		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lastError, NULL, errorMessage, 256U, NULL);
+		std::wcout << "E = Serial::init, " << errorMessage << std::endl;
 		out = false;
 	}
 	else {
@@ -179,7 +185,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		return;
 	}
 
-	//std::cout << "D = serial::receiveKissFrame, receiving started..." << std::endl;
+	std::cout << "D = serial::receiveKissFrame, receiving started..." << std::endl;
 
 	// received byte
 	uint8_t rxData = 0;

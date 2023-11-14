@@ -7,14 +7,31 @@
 #include "./serial/SerialBackgroundThread.h"
 
 #include <iostream>
+#include <fstream>
+#include <io.h>
+#include <fcntl.h>
 
 #define MAX_LOADSTRING 100
+
+class outbuf : public std::streambuf {
+public:
+    outbuf() {
+        setp(0, 0);
+    }
+
+    virtual int_type overflow(int_type c = traits_type::eof()) {
+        return fputc(c, stdout) == EOF ? traits_type::eof() : c;
+    }
+};
 
 // Global Variables:
 HINSTANCE hInst;								// current instance
 TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HWND hWnd;
+
+// Serial port
+Serial s;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -33,6 +50,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
  	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
+
+	// create the console
+    if (AllocConsole()) {
+        FILE* pCout;
+        freopen_s(&pCout, "CONOUT$", "w", stdout);
+        SetConsoleTitle(L"Debug Console");
+
+    }
+
+	    // set std::cout to use my custom streambuf
+    outbuf ob;
+    std::streambuf *sb = std::cout.rdbuf(&ob);
+
+	printf("dupa\r\n");
+	std::cout << "dupa druga" << std::endl;
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -54,7 +86,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 		//if ((!IsWindow(msg.hwnd))||(!IsDialogMessage(msg.hwnd,&msg)))
 		if (!IsDialogMessage(hWnd,&msg))
 		{
-			std::cout << msg.message << std::endl;
 			/*translate and dispatch other messages*/
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -160,6 +191,8 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDC_START_SERIAL:
+			std::cout << "IDC_START_SERIAL" << std::endl;
+			s.init();
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);

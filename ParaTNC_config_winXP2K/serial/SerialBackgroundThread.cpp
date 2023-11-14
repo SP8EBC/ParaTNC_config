@@ -1,14 +1,19 @@
 #include "stdafx.h"
 
 #include "./serial/SerialBackgroundThread.h"
+#include "./misc/AuxStuff.h"
 #include "../shared/exceptions/TimeoutE.h"
 #include "../shared/kiss_communication_service_ids.h"
+
+#include <iostream>
 
 DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 
 	if (param == NULL) {
 		return 1;
 	}
+
+	std::cout << "I = SerialBackgroundThread::EntryPoint" << std::endl;
 
 	SerialBackgroundThread * ptr = static_cast<SerialBackgroundThread*>(param);
 
@@ -37,7 +42,7 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 		uint8_t frameType = ptr->rxData[1];
 
 		if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
-			//std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(receivedData.at(2)) << std::endl;
+			std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(ptr->rxData[2]) << std::endl;
 		}
 		else {
 			// look for a pointer to a callback function
@@ -69,8 +74,8 @@ bool SerialBackgroundThread::start() {
 	return true;
 }
 
-SerialBackgroundThread::SerialBackgroundThread() {
-	serial = new Serial();
+SerialBackgroundThread::SerialBackgroundThread(Serial * serialPort) {
+	serial = serialPort;
 	startEvent = CreateEvent(NULL, FALSE, FALSE, L"SerialThreadStart");
 	workerLoop = true;
 }

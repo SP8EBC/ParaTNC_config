@@ -36,7 +36,7 @@ private:
 public:
 	bool start();
 
-	SerialBackgroundThread(void);
+	SerialBackgroundThread(Serial * serialPort);
 	~SerialBackgroundThread(void);
 
 };
