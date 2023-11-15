@@ -44,6 +44,10 @@ const wchar_t* Serial::COM4 = L"\\\\.\\COM4";
 const wchar_t* Serial::COM5 = L"\\\\.\\COM5";
 const wchar_t* Serial::COM6 = L"\\\\.\\COM6";
 
+// https://stackoverflow.com/questions/25100736/writing-to-serial-port-is-blocking-forever-when-other-thread-is-waiting-in-read
+// stupid windows cannot read and write to the serial port at once :(
+// calling WriteFile while a thread waits on ReadFile will create a deadlock :/
+
 Serial::Serial() {
 
 }
@@ -69,7 +73,7 @@ bool Serial::init()
 	if (serialPort == INVALID_HANDLE_VALUE) {
 		const DWORD lastError = GetLastError();
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, lastError, NULL, errorMessage, 256U, NULL);
-		std::wcout << "E = Serial::init, " << errorMessage << std::endl;
+		std::wcout << "E = Serial::init, lastError: " << lastError << std::endl;
 		out = false;
 	}
 	else {
@@ -106,8 +110,8 @@ bool Serial::init()
 				tout.ReadIntervalTimeout = MAXDWORD;
 				tout.ReadTotalTimeoutConstant = 0;
 				tout.ReadTotalTimeoutMultiplier = 0;
-				tout.WriteTotalTimeoutConstant = 50;
-				tout.WriteTotalTimeoutMultiplier = 10;
+				tout.WriteTotalTimeoutConstant = 0;
+				tout.WriteTotalTimeoutMultiplier = 0;
 
 				SetCommTimeouts(serialPort, &tout);
 
@@ -127,12 +131,18 @@ bool Serial::init()
 		}
 	}
 
+	if (out) {
+		serialState = SERIAL_IDLE;
+	}
+
 	return out;
 }
 
 void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
 //	ssize_t transmissionResult;
+
+	DWORD numberOfBytesWritten;
 
 	// check if serial port is opened and configured
 	if (serialState == SERIAL_NOT_CONFIGURED) {
@@ -142,11 +152,11 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 	if (this->serialState == SERIAL_IDLE) {
 		// send FEND at begining
 		//write(handle, FEND, 1);
-		WriteFile(serialPort, &FEND, 1, NULL, NULL);
+		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
 
-		WriteFile(serialPort, &frame[0], frame.size(), NULL, NULL);
+		WriteFile(serialPort, &frame[0], frame.size(), &numberOfBytesWritten, NULL);
 
-		WriteFile(serialPort, &FEND, 1, NULL, NULL);
+		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
 		//// send the content itself
 		//for (std::vector<uint8_t>::const_iterator it = frame.begin(); it != frame.end(); it++) {
 
@@ -217,6 +227,8 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 
 			// no data has been received
 			if (rxLn == 0 || readResult == FALSE) {
+				std::cout << "W = serial::receiveKissFrame, rxLn: " << rxLn << ", readResult: " << readResult << std::endl;
+
 				// continue the loop
 				continue;
 			}
@@ -232,7 +244,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			// with an error in case of timeout instead of looping here
 			// for no sense.
 			if (Serial::compareTime(currentTime, receivingStart) > SERIAL_MAXIMUM_RX_TIME_MS) {
-				//std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
+				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
 
 				throw TimeoutE();
 			}

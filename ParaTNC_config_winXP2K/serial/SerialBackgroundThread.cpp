@@ -20,7 +20,7 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 	// pointer to callback function
 	IService * callbackFunction = NULL;
 
-	SetEvent(ptr->startEvent);
+	BOOL eventResult = SetEvent(ptr->startEvent);
 
 	do {
 		// remove all old data from vector
@@ -37,29 +37,30 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 			ptr->workerLoop = false;
 			continue;
 		}
-		
-		// get frame type, which was received
-		uint8_t frameType = ptr->rxData[1];
+		if (ptr->rxData.size() > 1) {
+			// get frame type, which was received
+			uint8_t frameType = ptr->rxData[1];
 
-		if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
-			std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(ptr->rxData[2]) << std::endl;
-		}
-		else {
-			// look for a pointer to a callback function
-			std::map<uint8_t, IService*>::const_iterator it = ptr->callbackMap.find(frameType);
-
-			// if callack has been found
-			if (it != ptr->callbackMap.end()) {
-				callbackFunction = static_cast<IService *>(it->second);
-
-				callbackFunction->callback(&ptr->rxData);
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
+				std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(ptr->rxData[2]) << std::endl;
 			}
+			else {
+				// look for a pointer to a callback function
+				std::map<uint8_t, IService*>::const_iterator it = ptr->callbackMap.find(frameType);
+
+				// if callack has been found
+				if (it != ptr->callbackMap.end()) {
+					callbackFunction = static_cast<IService *>(it->second);
+
+					callbackFunction->callback(&ptr->rxData);
+				}
 
 
-			//if (callbackFunction != NULL) {
-			//	// invoke callback
-			//	serviceCallback->callback(&ptr->rxData);
-			//}
+				//if (callbackFunction != NULL) {
+				//	// invoke callback
+				//	serviceCallback->callback(&ptr->rxData);
+				//}
+			}
 		}
 	} while (ptr->workerLoop);
 
@@ -70,6 +71,8 @@ bool SerialBackgroundThread::start() {
 
 	// create background thread and start it immediately
 	thread = CreateThread(NULL, 0, SerialBackgroundThread::EntryPoint, this, 0, NULL);
+
+	WaitForSingleObject(startEvent, (DWORD)1234U);
 
 	return true;
 }

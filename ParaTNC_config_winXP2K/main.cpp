@@ -5,6 +5,7 @@
 #include "main.h"
 #include "./serial/Serial.h"
 #include "./serial/SerialBackgroundThread.h"
+#include "../shared/services/SrvGetVersionAndId.h"
 
 #include <iostream>
 #include <fstream>
@@ -32,6 +33,10 @@ HWND hWnd;
 
 // Serial port
 Serial s;
+SerialBackgroundThread * serialThread;
+
+// services
+SrvGetVersionAndId srvVersionAndId;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -56,7 +61,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         FILE* pCout;
         freopen_s(&pCout, "CONOUT$", "w", stdout);
         SetConsoleTitle(L"Debug Console");
-
+		//_setmode(_fileno(stdout), _O_U16TEXT);  
     }
 
 	    // set std::cout to use my custom streambuf
@@ -181,6 +186,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+	bool serialInitResult;
 
 	switch (message)
 	{
@@ -191,8 +197,15 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDC_START_SERIAL:
-			std::cout << "IDC_START_SERIAL" << std::endl;
-			s.init();
+			serialInitResult = s.init();
+			serialThread = new SerialBackgroundThread(&s);
+			std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
+			//serialThread->start();
+			srvVersionAndId.setSerialContext(&s);
+			std::cout << "serialThread has started" << std::endl;
+			break;
+		case IDC_GET_VERSION:
+			srvVersionAndId.sendRequest();
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
