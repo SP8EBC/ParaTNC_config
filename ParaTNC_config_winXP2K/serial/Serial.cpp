@@ -87,6 +87,10 @@ bool Serial::init()
 			serialParams.ByteSize = 8;
 			serialParams.StopBits = ONESTOPBIT;
 			serialParams.Parity = NOPARITY;
+			serialParams.fDtrControl = DTR_CONTROL_DISABLE;
+			serialParams.fOutX = FALSE;
+			serialParams.fInX = FALSE;
+			serialParams.fRtsControl = RTS_CONTROL_DISABLE;
 
 			// set serial port configuration
 			if (SetCommState(serialPort, &serialParams) == TRUE) {
@@ -107,9 +111,9 @@ bool Serial::init()
 				  *
 				  *  https://learn.microsoft.com/en-gb/windows/win32/api/winbase/ns-winbase-commtimeouts?redirectedfrom=MSDN
 				  */
-				tout.ReadIntervalTimeout = MAXDWORD;
-				tout.ReadTotalTimeoutConstant = 0;
-				tout.ReadTotalTimeoutMultiplier = 0;
+				tout.ReadIntervalTimeout = (DWORD)1000u;
+				tout.ReadTotalTimeoutConstant = (DWORD)1000u;
+				tout.ReadTotalTimeoutMultiplier = (DWORD)10u;
 				tout.WriteTotalTimeoutConstant = 0;
 				tout.WriteTotalTimeoutMultiplier = 0;
 
@@ -243,7 +247,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			// TODO: must be fixed, the method shall returns
 			// with an error in case of timeout instead of looping here
 			// for no sense.
-			if (Serial::compareTime(currentTime, receivingStart) > SERIAL_MAXIMUM_RX_TIME_MS) {
+			if (Serial::compareTime(receivingStart, currentTime) > SERIAL_MAXIMUM_RX_TIME_MS) {
 				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
 
 				throw TimeoutE();

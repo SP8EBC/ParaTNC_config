@@ -22,7 +22,7 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 
 	BOOL eventResult = SetEvent(ptr->startEvent);
 
-	do {
+	//do {
 		// remove all old data from vector
 		ptr->rxData.clear();
 
@@ -34,8 +34,10 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 			// timeout while receiving a frame, something is wrong
 
 			// exit from the main loop
-			ptr->workerLoop = false;
-			continue;
+			//ptr->workerLoop = false;
+			//continue;
+			std::cout << "E = SerialWorker::worker, timeout" << std::endl;
+			return -1;
 		}
 		if (ptr->rxData.size() > 1) {
 			// get frame type, which was received
@@ -46,10 +48,10 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 			}
 			else {
 				// look for a pointer to a callback function
-				std::map<uint8_t, IService*>::const_iterator it = ptr->callbackMap.find(frameType);
+				std::map<uint8_t, IService*>::const_iterator it = ptr->callbackMap->find(frameType);
 
 				// if callack has been found
-				if (it != ptr->callbackMap.end()) {
+				if (it != ptr->callbackMap->end()) {
 					callbackFunction = static_cast<IService *>(it->second);
 
 					callbackFunction->callback(&ptr->rxData);
@@ -62,9 +64,9 @@ DWORD WINAPI SerialBackgroundThread::EntryPoint(LPVOID param) {
 				//}
 			}
 		}
-	} while (ptr->workerLoop);
+	//} while (ptr->workerLoop);
 
-	return 0u;
+	return 0;
 }
 
 bool SerialBackgroundThread::start() {
@@ -77,7 +79,8 @@ bool SerialBackgroundThread::start() {
 	return true;
 }
 
-SerialBackgroundThread::SerialBackgroundThread(Serial * serialPort) {
+SerialBackgroundThread::SerialBackgroundThread(Serial * serialPort, std::map<uint8_t, IService*> * callbacks) {
+	callbackMap = callbacks;
 	serial = serialPort;
 	startEvent = CreateEvent(NULL, FALSE, FALSE, L"SerialThreadStart");
 	workerLoop = true;

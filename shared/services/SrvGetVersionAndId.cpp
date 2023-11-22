@@ -58,8 +58,8 @@ void SrvGetVersionAndId::callback(
 	std::string splited[3];
 
 	// extract ID string
-	for (size_t i = 0; i < frame->size(); i++) {
-		id.append(1, frame->at(i));
+	for (size_t it = 0; it < frame->size(); it++) {
+		id.append(1, frame->at(it));
 	}
 
 	std::string::iterator startIt = id.begin();
@@ -69,9 +69,16 @@ void SrvGetVersionAndId::callback(
 	do {
 		foundIt = std::find_if(startIt, id.end(), SrvGetVersionAndId::hyphenCheck);
 
-		splited[i] = std::string(startIt, foundIt);
+		const std::string extracted = std::string(startIt, foundIt);
 
-		startIt = foundIt + 1;
+		splited[i] = extracted;
+
+		// in case of last element in a version string find_if
+		// will return pass-the-end iterator, as there is 
+		// no another '-' in the string.
+		if (foundIt != id.end()) {
+			startIt = foundIt + 1;
+		}
 	} while (++i < 3);
 
 

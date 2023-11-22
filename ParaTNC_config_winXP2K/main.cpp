@@ -5,12 +5,15 @@
 #include "main.h"
 #include "./serial/Serial.h"
 #include "./serial/SerialBackgroundThread.h"
+
 #include "../shared/services/SrvGetVersionAndId.h"
+#include "../shared/kiss_communication_service_ids.h"
 
 #include <iostream>
 #include <fstream>
 #include <io.h>
 #include <fcntl.h>
+#include <map>
 
 #define MAX_LOADSTRING 100
 
@@ -37,6 +40,9 @@ SerialBackgroundThread * serialThread;
 
 // services
 SrvGetVersionAndId srvVersionAndId;
+
+// map with services callbacks
+std::map<uint8_t, IService*> callbackMap;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -70,6 +76,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	printf("dupa\r\n");
 	std::cout << "dupa druga" << std::endl;
+
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvVersionAndId));
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -198,14 +206,14 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		{
 		case IDC_START_SERIAL:
 			serialInitResult = s.init();
-			serialThread = new SerialBackgroundThread(&s);
+			serialThread = new SerialBackgroundThread(&s, &callbackMap);
 			std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
-			//serialThread->start();
 			srvVersionAndId.setSerialContext(&s);
 			std::cout << "serialThread has started" << std::endl;
 			break;
 		case IDC_GET_VERSION:
 			srvVersionAndId.sendRequest();
+			serialThread->start();
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
