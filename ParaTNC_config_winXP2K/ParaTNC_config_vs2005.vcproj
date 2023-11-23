@@ -214,13 +214,29 @@
 				Name="serial"
 				>
 				<File
+					RelativePath=".\serial\ProtocolCommBackgroundThread.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\serial\ProtocolCommBackgroundThread_GetVersion.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\serial\Serial.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\serial\SerialBackgroundThread.cpp"
+					RelativePath=".\serial\SerialRxBackgroundThread.cpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="gui"
+				>
+			</Filter>
+			<Filter
+				Name="files"
+				>
 			</Filter>
 		</Filter>
 		<Filter
@@ -316,11 +332,35 @@
 				Name="serial"
 				>
 				<File
+					RelativePath=".\serial\ProtocolCommBackgroundThread.h"
+					>
+				</File>
+				<File
+					RelativePath=".\serial\ProtocolCommBackgroundThread_GetVersion.h"
+					>
+				</File>
+				<File
 					RelativePath=".\serial\Serial.h"
 					>
 				</File>
 				<File
-					RelativePath=".\serial\SerialBackgroundThread.h"
+					RelativePath=".\serial\SerialRxBackgroundThread.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="gui"
+				>
+			</Filter>
+			<Filter
+				Name="files"
+				>
+			</Filter>
+			<Filter
+				Name="types"
+				>
+				<File
+					RelativePath=".\types\ControllerSoftwareVersion.h"
 					>
 				</File>
 			</Filter>

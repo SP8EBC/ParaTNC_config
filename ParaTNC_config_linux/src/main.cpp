@@ -4,10 +4,9 @@
 #include <vector>
 #include <memory>
 #include <pthread.h>
+#include <serial/SerialRxBackgroundWorker.h>
 #include "ProgramConfig.h"
 #include "serial/Serial.h"
-#include "serial/SerialWorker.h"
-
 #include "../shared/services/SrvGetRunningConfig.h"
 #include "../shared/services/SrvGetVersionAndId.h"
 #include "../shared/services/SrvEraseStartupConfig.h"
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
 
-	SerialWorker worker(&s, callbackMap);
+	SerialRxBackgroundWorker worker(&s, callbackMap);
 
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);

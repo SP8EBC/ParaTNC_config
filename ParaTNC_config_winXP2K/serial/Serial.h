@@ -43,7 +43,7 @@
 #define SERIAL_MILISECONDS_PER_SECOND	(DWORD)1000UL
 
 /**
- * Class implementing communication through serial port
+ * Class implementing communication through serial port. It has blocking I/O!
  */
 class Serial {
 
@@ -83,9 +83,11 @@ class Serial {
 	 * Compares two SYSTEMTIME structures and returns difference in miliseconds.
 	 * Positive number means that time represend by 'to' is in future in relation to 'from' 
 	 */
-	static DWORD compareTime(const SYSTEMTIME from, const SYSTEMTIME to) {
-		DWORD fromMs = 0UL;
-		DWORD toMs = 0UL;
+	static LONG compareTime(const SYSTEMTIME from, const SYSTEMTIME to) {
+		LONG fromMs = 0UL;
+		LONG toMs = 0UL;
+
+		LONG out = 0UL;
 
 		fromMs =	from.wDay * SERIAL_MILISECONDS_PER_DAY +
 			from.wHour * SERIAL_MILISECONDS_PER_HOUR +
@@ -99,7 +101,9 @@ class Serial {
 			to.wSecond * SERIAL_MILISECONDS_PER_SECOND +
 			to.wMilliseconds;
 
-		return toMs - fromMs;
+		out = toMs - fromMs;
+
+		return out;
 	}
 
 public:
@@ -139,5 +143,8 @@ public:
 	Serial();
 	virtual ~Serial();
 };
+
+typedef Serial SERIAL;
+typedef Serial * LPSERIAL;
 
 #endif /* SERIAL_SERIAL_H_ */

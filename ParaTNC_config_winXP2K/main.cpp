@@ -3,17 +3,15 @@
 
 #include "stdafx.h"
 #include "main.h"
-#include "./serial/Serial.h"
-#include "./serial/SerialBackgroundThread.h"
 
-#include "../shared/services/SrvGetVersionAndId.h"
-#include "../shared/kiss_communication_service_ids.h"
 
 #include <iostream>
 #include <fstream>
 #include <io.h>
 #include <fcntl.h>
 #include <map>
+
+#include "./serial/ProtocolCommBackgroundThread.h"
 
 #define MAX_LOADSTRING 100
 
@@ -34,15 +32,12 @@ TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HWND hWnd;
 
-// Serial port
-Serial s;
-SerialBackgroundThread * serialThread;
-
-// services
-SrvGetVersionAndId srvVersionAndId;
-
 // map with services callbacks
-std::map<uint8_t, IService*> callbackMap;
+//std::map<uint8_t, IService*> callbackMap;
+
+// 
+TCHAR szEditVersionText[64];
+LPCTSTR szText = L"1234test";
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -77,7 +72,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	printf("dupa\r\n");
 	std::cout << "dupa druga" << std::endl;
 
-	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvVersionAndId));
+	//callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvVersionAndId));
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -168,6 +163,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    //   CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
    hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), 0, (DLGPROC)MainDialogProc);
 
+   HANDLE hWndEdit = GetDlgItem(hWnd, IDC_EDIT_VERSION);
+
    if (!hWnd)
    {
       return FALSE;
@@ -205,15 +202,17 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDC_START_SERIAL:
-			serialInitResult = s.init();
-			serialThread = new SerialBackgroundThread(&s, &callbackMap);
-			std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
-			srvVersionAndId.setSerialContext(&s);
-			std::cout << "serialThread has started" << std::endl;
+			//serialInitResult = s.init();
+			//serialThread = new SerialRxBackgroundThread(&s, &callbackMap);
+			//std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
+			//srvVersionAndId.setSerialContext(&s);
+			//std::cout << "serialThread has started" << std::endl;
+			GetDlgItemText(hWnd, IDC_EDIT_VERSION, szEditVersionText, 64);
+			SetDlgItemText(hWnd, IDC_EDIT_VERSION, szText);
 			break;
 		case IDC_GET_VERSION:
-			srvVersionAndId.sendRequest();
-			serialThread->start();
+			//srvVersionAndId.sendRequest();
+			//serialThread->start();
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
