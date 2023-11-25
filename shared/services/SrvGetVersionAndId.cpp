@@ -44,6 +44,33 @@ void SrvGetVersionAndId::sendRequest() {
 
 void SrvGetVersionAndId::receiveSynchronously() {
 	if (s) {
+		std::vector<uint8_t> response;
+
+		// receive a response
+		s->receiveKissFrame(response);
+
+		if (response.size() > 1) {
+			// get frame type, which was received
+			uint8_t frameType = response[1];
+
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) 
+			{
+				std::cout << "E = SrvGetVersionAndId::receiveSynchronously, NRC received: 0x" << 
+					std::hex << response[2] << std::dec << std::endl;
+			}
+			else if (frameType == KISS_VERSION_AND_ID) 
+			{
+				// use callback manualy
+				this->callback(&response);
+			}
+			else
+			{
+				std::cout << "E = SrvGetVersionAndId::receiveSynchronously, response to unknown service!" << std::endl;
+			}
+
+
+		}
+
 
 	}
 }
@@ -90,8 +117,12 @@ void SrvGetVersionAndId::callback(
 		}
 	} while (++i < 3);
 
+	// 
+	boardType = std::string(splited[0], 2, splited[0].length());
+	softwareVersion = splited[1];
+	protocolVersion = splited[2][0];
 
-	std::cout << "I = SrvGetVersionAndId::callback, splited[0]: " << splited[0] << ", splited[1]: " << splited[1] << ", splited[2]: " << splited[2] <<  std::endl;
+	std::cout << "I = SrvGetVersionAndId::callback, boardType: " << boardType << ", softwareVersion: " << softwareVersion << ", protocolVersion: " << protocolVersion <<  std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	SetEvent(syncEvent);

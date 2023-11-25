@@ -49,7 +49,10 @@ const wchar_t* Serial::COM6 = L"\\\\.\\COM6";
 // calling WriteFile while a thread waits on ReadFile will create a deadlock :/
 
 Serial::Serial() {
-
+	serialPort = INVALID_HANDLE_VALUE;
+	rawArrayIterator = 0;
+	memset(raw, 0x00, SERIAL_RAW_ARRAY_SIZE);
+	std::cout << "D = Serial::Serial" << std::endl;
 }
 
 
@@ -137,9 +140,8 @@ bool Serial::init()
 
 	if (out) {
 		serialState = SERIAL_IDLE;
+			std::cout << "I = Serial::init, initialization succeded" << std::endl;
 	}
-
-	std::cout << "I = Serial::init, out = " << out << std::endl;
 
 	return out;
 }
@@ -157,33 +159,11 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
 	if (this->serialState == SERIAL_IDLE) {
 		// send FEND at begining
-		//write(handle, FEND, 1);
 		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
 
 		WriteFile(serialPort, &frame[0], frame.size(), &numberOfBytesWritten, NULL);
 
 		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
-		//// send the content itself
-		//for (std::vector<uint8_t>::const_iterator it = frame.begin(); it != frame.end(); it++) {
-
-		//	// get byte fron the iterator
-		//	const uint8_t byte = *it;
-
-		//	// write this byte to the serial port
-		//	//transmissionresult = write(handle, &byte, 1);
-
-
-		//	// check if eror has
-		//	if (transmissionresult == 0) {
-		//		std::cout << "e = serial::transmitkissframe, error has occured while sending: 0x" << std::hex << byte << std::dec << std::endl;
-
-		//		throw transmissionfailedex();
-		//	}
-		//}
-
-		// send FEND at the end
-		//write(handle, FEND, 1);
-		//WriteFile(serialPort, 
 
 		std::cout << "I = serial::transmitKissFrame, transmission done " << std::endl;
 	}
@@ -220,7 +200,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 	do {
 		// block the thread and wait for any new data to be reveived
 		// WARNING: this function has no timeout and waits indefinitely
-		const BOOL status = WaitCommEvent(serialPort, &eventMask, NULL);
+		//const BOOL status = WaitCommEvent(serialPort, &eventMask, NULL);
 
 		// try to read all byes available right now
 		do {
@@ -230,6 +210,16 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			// try to receice single byte
 			//rxLn = read(handle, &rxData, 1);
 			const BOOL readResult = ReadFile(serialPort, &rxData, 1, &rxLn, NULL);
+
+			// check if timeout
+			// TODO: must be fixed, the method shall returns
+			// with an error in case of timeout instead of looping here
+			// for no sense.
+			if (Serial::compareTime(receivingStart, currentTime) > SERIAL_MAXIMUM_RX_TIME_MS) {
+				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
+
+				throw TimeoutE();
+			}
 
 			// no data has been received
 			if (rxLn == 0 || readResult == FALSE) {
@@ -243,16 +233,6 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			raw[rawArrayIterator++]	= rxData;
 			if (rawArrayIterator >= SERIAL_RAW_ARRAY_SIZE - 1) {
 				rawArrayIterator = 0;
-			}
-
-			// check if timeout
-			// TODO: must be fixed, the method shall returns
-			// with an error in case of timeout instead of looping here
-			// for no sense.
-			if (Serial::compareTime(receivingStart, currentTime) > SERIAL_MAXIMUM_RX_TIME_MS) {
-				std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
-
-				throw TimeoutE();
 			}
 
 			if (receivingState == RX_ST_STARTED) {

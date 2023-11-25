@@ -153,7 +153,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_APP_TITLE           "ParaTNC_config_vs2005"
+    IDS_COMM_TIMEOUT_TITLE  "Serial Communication Timeout"
     IDC_PARATNC_CONFIG_VS2005 "PARATNC_CONFIG_VS2005"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_COMM_TIMEOUT_MESSAGE_GETVER "Cannot get controller firmware version"
 END
 
 #endif    // English (U.S.) resources

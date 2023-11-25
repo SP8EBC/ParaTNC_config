@@ -190,7 +190,6 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	bool serialInitResult;
 
 	switch (message)
 	{
@@ -207,10 +206,11 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			//srvVersionAndId.setSerialContext(&s);
 			//std::cout << "serialThread has started" << std::endl;
 			kissProtocolComm = new PCBT();
-			GetDlgItemText(hWnd, IDC_EDIT_VERSION, szEditVersionText, 64);
-			SetDlgItemText(hWnd, IDC_EDIT_VERSION, szText);
+			//GetDlgItemText(hWnd, IDC_EDIT_VERSION, szEditVersionText, 64);
+			//SetDlgItemText(hWnd, IDC_EDIT_VERSION, szText);
 			break;
 		case IDC_GET_VERSION:
+			kissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
 			//srvVersionAndId.sendRequest();
 			//serialThread->start();
 			break;

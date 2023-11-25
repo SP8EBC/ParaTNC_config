@@ -21,7 +21,10 @@ typedef struct ControllerSoftwareVersion {
 	ControlerSoftwareType type;
 
 	// software version
-	CHAR softwareVersion[4];
+	CHAR softwareVersion[5];
+
+	// software version as wide string
+	WCHAR softwareVersionW[5];
 
 	// KISS protocol version
 	CHAR kissVersion;

@@ -1,0 +1,7 @@
+#include <atlstr.h>
+
+......
+
+ATL::CString str;
+WORD LangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT); 
+str.LoadString(NULL,IDS_STRING101, LangID);

@@ -36,11 +36,13 @@ ProtocolCommBackgroundThread::~ProtocolCommBackgroundThread(void)
 {
 }
 
-BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow)
+BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow)
 {
 	BOOL result = false;
 
 	DWORD threadId = 0;
+
+	memset(&this->srvVersionAndId_context, 0x00, sizeof(CTXPCBTVER));
 
 	this->srvVersionAndId_context.editCodeplugWindow = editCodeplugWindow;
 	this->srvVersionAndId_context.mainWindow = mainWindow;
@@ -55,9 +57,6 @@ BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HANDLE mainWindow, HA
 				NULL,
 				&threadId);
 
-	std::cout << "I = PCBT::commVersionAndUpdateGui, " <<  
-		std::hex << ", threadId: 0x" << threadId << std::dec << std::endl;
-
 	if (thread != NULL)
 	{
 		result = true;
@@ -69,6 +68,17 @@ BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HANDLE mainWindow, HA
 BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p) 
 {
 	BOOL result = false;
+
+	if (p != NULL)
+	{
+		p->kissVersion = this->srvVersionAndId_context.srvVersionAndIdResult.kissVersion;
+		memcpy(
+			p->softwareVersion, 
+			this->srvVersionAndId_context.srvVersionAndIdResult.softwareVersion,
+			sizeof(CHAR) * 5);
+
+		p->type = this->srvVersionAndId_context.srvVersionAndIdResult.type;
+	}
 
 	return result;
 }

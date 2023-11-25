@@ -31,7 +31,32 @@ void SrvReadDid::sendRequest() {
 
 void SrvReadDid::receiveSynchronously() {
 	if (s) {
+		std::vector<uint8_t> response;
 
+		// receive a response
+		s->receiveKissFrame(response);
+
+		if (response.size() > 1) {
+			// get frame type, which was received
+			uint8_t frameType = response[1];
+
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) 
+			{
+				std::cout << "E = SrvReadDid::receiveSynchronously, NRC received: 0x" << 
+					std::hex << response[2] << std::dec << std::endl;
+			}
+			else if (frameType == KISS_VERSION_AND_ID) 
+			{
+				// use callback manualy
+				this->callback(&response);
+			}
+			else
+			{
+				std::cout << "E = SrvReadDid::receiveSynchronously, response to unknown service!" << std::endl;
+			}
+
+
+		}
 	}
 }
 

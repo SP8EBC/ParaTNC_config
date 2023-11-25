@@ -60,7 +60,7 @@ public:
 	// updates Edit Controls on Main dialog and on Edit Codeplug
 	// dialog if it has been created. information returned by
 	// the controller are stored 
-	BOOL commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow);
+	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
 	BOOL getVersion(LPCSV p);
 
 	ProtocolCommBackgroundThread(void);
