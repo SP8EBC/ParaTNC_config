@@ -103,6 +103,12 @@ void SrvGetRunningConfig::sendRequest() {
 
 }
 
+void SrvGetRunningConfig::receiveSynchronously() {
+	if (s) {
+
+	}
+}
+
 bool SrvGetRunningConfig::storeToBinaryFile(std::string _in) {
 
 	bool output = false;

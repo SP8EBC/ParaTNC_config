@@ -138,6 +138,12 @@ void SrvSendStartupConfig::sendRequest() {
 
 }
 
+void SrvSendStartupConfig::receiveSynchronously() {
+	if (s) {
+
+	}
+}
+
 void SrvSendStartupConfig::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> > *frame) {
 

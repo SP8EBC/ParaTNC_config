@@ -29,6 +29,12 @@ void SrvReadDid::sendRequest() {
 	}
 }
 
+void SrvReadDid::receiveSynchronously() {
+	if (s) {
+
+	}
+}
+
 void SrvReadDid::sendRequestForDid(uint16_t did) {
 
 	// check if all variables are set correctly

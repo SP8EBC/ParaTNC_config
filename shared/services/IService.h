@@ -28,6 +28,8 @@ public:
 
 
 	virtual void sendRequest() = 0;
+
+	virtual void receiveSynchronously() = 0;
 };
 
 #endif /* SRC_SERVICES_ISERVICE_H_ */

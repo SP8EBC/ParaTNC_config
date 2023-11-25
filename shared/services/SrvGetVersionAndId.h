@@ -48,6 +48,8 @@ public:
 	 */
 	virtual void sendRequest();
 
+	virtual void receiveSynchronously();
+
 	virtual ~SrvGetVersionAndId();
 	SrvGetVersionAndId& operator=(const SrvGetVersionAndId &other);
 	SrvGetVersionAndId(const SrvGetVersionAndId &other);

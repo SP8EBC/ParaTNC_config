@@ -54,6 +54,8 @@ public:
 
 	virtual void sendRequest();
 
+	virtual void receiveSynchronously();
+
 	SrvEraseStartupConfig();
 	virtual ~SrvEraseStartupConfig();
 

@@ -42,8 +42,17 @@ void SrvGetVersionAndId::sendRequest() {
 
 }
 
+void SrvGetVersionAndId::receiveSynchronously() {
+	if (s) {
+
+	}
+}
+
 bool SrvGetVersionAndId::hyphenCheck(char x) {
 	 if (x == '-') return true; else return false;
+}
+
+SrvGetVersionAndId::SrvGetVersionAndId(const SrvGetVersionAndId &other) {
 }
 
 void SrvGetVersionAndId::callback(

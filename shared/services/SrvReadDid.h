@@ -52,6 +52,8 @@ public:
 	 */
 	virtual void sendRequest();
 
+	virtual void receiveSynchronously();
+
 	/**
 	 * Sends request to read given DID
 	 * @param did data identifier to be written

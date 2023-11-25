@@ -70,6 +70,8 @@ public:
 	 */
 	virtual void sendRequest();
 
+	virtual void receiveSynchronously();
+
 	/**
 	 * Callback to be used when a portion of configuration data
 	 * is received from TNC by host pc

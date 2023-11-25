@@ -34,6 +34,11 @@ SrvEraseStartupConfig::SrvEraseStartupConfig() {
 SrvEraseStartupConfig::~SrvEraseStartupConfig() {
 }
 
+void SrvEraseStartupConfig::receiveSynchronously() {
+	if (s) {
+	}
+}
+
 void SrvEraseStartupConfig::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> >  * frame) {
 

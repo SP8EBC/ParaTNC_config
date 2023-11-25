@@ -89,6 +89,8 @@ public:
 	 */
 	virtual void sendRequest();
 
+	virtual void receiveSynchronously();
+
 	SrvSendStartupConfig(int singleFrameLn);
 	virtual ~SrvSendStartupConfig();
 	SrvSendStartupConfig(const SrvSendStartupConfig &other);
