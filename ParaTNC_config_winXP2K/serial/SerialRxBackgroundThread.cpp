@@ -34,7 +34,7 @@ DWORD WINAPI SerialRxBackgroundThread::EntryPoint(LPVOID param) {
 
 		// exit from the main loop
 		std::cout << "E = SerialWorker::worker, timeout" << std::endl;
-		return -1;
+		return 1;
 	}
 	if (ptr->rxData.size() > 1) {
 		// get frame type, which was received

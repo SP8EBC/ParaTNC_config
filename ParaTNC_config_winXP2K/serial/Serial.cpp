@@ -139,6 +139,8 @@ bool Serial::init()
 		serialState = SERIAL_IDLE;
 	}
 
+	std::cout << "I = Serial::init, out = " << out << std::endl;
+
 	return out;
 }
 
@@ -304,40 +306,3 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 void Serial::waitForTransmissionDone() {
 
 }
-//void serial::test_transmit()
-//{
-//	for (uint8_t i = 0; i < 255; i++)
-//		write( handle, &i, 1 );
-//}
-//
-//short serial::checkCRC(char* pInputData) {
-//	char ii,i = 0;
-//	unsigned short crc = 0xFFFF;
-//	ii = pInputData[6] + 12;
-//	for (i = 0; i < ii - 3; i++)
-//		crc = calc_crc(crc, pInputData[i]);
-//	if ( (pInputData[ii - 2] == ( (crc & 0xFF00) >> 8) ) && ( pInputData[ii - 3] == (crc & 0xFF) ) )
-//		return 0;
-//	else
-//		return -1;
-//}
-//
-//unsigned short serial::calc_crc(unsigned short crc_buff, unsigned char input) {
-//	unsigned char i;
-//	unsigned short x16;
-//	for	(i=0; i<8; i++)
-//	{
-//		// XOR current D0 and next input bit to determine x16 value
-//		if		( (crc_buff & 0x0001) ^ (input & 0x01) )
-//			x16 = 0x8408;
-//		else
-//			x16 = 0x0000;
-//		// shift crc buffer
-//		crc_buff = crc_buff >> 1;
-//		// XOR in the x16 value
-//		crc_buff ^= x16;
-//		// shift input for next iteration
-//		input = input >> 1;
-//	}
-//	return (crc_buff);
-//}

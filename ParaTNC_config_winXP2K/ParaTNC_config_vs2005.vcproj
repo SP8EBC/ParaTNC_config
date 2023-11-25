@@ -214,14 +214,6 @@
 				Name="serial"
 				>
 				<File
-					RelativePath=".\serial\ProtocolCommBackgroundThread.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\serial\ProtocolCommBackgroundThread_GetVersion.cpp"
-					>
-				</File>
-				<File
 					RelativePath=".\serial\Serial.cpp"
 					>
 				</File>
@@ -238,12 +230,28 @@
 				Name="files"
 				>
 			</Filter>
+			<Filter
+				Name="protocol"
+				>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetVersion.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\configuration.h"
+				>
+			</File>
 			<File
 				RelativePath=".\main.h"
 				>
@@ -332,14 +340,6 @@
 				Name="serial"
 				>
 				<File
-					RelativePath=".\serial\ProtocolCommBackgroundThread.h"
-					>
-				</File>
-				<File
-					RelativePath=".\serial\ProtocolCommBackgroundThread_GetVersion.h"
-					>
-				</File>
-				<File
 					RelativePath=".\serial\Serial.h"
 					>
 				</File>
@@ -361,6 +361,18 @@
 				>
 				<File
 					RelativePath=".\types\ControllerSoftwareVersion.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="protocol"
+				>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread.h"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetVersion.h"
 					>
 				</File>
 			</Filter>

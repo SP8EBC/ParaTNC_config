@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <map>
 
-#include "./serial/ProtocolCommBackgroundThread.h"
+#include "./protocol/ProtocolCommBackgroundThread.h"
 
 #define MAX_LOADSTRING 100
 
@@ -32,8 +32,8 @@ TCHAR szTitle[MAX_LOADSTRING];					// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HWND hWnd;
 
-// map with services callbacks
-//std::map<uint8_t, IService*> callbackMap;
+// KISS protocol communication handler
+LPPCBT kissProtocolComm;
 
 // 
 TCHAR szEditVersionText[64];
@@ -62,10 +62,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
         FILE* pCout;
         freopen_s(&pCout, "CONOUT$", "w", stdout);
         SetConsoleTitle(L"Debug Console");
-		//_setmode(_fileno(stdout), _O_U16TEXT);  
     }
 
-	    // set std::cout to use my custom streambuf
+	// set std::cout to use my custom streambuf
     outbuf ob;
     std::streambuf *sb = std::cout.rdbuf(&ob);
 
@@ -207,6 +206,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			//std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
 			//srvVersionAndId.setSerialContext(&s);
 			//std::cout << "serialThread has started" << std::endl;
+			kissProtocolComm = new PCBT();
 			GetDlgItemText(hWnd, IDC_EDIT_VERSION, szEditVersionText, 64);
 			SetDlgItemText(hWnd, IDC_EDIT_VERSION, szText);
 			break;
