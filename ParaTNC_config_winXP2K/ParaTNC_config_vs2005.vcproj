@@ -238,7 +238,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetRunningConfig.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetVersion.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_ReadDid.cpp"
 					>
 				</File>
 			</Filter>
@@ -372,7 +380,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetRunningConfig.h"
+					>
+				</File>
+				<File
 					RelativePath=".\protocol\ProtocolCommBackgroundThread_GetVersion.h"
+					>
+				</File>
+				<File
+					RelativePath=".\protocol\ProtocolCommBackgroundThread_ReadDid.h"
 					>
 				</File>
 			</Filter>

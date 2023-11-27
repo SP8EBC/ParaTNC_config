@@ -4,6 +4,8 @@
 #include <map>
 
 #include "ProtocolCommBackgroundThread_GetVersion.h"
+#include "ProtocolCommBackgroundThread_ReadDid.h"
+#include "ProtocolCommBackgroundThread_GetRunningConfig.h"
 
 #include "../serial/Serial.h"
 #include "../serial/SerialRxBackgroundThread.h"
@@ -42,9 +44,13 @@ private:
 
 	// services
 	SrvGetVersionAndId srvVersionAndId;
+	SrvReadDid srvReadDid;
+	SrvGetRunningConfig srvGetRunningConfig;
 
 	// services context classes
 	CTXPCBTVER srvVersionAndId_context;
+	CTXPCBTRDID srvReadDid_context;
+	CTXPCBTGRC srvGetRunningConfig_context;
 
 public:
 
@@ -62,6 +68,12 @@ public:
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
 	BOOL getVersion(LPCSV p);
+
+	BOOL commReadDidAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow, int did);
+	BOOL getReadDid(DidResponse * didResponse);
+
+	BOOL commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
+	BOOL getRunningConfig();
 
 	ProtocolCommBackgroundThread(void);
 	~ProtocolCommBackgroundThread(void);

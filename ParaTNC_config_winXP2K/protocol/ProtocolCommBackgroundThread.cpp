@@ -17,6 +17,8 @@ ProtocolCommBackgroundThread::ProtocolCommBackgroundThread(void) : thread(0)
 
 	// set serial context for all services handlers
 	srvVersionAndId.setSerialContext(&s);
+	srvReadDid.setSerialContext(&s);
+	srvGetRunningConfig.setSerialContext(&s);
 
 	// create mutex which will protect agains starting two paralell comm transactions
 	threadMutex = CreateMutex(NULL, FALSE, L"ProtocolCommMutex");
@@ -81,4 +83,70 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 	}
 
 	return result;
+}
+
+BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow, int did)
+{
+	BOOL result = false;
+
+	DWORD threadId = 0;
+
+	memset(&this->srvReadDid_context, 0x00, sizeof(CTXPCBTRDID));
+
+	this->srvReadDid_context.readDid = &this->srvReadDid;
+	this->srvReadDid_context.mutex = this->threadMutex;
+	this->srvReadDid_context.didNumber = did;
+
+	thread = CreateThread(
+				NULL, 
+				NULL, 
+				ProtocolCommBackgroundThread_ReadDid, 
+				&this->srvReadDid_context, 
+				NULL,
+				&threadId);
+
+	if (thread != NULL)
+	{
+		result = true;
+	}
+
+	return result;
+}
+
+BOOL ProtocolCommBackgroundThread::getReadDid(DidResponse * didResponse)
+{
+	return true;
+}
+
+BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow)
+{
+	BOOL result = false;
+
+	DWORD threadId = 0;
+
+	memset(&this->srvGetRunningConfig_context, 0x00, sizeof(CTXPCBTGRC));
+
+	this->srvGetRunningConfig_context.getRunningConfig = &this->srvGetRunningConfig;
+	this->srvGetRunningConfig_context.mutex = this->threadMutex;
+	//this->srvGetRunningConfig_context.didNumber = did;
+
+	thread = CreateThread(
+				NULL, 
+				NULL, 
+				ProtocolCommBackgroundThread_GetRunningConfig, 
+				&this->srvGetRunningConfig_context, 
+				NULL,
+				&threadId);
+
+	if (thread != NULL)
+	{
+		result = true;
+	}
+
+	return result;
+}
+
+BOOL ProtocolCommBackgroundThread::getRunningConfig()
+{
+	return true;
 }

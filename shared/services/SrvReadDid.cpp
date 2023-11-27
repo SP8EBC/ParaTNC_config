@@ -45,7 +45,7 @@ void SrvReadDid::receiveSynchronously() {
 				std::cout << "E = SrvReadDid::receiveSynchronously, NRC received: 0x" << 
 					std::hex << response[2] << std::dec << std::endl;
 			}
-			else if (frameType == KISS_VERSION_AND_ID) 
+			else if (frameType == KISS_READ_DID_RESP)
 			{
 				// use callback manualy
 				this->callback(&response);
@@ -91,6 +91,7 @@ void SrvReadDid::callback(
 	int8_t generic_8;
 	int16_t generic_16;
 	int32_t generic_32;
+	float generic_float = 0.0f;
 
 	for (size_t i = 0; i < frame->size(); i++) {
 		std::cout << ", 0x" << std::hex << (int)frame->at(i);
@@ -99,6 +100,7 @@ void SrvReadDid::callback(
 	std::cout << std::dec << std::endl;
 
 	if (it != frame->end()) {
+		// rewind first two bytes which contains frame size and service ID
 		it += 2;
 
 		const uint8_t did_lsb = *it;
@@ -107,47 +109,100 @@ void SrvReadDid::callback(
 		const uint8_t did_msb = *it;
 		it++;
 
+		this->didResponse.did = did_lsb | (did_msb << 16);
+
 		const uint8_t size_byte = *it;
 
 		const bool is_string = ((size_byte & 0x80) == 0) ? true : false;
 
-		const bool is_float = ((size_byte & 0xC0) == 0) ? true : false;
-
-		it++;
+		const bool is_float = ((size_byte & 0xC0) == 0xC0) ? true : false;
 
 		if (is_string) {
 			std::string content;
 
+			this->didResponse.firstSize = DIDRESPONSE_DATASIZE_STRING;
+			this->didResponse.secondSize = DIDRESPONSE_DATASIZE_EMPTY;
+			this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_EMPTY;
+
 			do {
 				content.push_back(*it);
 
-				std::cout << "I = SrvReadDid::callback, string: " << content << std::endl;
 			}while (++it != frame->end());
+
+			memset(this->didResponse.first.str, 0x00, DID_RESPONSE_MAX_STRING);
+			strncpy(this->didResponse.first.str, content.c_str(), content.size());
 
 		}
 		else if (is_float) {
 
+			it++;
+
+			const uint8_t amount_of_data = (size_byte & 0x3);
+			uint32_t * float_ptr = (uint32_t*)&generic_float;
+
+			if (amount_of_data >= 1) {
+
+				*float_ptr = *it++;
+				*float_ptr |= ((*it++) << 8);
+				*float_ptr |= ((*it++) << 16);
+				*float_ptr |= ((*it++) << 24);
+
+				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_FLOAT;
+				this->didResponse.first.f = generic_float;
+			}
+
+			generic_float = 0.0f;
+
+			if (amount_of_data >= 2) {
+				*float_ptr = *it++;
+				*float_ptr |= ((*it++) << 8);
+				*float_ptr |= ((*it++) << 16);
+				*float_ptr |= ((*it++) << 24);
+
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_FLOAT;
+				this->didResponse.second.f = generic_float;
+			}
+			else {
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_EMPTY;
+			}
+
+			generic_float = 0.0f;
+
+			if (amount_of_data >= 3) {
+				*float_ptr = *it++;
+				*float_ptr |= ((*it++) << 8);
+				*float_ptr |= ((*it++) << 16);
+				*float_ptr |= ((*it++) << 24);
+
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_FLOAT;
+				this->didResponse.third.f = generic_float;
+			}
+			else {
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_EMPTY;
+			}
+
 		}
 		else {
+			it++;
+
 			const uint8_t first_size = size_byte & 0x03;
 			const uint8_t second_size = (size_byte & 0x0C) >> 2;
 			const uint8_t third_size = (size_byte & 0x30) >> 4;
 
-			std::cout << "I = SrvReadDid::callback, " <<
-						"first_size: " 	<< 	(int)first_size 	<< ", " <<
-						"second_size: " << 	(int)second_size 	<< ", " <<
-						"third_size: " 	<< 	(int)third_size 	<< ", " << std::endl;
-
 			switch (first_size) {
 			case 1:	// int8_t
 				generic_8 = *it++;
-				std::cout << "I = SrvReadDid::callback, first_generic_8: " << generic_8;
+
+				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_INT8;
+				this->didResponse.first.i8 = generic_8;
 
 				break;
 			case 2:	// int16_t
 				generic_16 = *it++;
 				generic_16 |= ((*it++) << 8);
-				std::cout << "I = SrvReadDid::callback, first_generic_16: " << generic_16;
+
+				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_INT16;
+				this->didResponse.first.i8 = generic_16;
 
 				break;
 			case 3:	// int32_t
@@ -155,8 +210,9 @@ void SrvReadDid::callback(
 				generic_32 |= ((*it++) << 8);
 				generic_32 |= ((*it++) << 16);
 				generic_32 |= ((*it++) << 24);
-				std::cout << "I = SrvReadDid::callback, first_generic_32: " << generic_32;
 
+				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_INT32;
+				this->didResponse.first.i8 = generic_32;
 
 				break;
 			}
@@ -164,13 +220,17 @@ void SrvReadDid::callback(
 			switch (second_size) {
 			case 1:	// int8_t
 				generic_8 = *it++;
-				std::cout << ", second_generic_8: " << generic_8;
+
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_INT8;
+				this->didResponse.second.i8 = generic_8;
 
 				break;
 			case 2:	// int16_t
 				generic_16 = *it++;
 				generic_16 |= ((*it++) << 8);
-				std::cout << ", second_generic_16: " << generic_16;
+
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_INT16;
+				this->didResponse.second.i8 = generic_16;
 
 				break;
 			case 3:	// int32_t
@@ -178,8 +238,9 @@ void SrvReadDid::callback(
 				generic_32 |= ((*it++) << 8);
 				generic_32 |= ((*it++) << 16);
 				generic_32 |= ((*it++) << 24);
-				std::cout << ", second_generic_32: " << generic_32;
 
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_INT32;
+				this->didResponse.second.i32 = generic_32;
 
 				break;
 			}
@@ -187,13 +248,17 @@ void SrvReadDid::callback(
 			switch (third_size) {
 			case 1:	// int8_t
 				generic_8 = *it++;
-				std::cout << ", third_generic_8: " << generic_8;
+
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_INT8;
+				this->didResponse.third.i8 = generic_8;
 
 				break;
 			case 2:	// int16_t
 				generic_16 = *it++;
 				generic_16 |= ((*it++) << 8);
-				std::cout << ", third_generic_16: " << generic_16;
+
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_INT16;
+				this->didResponse.third.i16 = generic_16;
 
 				break;
 			case 3:	// int32_t
@@ -201,12 +266,58 @@ void SrvReadDid::callback(
 				generic_32 |= ((*it++) << 8);
 				generic_32 |= ((*it++) << 16);
 				generic_32 |= ((*it++) << 24);
-				std::cout << ", third_generic_32: " << generic_32;
 
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_INT32;
+				this->didResponse.third.i32 = generic_32;
 
 				break;
 			}
-			std::cout << std::endl;
+		}
+
+		// print response
+		if (this->didResponse.firstSize != DIDRESPONSE_DATASIZE_EMPTY) {
+			std::cout 	<< "I = SrvReadDid::callback, firstSize: "
+						<< DidResponse_DataSize_toString(this->didResponse.firstSize)
+						<< ", data: ";
+
+			switch (this->didResponse.firstSize) {
+				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.first.i8 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.first.i16 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.first.i32 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.first.f << std::endl; break;
+				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.first.str << std::endl; break;
+				default: break;
+			}
+		}
+
+		if (this->didResponse.secondSize != DIDRESPONSE_DATASIZE_EMPTY) {
+			std::cout 	<< "I = SrvReadDid::callback, secondSize: "
+						<< DidResponse_DataSize_toString(this->didResponse.secondSize)
+						<< ", data: ";
+
+			switch (this->didResponse.secondSize) {
+				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.second.i8 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.second.i16 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.second.i32 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.second.f << std::endl; break;
+				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.second.str << std::endl; break;
+				default: break;
+			}
+		}
+
+		if (this->didResponse.thirdSize != DIDRESPONSE_DATASIZE_EMPTY) {
+			std::cout 	<< "I = SrvReadDid::callback, thirdSize: "
+						<< DidResponse_DataSize_toString(this->didResponse.thirdSize)
+						<< ", data: ";
+
+			switch (this->didResponse.thirdSize) {
+				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.third.i8 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.third.i16 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.third.i32 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.third.f << std::endl; break;
+				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.third.str << std::endl; break;
+				default: break;
+			}
 		}
 	}
 

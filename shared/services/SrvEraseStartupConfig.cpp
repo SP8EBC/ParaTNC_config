@@ -36,6 +36,30 @@ SrvEraseStartupConfig::~SrvEraseStartupConfig() {
 
 void SrvEraseStartupConfig::receiveSynchronously() {
 	if (s) {
+		std::vector<uint8_t> response;
+
+		// receive a response
+		s->receiveKissFrame(response);
+
+		if (response.size() > 1) {
+			// get frame type, which was received
+			uint8_t frameType = response[1];
+
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE)
+			{
+				std::cout << "E = SrvEraseStartupConfig::receiveSynchronously, NRC received: 0x" <<
+					std::hex << response[2] << std::dec << std::endl;
+			}
+			else if (frameType == KISS_ERASE_STARTUP_CFG_RESP)
+			{
+				// use callback manualy
+				this->callback(&response);
+			}
+			else
+			{
+				std::cout << "E = SrvEraseStartupConfig::receiveSynchronously, response to unknown service!" << std::endl;
+			}
+		}
 	}
 }
 

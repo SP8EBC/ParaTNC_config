@@ -10,6 +10,7 @@
 #include <io.h>
 #include <fcntl.h>
 #include <map>
+#include <stdlib.h>
 
 #include "./protocol/ProtocolCommBackgroundThread.h"
 
@@ -190,6 +191,8 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	int wmId, wmEvent;
 	PAINTSTRUCT ps;
 	HDC hdc;
+	TCHAR did[6] = {0u};
+	int didNumber;
 
 	switch (message)
 	{
@@ -200,19 +203,23 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDC_START_SERIAL:
-			//serialInitResult = s.init();
-			//serialThread = new SerialRxBackgroundThread(&s, &callbackMap);
-			//std::cout << "IDC_START_SERIAL, serialInitResult: " << (serialInitResult ? "TRUE" : "FALSE") << std::endl;
-			//srvVersionAndId.setSerialContext(&s);
-			//std::cout << "serialThread has started" << std::endl;
 			kissProtocolComm = new PCBT();
-			//GetDlgItemText(hWnd, IDC_EDIT_VERSION, szEditVersionText, 64);
-			//SetDlgItemText(hWnd, IDC_EDIT_VERSION, szText);
 			break;
 		case IDC_GET_VERSION:
 			kissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
 			//srvVersionAndId.sendRequest();
 			//serialThread->start();
+			break;
+		case IDC_BUTTON_READ_DID:
+			GetDlgItemText(hWnd, IDC_DID_NUM, did, 5);
+			didNumber = _wcstoi64(did, NULL, 16);
+			if (didNumber > 0x0 && didNumber < 0xFFFF) 
+			{
+				kissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
+			}
+			break;
+		case IDC_GET_RUNNING:
+			kissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
