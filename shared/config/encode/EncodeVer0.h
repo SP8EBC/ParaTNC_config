@@ -31,11 +31,11 @@ public:
 	virtual void setPowersave(Powersave _powersave);
 	virtual void setGsmApnUsername(std::string &username);
 	virtual void setRtuConfiguredSourceQnh(uint8_t _rtuSrcQnhPressure);
-	virtual void setRtuSourceConfiguration(Rtu &config, uint8_t sourceId);
+	virtual void setRtuSourceConfiguration(const Rtu &config, uint8_t sourceId);
 	virtual void setWxDoubleTransmit(bool _doubleTransmit);
 	virtual void setRtuSlaveParity(uint8_t _slaveParity);
 	virtual void setWindSrc(WeatherSource _windSource);
-	virtual void setPath(AprsPath _path);
+	virtual void setPath(const AprsPath _path);
 	virtual void setUmbChannelWindspeed(uint16_t _channelWindspeed);
 	virtual void setDigiRadiusFilter(uint8_t _radius);
 	virtual void setMs5611orBmeSensor(bool _sensor);

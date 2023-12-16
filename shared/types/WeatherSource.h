@@ -17,6 +17,7 @@ typedef enum WeatherSource {
 		 * 	- analog/mechanical anemometer for wind
 		 */
 		WX_SOURCE_INTERNAL = 1,
+		WX_SOURCE_INTERNAL_PT100 = 6,
 
 		/**
 		 * Lufft UMB devices

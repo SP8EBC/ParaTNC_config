@@ -256,10 +256,10 @@ uint8_t DecodeVer0::getDigiDelayInMsec() {
 }
 
 uint32_t DecodeVer0::getGsmPin() {
-	uint8_t lsb_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET);
-	uint8_t nd_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 1);
-	uint8_t rd_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 2);
-	uint8_t msb_byte = data.at(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET + 3);
+	uint8_t lsb_byte = data.at(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET);
+	uint8_t nd_byte = data.at(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET + 1);
+	uint8_t rd_byte = data.at(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET + 2);
+	uint8_t msb_byte = data.at(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET + 3);
 
 
 	return lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24);
@@ -360,6 +360,9 @@ WeatherSource DecodeVer0::getWindSrc() {
 	}
 	else if (byte == 5) {
 		out = WX_SOURCE_DAVIS_SERIAL;
+	}
+	else if (byte == 6) {
+		out = WX_SOURCE_INTERNAL_PT100;
 	}
 	else {
 		out = WX_SOURCE_INTERNAL;
@@ -481,7 +484,14 @@ void DecodeVer0::getGsmApnUsername(std::string &username) {
 
 	username.clear();
 
-	//std::for_each(startIt, endIt, [&username](uint8_t b) { username.append(1, (char) b);});
+	while (startIt != endIt) {
+		username.push_back(*startIt);
+		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
+	}
 }
 
 ButtonFunction DecodeVer0::getButtonOneFunction() {
@@ -524,8 +534,8 @@ uint16_t DecodeVer0::getUmbChannelTemperature() {
 }
 
 uint16_t DecodeVer0::getUmbChannelWinggusts() {
-	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE );
-	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_TEMPERATURE + 1);
+	uint8_t lsb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDGUST );
+	uint8_t msb_byte = data.at(CONFIG_UMB_OFFSET + UMB_CHANNEL_WINDGUST + 1);
 
 	return lsb_byte | (msb_byte << 8);
 }

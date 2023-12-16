@@ -62,7 +62,7 @@ public:
 	virtual void setEorW(bool _eOrW) = 0;
 	virtual void setDescritpion(std::string & description) = 0;
 	virtual void setSymbol(AprsSymbol _symbol) = 0;
-	virtual void setPath(AprsPath _path) = 0;
+	virtual void setPath(const AprsPath _path) = 0;
 	virtual void setBeaconAtStartup(bool _beaconAtStartup) = 0;
 	virtual void setWxTransmitPeriod(uint8_t wxTransmitPeriod) = 0;
 	virtual void setBeaconTransmitPeriod(uint8_t beaconTransmitPeriod) = 0;
@@ -90,7 +90,7 @@ public:
 	virtual void setRtuConfiguredSourceWinddirection(uint8_t __rtuSrcWinddirection) = 0;
 	virtual void setRtuConfiguredSourceTemperature(uint8_t _rtuSrcTemperature) = 0;
 	virtual void setRtuConfiguredSourceQnh(uint8_t _rtuSrcQnhPressure) = 0;
-	virtual void setRtuSourceConfiguration(Rtu & config, uint8_t sourceId) = 0;
+	virtual void setRtuSourceConfiguration(const Rtu & config, uint8_t sourceId) = 0;
 
 	virtual void setGsmPin(uint32_t _pin) = 0;
 	virtual void setGsmApnName(std::string & apn) = 0;
