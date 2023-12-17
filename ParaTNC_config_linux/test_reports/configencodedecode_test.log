@@ -1,0 +1,27 @@
+Running 3 test cases...
+Entering test module "DECODEENCODE"
+../src/ConfigEncodeDecode_test.cpp(43): Entering test case "beacon_description"
+../src/ConfigEncodeDecode_test.cpp(54): info: check test_output == test has passed
+../src/ConfigEncodeDecode_test.cpp(43): Leaving test case "beacon_description"; testing time: 116us
+../src/ConfigEncodeDecode_test.cpp(57): Entering test case "symbols"
+../src/ConfigEncodeDecode_test.cpp(62): info: check decode.getSymbol() == SYMBOL_HOUSE has passed
+../src/ConfigEncodeDecode_test.cpp(66): info: check decode2.getSymbol() == SYMBOL_IGATE has passed
+../src/ConfigEncodeDecode_test.cpp(70): info: check decode3.getSymbol() == SYMBOL_RXIGATE has passed
+../src/ConfigEncodeDecode_test.cpp(74): info: check decode4.getSymbol() == SYMBOL_SAILBOAT has passed
+../src/ConfigEncodeDecode_test.cpp(57): Leaving test case "symbols"; testing time: 110us
+../src/ConfigEncodeDecode_test.cpp(77): Entering test case "defaults"
+../src/ConfigEncodeDecode_test.cpp(85): info: check description == "update this text" has passed
+../src/ConfigEncodeDecode_test.cpp(89): info: check call == "N0CALL" has passed
+../src/ConfigEncodeDecode_test.cpp(91): info: check decode.getLatitude() == 50.000f has passed
+../src/ConfigEncodeDecode_test.cpp(92): info: check decode.getLongitude() == 19.0000f has passed
+../src/ConfigEncodeDecode_test.cpp(93): info: check decode.getSsid() == 0 has passed
+../src/ConfigEncodeDecode_test.cpp(94): info: check decode.getNorS() == false has passed
+../src/ConfigEncodeDecode_test.cpp(95): info: check decode.getEorW() == false has passed
+../src/ConfigEncodeDecode_test.cpp(96): info: check decode.getSymbol() == SYMBOL_WIDE1_DIGI has passed
+../src/ConfigEncodeDecode_test.cpp(97): info: check decode.getPath() == PATH_WIDE21 has passed
+../src/ConfigEncodeDecode_test.cpp(98): info: check decode.getBeaconAtStartup() == false has passed
+../src/ConfigEncodeDecode_test.cpp(99): info: check decode.getWxTransmitPeriod() == 5 has passed
+../src/ConfigEncodeDecode_test.cpp(100): info: check decode.getBeaconTransmitPeriod() == 67 has passed
+../src/ConfigEncodeDecode_test.cpp(101): info: check decode.getWxDoubleTransmit() == false has passed
+../src/ConfigEncodeDecode_test.cpp(77): Leaving test case "defaults"; testing time: 142us
+Leaving test module "DECODEENCODE"; testing time: 393us

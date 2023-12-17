@@ -20,6 +20,8 @@ public:
 
 	virtual bool decodeToFile(std::string _fn);
 
+	virtual uint32_t getProgrammingCounter();
+
 	virtual bool getMs5611orBmeSensor()  ;
 	virtual DigiFilter getDigiFilter()  ;
 	virtual uint8_t getWxTransmitPeriod()  ;
@@ -80,6 +82,9 @@ public:
 	virtual bool getWxDoubleTransmit()  ;
 	virtual WeatherSource getHumiditySrc()  ;
 	virtual void getGsmApnPassword(std::string &password)  ;
+	virtual void getGsmAprsisServer(std::string & server );
+	virtual uint16_t getGsmAprsisServerPort ();
+	virtual uint32_t getGsmAprsisPasscode	();
 };
 
 #endif /* SRC_CONFIG_DECODE_DECODEVER0_H_ */

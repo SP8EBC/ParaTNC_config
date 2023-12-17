@@ -43,7 +43,7 @@ uint32_t reflect32(uint32_t val)
     return resVal;
 }
 
-uint32_t calcCRC32stm(void *data, uint32_t len,
+uint32_t calcCRC32stm(const void *data, uint32_t len,
    uint32_t poly, uint32_t seed, uint32_t initCRC, uint32_t inR, uint32_t outR)
 {
     const uint8_t *buffer = (const uint8_t*) data;
@@ -71,7 +71,7 @@ uint32_t calcCRC32stm(void *data, uint32_t len,
     return crc;
 }
 
-uint32_t calcCRC32std(void *data, uint32_t len,
+uint32_t calcCRC32std(const void *data, uint32_t len,
    uint32_t poly, uint32_t seed, uint32_t initCRC, uint32_t inR, uint32_t outR)
 {
     uint32_t crc;

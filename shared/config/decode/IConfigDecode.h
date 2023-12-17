@@ -30,6 +30,8 @@ public:
 
 	virtual bool decodeToFile(std::string _fn) = 0;
 
+	virtual uint32_t getProgrammingCounter() = 0;
+
 	virtual Digi getDigiEnabled() = 0;
 	virtual uint8_t getVisvousDelayInSec() = 0;
 	virtual uint8_t getDigiDelayInMsec() = 0;
@@ -97,6 +99,10 @@ public:
 	virtual bool getGsmApiEnable() = 0;
 	virtual void getGsmApiBaseUrl(std::string & password) = 0;
 	virtual bool getGsmAprsisEnable() = 0;
+
+	virtual void getGsmAprsisServer(std::string & server ) = 0;
+	virtual uint16_t getGsmAprsisServerPort () = 0;
+	virtual uint32_t getGsmAprsisPasscode	() = 0;
 
 };
 

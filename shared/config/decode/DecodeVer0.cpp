@@ -57,6 +57,16 @@ bool DecodeVer0::decodeToFile(std::string _fn) {
 	return out;
 }
 
+uint32_t DecodeVer0::getProgrammingCounter() {
+	uint8_t lsb_byte = data.at(CONFIG_MODE_PGM_CNTR);
+	uint8_t nd_byte = data.at(CONFIG_MODE_PGM_CNTR + 1);
+	uint8_t rd_byte = data.at(CONFIG_MODE_PGM_CNTR + 2);
+	uint8_t msb_byte = data.at(CONFIG_MODE_PGM_CNTR + 3);
+
+
+	return lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24);
+}
+
 bool DecodeVer0::getMs5611orBmeSensor() {
 	bool output = false;
 
@@ -137,6 +147,10 @@ void DecodeVer0::getGsmApiBaseUrl(std::string &password) {
 		password.append(1, (char) *startIt);
 
 		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
 	} while(startIt != endIt);
 
 	//std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
@@ -299,6 +313,10 @@ void DecodeVer0::getGsmApnName(std::string &apn) {
 		apn.append(1, (char) *startIt);
 
 		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
 	} while(startIt != endIt);
 
 	//std::for_each(startIt, endIt, [&apn](uint8_t b) { apn.append(1, (char) b);});
@@ -388,6 +406,9 @@ AprsSymbol DecodeVer0::getSymbol() {
 	}
 	else if (byte == 4) {
 		out = SYMBOL_IGATE;
+	}
+	else if (byte == 5) {
+		out = SYMBOL_SAILBOAT;
 	}
 	else {
 		out = SYMBOL_DIGI;
@@ -522,6 +543,10 @@ void DecodeVer0::getDescritpion(std::string &description) {
 		description.append(1, (char) *startIt);
 
 		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
 	} while(startIt != endIt);
 
 }
@@ -744,6 +769,50 @@ void DecodeVer0::getGsmApnPassword(std::string &password) {
 		password.append(1, (char) *startIt);
 
 		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
 	} while(startIt != endIt);
 
+}
+
+void DecodeVer0::getGsmAprsisServer(std::string & server ) {
+	std::size_t offset = GSM_APRSIS_SERVER_OFFSET + CONFIG_GSM_OFFSET;
+
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_APRSIS_SERVER_LN;
+
+	if (*startIt == 0xFF || *startIt == 0x00) {
+		return;
+	}
+
+	server.clear();
+
+	do {
+		server.append(1, (char) *startIt);
+
+		startIt++;
+
+		if (*startIt == 0x00) {
+			break;
+		}
+	} while(startIt != endIt);
+}
+
+uint16_t DecodeVer0::getGsmAprsisServerPort () {
+	uint8_t lsb_byte = data.at(CONFIG_GSM_OFFSET + GSM_APRSIS_PORT_OFFSET );
+	uint8_t msb_byte = data.at(CONFIG_GSM_OFFSET + GSM_APRSIS_PORT_OFFSET + 1);
+
+	return lsb_byte | (msb_byte << 8);
+}
+
+uint32_t DecodeVer0::getGsmAprsisPasscode	() {
+	uint8_t lsb_byte = data.at(CONFIG_GSM_OFFSET 	+ GSM_APRSIS_PASSCODE_OFFSET);
+	uint8_t nd_byte = data.at(CONFIG_GSM_OFFSET 	+ GSM_APRSIS_PASSCODE_OFFSET + 1);
+	uint8_t rd_byte = data.at(CONFIG_GSM_OFFSET 	+ GSM_APRSIS_PASSCODE_OFFSET + 2);
+	uint8_t msb_byte = data.at(CONFIG_GSM_OFFSET 	+ GSM_APRSIS_PASSCODE_OFFSET + 3);
+
+
+	return lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24);
 }

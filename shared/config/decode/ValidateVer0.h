@@ -12,7 +12,8 @@
 
 class ValidateVer0: public IConfigValidate {
 public:
-	virtual bool checkValidate(std::vector<uint8_t> & dataFromTnc);
+	virtual bool checkValidate(const std::vector<uint8_t> & dataFromTnc);
+	virtual bool calculateValidate(std::vector<uint8_t> & dataToTnc);
 
 	virtual ~ValidateVer0();
 };

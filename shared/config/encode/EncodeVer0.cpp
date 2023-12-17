@@ -26,6 +26,22 @@ EncodeVer0::EncodeVer0() {
 EncodeVer0::~EncodeVer0() {
 }
 
+void EncodeVer0::incrementProgrammingCounter() {
+	uint8_t lsb_byte = data.at(CONFIG_MODE_PGM_CNTR);
+	uint8_t nd_byte = data.at(CONFIG_MODE_PGM_CNTR + 1);
+	uint8_t rd_byte = data.at(CONFIG_MODE_PGM_CNTR + 2);
+	uint8_t msb_byte = data.at(CONFIG_MODE_PGM_CNTR + 3);
+
+	uint32_t current_counter = lsb_byte | (nd_byte << 8) | (rd_byte << 16) | (msb_byte << 24);
+
+	current_counter += 2;
+
+	data[CONFIG_MODE_PGM_CNTR] 		= static_cast<uint8_t>(current_counter 		& 0x000000FFu);
+	data[CONFIG_MODE_PGM_CNTR + 1] 	= static_cast<uint8_t>((current_counter 	& 0x0000FF00u) >> 8);
+	data[CONFIG_MODE_PGM_CNTR + 2] 	= static_cast<uint8_t>((current_counter 	& 0x00FF0000u) >> 16);
+	data[CONFIG_MODE_PGM_CNTR + 3] 	= static_cast<uint8_t>((current_counter 	& 0xFF000000u) >> 24);
+}
+
 void EncodeVer0::setEorW(bool _eOrW) {
 	if (_eOrW) {
 		data[CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET] = 1;
@@ -52,7 +68,7 @@ void EncodeVer0::setGsmAprsisEnable(bool _apsisEnable) {
 	}
 }
 
-void EncodeVer0::setCallsign(std::string &call) {
+void EncodeVer0::setCallsign(const std::string &call) {
 	std::size_t offset = BASIC_CALLSIGN_OFFSET + CONFIG_BASIC_OFFSET;
 
 	memcpy(&data[offset], call.c_str(), call.size());
@@ -83,7 +99,7 @@ void EncodeVer0::setPowersave(Powersave _powersave) {
 	data[CONFIG_MODE_OFSET + MODE_POWERSAVE_OFFSET] = _data;
 }
 
-void EncodeVer0::setGsmApnUsername(std::string &username) {
+void EncodeVer0::setGsmApnUsername(const std::string &username) {
 
 	if (username.length() < GSM_USERNAME_LEN) {
 		const char * pStr = username.c_str();
@@ -385,12 +401,13 @@ void EncodeVer0::setWxModbusEnabled(bool _enabled) {
 	}
 }
 
-void EncodeVer0::setGsmApnName(std::string &apn) {
+void EncodeVer0::setGsmApnName(const std::string &apn) {
 
 	if (apn.length() < GSM_APN_LENGHT) {
 		const char * pStr = apn.c_str();
 		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + GSM_APN_OFFSET + CONFIG_GSM_OFFSET;
 
+		memset(pDestination, 0x00, GSM_APN_LENGHT);
 		strncpy(pDestination, pStr, apn.length());
 	}
 	else {
@@ -448,12 +465,13 @@ void EncodeVer0::setPressureSrc(WeatherSource _pressureSource) {
 	data[CONFIG_SOURCES_OFFSET + SOURCE_PRESSURE_OFFSET] = byte;
 }
 
-void EncodeVer0::setDescritpion(std::string &description) {
+void EncodeVer0::setDescritpion(const std::string &description) {
 
 	if (description.length() < BASIC_COMMENT_LENGHT) {
 		const char * pStr = description.c_str();
 		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + BASIC_COMMENT_OFFSET + CONFIG_BASIC_OFFSET;
 
+		memset(pDestination, 0x00, BASIC_COMMENT_LENGHT);
 		strncpy(pDestination, pStr, description.length());
 	}
 	else {
@@ -461,11 +479,12 @@ void EncodeVer0::setDescritpion(std::string &description) {
 	}
 }
 
-void EncodeVer0::setGsmApnPassword(std::string &password) {
+void EncodeVer0::setGsmApnPassword(const std::string &password) {
 	if (password.length() < GSM_USERNAME_LEN) {
 		const char * pStr = password.c_str();
 		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + GSM_PASSWORD_OFFSET + CONFIG_GSM_OFFSET;
 
+		memset(pDestination, 0x00, GSM_PASSWORD_LEN);
 		strncpy(pDestination, pStr, password.length());
 	}
 	else {
@@ -507,11 +526,12 @@ void EncodeVer0::setUmbSlaveId(uint16_t _slaveId) {
 
 }
 
-void EncodeVer0::setGsmApiBaseUrl(std::string &password) {
+void EncodeVer0::setGsmApiBaseUrl(const std::string &password) {
 	if (password.length() < GSM_API_BASE_URL_LEN) {
 		const char * pStr = password.c_str();
 		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + GSM_API_BASE_URL_OFFSET + CONFIG_GSM_OFFSET;
 
+		memset(pDestination, 0x00, GSM_API_BASE_URL_LEN);
 		strncpy(pDestination, pStr, password.length());
 	}
 	else {
@@ -546,7 +566,11 @@ void EncodeVer0::setSymbol(AprsSymbol _symbol) {
 	case SYMBOL_RXIGATE: byte = 3; break;
 	case SYMBOL_IGATE: byte = 4; break;
 	case SYMBOL_DIGI: byte = 0; break;
+	case SYMBOL_SAILBOAT: byte = 5; break;
 	}
+
+	data[CONFIG_BASIC_OFFSET + BASIC_SYMBOL_OFFSET] = byte;
+
 }
 
 void EncodeVer0::setRtuConfiguredSourceWinddirection(
@@ -612,5 +636,28 @@ bool EncodeVer0::decodeToFile(std::string _fn) {
 void EncodeVer0::setUmbChannelQnh(uint16_t _channelQnhPressure) {
 	data[CONFIG_UMB_OFFSET + UMB_CHANNEL_QNH] = static_cast<uint8_t>(_channelQnhPressure & 0xFFu);
 	data[CONFIG_UMB_OFFSET + UMB_CHANNEL_QNH + 1] = static_cast<uint8_t>((_channelQnhPressure & 0xFF00u) >> 8);
+
+}
+
+void EncodeVer0::setGsmAprsisServer(const std::string & server ) {
+	if (server.length() < GSM_API_BASE_URL_LEN) {
+		const char * pStr = server.c_str();
+		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + GSM_APRSIS_SERVER_OFFSET + CONFIG_GSM_OFFSET;
+
+		memset(pDestination, 0x00, GSM_APRSIS_SERVER_LN);
+		strncpy(pDestination, pStr, server.length());
+	}
+	else {
+		throw std::runtime_error("Provided API base url is too long");
+	}
+}
+
+void EncodeVer0::setGsmAprsisServerPort (uint16_t port) {
+	data[GSM_APRSIS_PORT_OFFSET + CONFIG_GSM_OFFSET] 		= static_cast<uint8_t>(port 	& 0x00FFu);
+	data[GSM_APRSIS_PORT_OFFSET + CONFIG_GSM_OFFSET + 1] 	= static_cast<uint8_t>((port 	& 0xFF00u) >> 8);
+
+}
+
+void EncodeVer0::setGsmAprsisPasscode	(uint32_t passcode) {
 
 }

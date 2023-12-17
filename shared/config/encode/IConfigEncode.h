@@ -21,6 +21,8 @@
 #include "../../types/DigiFilter.h"
 #include "../../types/ButtonFunction.h"
 
+#include "../DefaultConfig.h"
+
 class IConfigEcode {
 
 
@@ -31,6 +33,8 @@ public:
 	}
 
 	virtual bool decodeToFile(std::string _fn) = 0;
+
+	virtual void incrementProgrammingCounter() = 0;
 
 	virtual void setDigiEnabled(Digi _digi) = 0;
 	virtual void setVisvousDelayInSec(uint8_t _seconds) = 0;
@@ -50,17 +54,17 @@ public:
 	virtual void setDigiAlwaysMessageAndStatus(bool _alwaysMessageAndSts) = 0;	// reserved
 	virtual void setDigiFilter(DigiFilter _filter) = 0;		// reserved
 	virtual void setDigiFilterPrefixList(uint8_t entry, std::string & _value) = 0;		// reserved
-	virtual void setButtonOneFunction(ButtonFunction _buttonOne) = 0;
-	virtual void setButtonTwoFunction(ButtonFunction _buttonTwo) = 0;
+	virtual void setButtonOneFunction(ButtonFunction _buttonOne) = 0;	// reserved
+	virtual void setButtonTwoFunction(ButtonFunction _buttonTwo) = 0;	// reserved
 
 
-	virtual void setCallsign(std::string & call) = 0;
+	virtual void setCallsign(const std::string & call) = 0;
 	virtual void setSsid(uint8_t _ssid) = 0;
 	virtual void setLatitude(float _latitude) = 0;
 	virtual void setNorS(bool _nOrS) = 0;
 	virtual void setLongitude(float _longitude) = 0;
 	virtual void setEorW(bool _eOrW) = 0;
-	virtual void setDescritpion(std::string & description) = 0;
+	virtual void setDescritpion(const std::string & description) = 0;
 	virtual void setSymbol(AprsSymbol _symbol) = 0;
 	virtual void setPath(const AprsPath _path) = 0;
 	virtual void setBeaconAtStartup(bool _beaconAtStartup) = 0;
@@ -93,12 +97,79 @@ public:
 	virtual void setRtuSourceConfiguration(const Rtu & config, uint8_t sourceId) = 0;
 
 	virtual void setGsmPin(uint32_t _pin) = 0;
-	virtual void setGsmApnName(std::string & apn) = 0;
-	virtual void setGsmApnUsername(std::string & username) = 0;
-	virtual void setGsmApnPassword(std::string & password) = 0;
+	virtual void setGsmApnName(const std::string & apn) = 0;
+	virtual void setGsmApnUsername(const std::string & username) = 0;
+	virtual void setGsmApnPassword(const std::string & password) = 0;
 	virtual void setGsmApiEnable(bool _apiEnable) = 0;
-	virtual void setGsmApiBaseUrl(std::string & password) = 0;
+	virtual void setGsmApiBaseUrl(const std::string & password) = 0;
 	virtual void setGsmAprsisEnable(bool _apsisEnable) = 0;
+	virtual void setGsmAprsisServer(const std::string & server ) = 0;
+	virtual void setGsmAprsisServerPort (uint16_t port) = 0;
+	virtual void setGsmAprsisPasscode	(uint32_t passcode) = 0;
+
+	virtual void loadDefaults() 	{
+		setDigiEnabled				(DEFAULT_CONFIG_DIGI_ENABLE);
+		setVisvousDelayInSec		(DEFAULT_CONFIG_VISCOUS_DELAY);
+		setDigiDelayInMsec			(DEFAULT_CONFIG_DIGI_DELAY);
+		setWxEnabled				(DEFAULT_CONFIG_WX_ENABLED);
+		setWxUmbEnabled				(DEFAULT_CONFIG_WX_UMB_ENABLED);
+		setWxModbusEnabled			(DEFAULT_CONFIG_WX_MODBUS_ENABLED);
+		setWxDavisEnabled			(DEFAULT_CONFIG_WX_DAVIS_ENABLED);
+		setMs5611orBmeSensor		(DEFAULT_CONFIG_MS5611_OR_BME_SENSOR);
+		setAnemometerPulsesConstant	(DEFAULT_CONFIG_ANEMOMETER_PULSES);
+		setVictronEnabled			(DEFAULT_CONFIG_VICTRON_ENABLED);
+		setPowersave				(DEFAULT_CONFIG_POWERSAVE);
+		setGsmEnabled				(DEFAULT_CONFIG_GSM_ENABLED);
+		setKeepGsmAlwaysOn			(DEFAULT_CONFIG_KEEP_GSM_ALWAYS_ON);
+
+		setCallsign			(DEFAULT_CONFIG_CALLSIGN);
+		setSsid				(DEFAULT_CONFIG_SSID);
+		setLatitude			(DEFAULT_CONFIG_LATITUDE);
+		setNorS				(DEFAULT_CONFIG_N_OR_S);
+		setLongitude		(DEFAULT_CONFIG_LONGITUDE);
+		setEorW				(DEFAULT_CONFIG_E_OR_W);
+		setDescritpion		(DEFAULT_CONFIG_DESCRIPTION);
+		setSymbol			(DEFAULT_CONFIG_SYMBOL);
+		setPath				(DEFAULT_CONFIG_PATH);
+		setBeaconAtStartup	(DEFAULT_CONFIG_BEACON_START);
+		setWxTransmitPeriod	(DEFAULT_CONFIG_WX_PERIOD);
+		setBeaconTransmitPeriod(DEFAULT_CONFIG_BEACON_PERIO);
+		setWxDoubleTransmit	(DEFAULT_CONFIG_WX_DOUBLE_TX);
+
+		setTemperatureSrc		(DEFAULT_CONFIG_SOURCE_TEMPERATURE);
+		setPressureSrc			(DEFAULT_CONFIG_SOURCE_PRESSURE);
+		setWindSrc				(DEFAULT_CONFIG_SOURCE_WIND);
+		setHumiditySrc			(DEFAULT_CONFIG_SOURCE_HUMIDITY);
+
+		setUmbSlaveClass				(DEFAULT_CONFIG_UMB_SLAVE_CLASS);
+		setUmbSlaveId					(DEFAULT_CONFIG_UMB_SLAVE_ID);
+		setUmbChannelWindspeed			(DEFAULT_CONFIG_UMB_CHANNEL_WINDSPEED);
+		setUmbChannelWinggusts			(DEFAULT_CONFIG_UMB_CHANNEL_WINDGUSTS);
+		setUmbChannelWinddirection		(DEFAULT_CONFIG_UMB_CHANNEL_WINDDIR);
+		setUmbChannelTemperature		(DEFAULT_CONDIG_UMB_CHANNEL_TEMPERATURE);
+		setUmbChannelQnh				(DEFAULT_CONFIG_UMB_CHANNEL_QNH);
+
+		setRtuSlaveSpeed					(DEFAULT_CONFIG_RTU_SLAVE_SPEED);
+		setRtuSlaveParity					(DEFAULT_CONFIG_RTU_SLAVE_PARITY);
+		setRtuSlaveStopBits					(DEFAULT_CONFIG_RTU_STOP_BITS);
+		setRtuFullWindData					(DEFAULT_CONFIG_RTU_FULL_WIND);
+		setRtuConfiguredSourceWindspeed		(DEFAULT_CONFIG_RTU_SOURCE_WINDSPEED);
+		setRtuConfiguredSourceWindgusts		(DEFAULT_CONFIG_RTU_SOURCE_WINDGUST);
+		setRtuConfiguredSourceWinddirection	(DEFAULT_CONFIG_RTU_SOURCE_WINDDIR);
+		setRtuConfiguredSourceTemperature	(DEFAULT_CONFIG_RTU_SOURCE_TEMP);
+		setRtuConfiguredSourceQnh			(DEFAULT_CONFIG_RTU_SOURCE_PRESSURE);
+
+		setGsmPin			(DEFAULT_CONFIG_GSM_PIN);
+		setGsmApnName		(DEFAULT_CONFIG_GSM_APNNAME);
+		setGsmApnUsername	(DEFAULT_CONFIG_GSM_USERNAME);
+		setGsmApnPassword	(DEFAULT_CONFIG_GSM_PASSWORD);
+		setGsmApiEnable		(DEFAULT_CONFIG_GSM_API_ENABLE);
+		setGsmApiBaseUrl	(DEFAULT_CONFIG_GSM_API_BASEURL);
+		setGsmAprsisEnable	(DEFAULT_CONFIG_APRSIS_ENABLE);
+		setGsmAprsisServer	(DEFAULT_CONFIG_APRSIS_SERVER);
+		setGsmAprsisServerPort(DEFAULT_CONFIG_APRSIS_PORT);
+		setGsmAprsisPasscode(DEFAULT_CONFIG_APRSIS_PASSCODE);
+	}
 
 };
 
