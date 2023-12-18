@@ -61,6 +61,8 @@ public:
 	// dialog if it has been created. information returned by
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow);
+	BOOL commReadDidAndUpdateGui(HANDLE mainWindow, HANDLE didWindow, int didNumber);
+	BOOL commRunningConfigAndUpdateGui(HANDLE mainWindow, HANDLE configWindow);
 	BOOL getVersion(LPCSV p);
 
 	ProtocolCommBackgroundThread(void);

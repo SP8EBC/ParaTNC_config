@@ -391,8 +391,11 @@ void EncodeVer0::setTemperatureSrc(WeatherSource _temperatureSource) {
 void EncodeVer0::setLatitude(float _latitude) {
 
 	void * ptr = &_latitude;
+	uint32_t * uptr = (uint32_t*)ptr;
 
-	uint32_t intermediate = reinterpret_cast<uint32_t>(*reinterpret_cast<uint32_t*>(ptr));
+	uint32_t intermediate = *uptr;
+	// VS2005 is complaining about that
+	//uint32_t intermediate = reinterpret_cast<uint32_t>(*reinterpret_cast<uint32_t*>(ptr));
 
 	data[CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET] 		= static_cast<uint8_t>(intermediate 	& 0x000000FFu);
 	data[CONFIG_BASIC_OFFSET + BASIC_LATITUDE_OFFSET + 1] 	= static_cast<uint8_t>((intermediate 	& 0x0000FF00u) >> 8);
@@ -551,7 +554,11 @@ void EncodeVer0::setGsmApiBaseUrl(const std::string &password) {
 void EncodeVer0::setLongitude(float _longitude) {
 	void * ptr = &_longitude;
 
-	uint32_t intermediate = reinterpret_cast<uint32_t>(*reinterpret_cast<uint32_t*>(ptr));
+	uint32_t * uptr = (uint32_t*)ptr;
+
+	uint32_t intermediate = *uptr;
+	// VS2005 is complaining about that
+	//uint32_t intermediate = reinterpret_cast<uint32_t>(*reinterpret_cast<uint32_t*>(ptr));
 
 	data[CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS] 		= static_cast<uint8_t>(intermediate 	& 0x000000FFu);
 	data[CONFIG_BASIC_OFFSET + BASIC_LONGITUDE_OFFS + 1] 	= static_cast<uint8_t>((intermediate 	& 0x0000FF00u) >> 8);

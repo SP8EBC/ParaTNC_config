@@ -72,3 +72,13 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 
 	return result;
 }
+
+BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HANDLE mainWindow, HANDLE didWindow, int didNumber) {
+
+	return true;
+}
+	
+BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HANDLE mainWindow, HANDLE configWindow) {
+	
+	return true;
+}
