@@ -12,11 +12,11 @@ typedef struct ProtocolCommBackgroundThread_GetVersion_Context {
 
 	// handle to main dialog which shall be updated
 	// after successfull communication with controller
-	HWND mainWindow;
+	HANDLE mainWindow;
 	
 	// handle to main dialog which might be updated
 	// after successfull comm if this dialog is created
-	HWND editCodeplugWindow;
+	HANDLE editCodeplugWindow;
 
 	// mutex declared in 'ProtocolCommBackgroundThread' 
 	// to sync serial KISS protocol communication and 

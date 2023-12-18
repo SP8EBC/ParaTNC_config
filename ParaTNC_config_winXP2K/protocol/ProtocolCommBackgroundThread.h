@@ -4,8 +4,6 @@
 #include <map>
 
 #include "ProtocolCommBackgroundThread_GetVersion.h"
-#include "ProtocolCommBackgroundThread_ReadDid.h"
-#include "ProtocolCommBackgroundThread_GetRunningConfig.h"
 
 #include "../serial/Serial.h"
 #include "../serial/SerialRxBackgroundThread.h"
@@ -44,13 +42,9 @@ private:
 
 	// services
 	SrvGetVersionAndId srvVersionAndId;
-	SrvReadDid srvReadDid;
-	SrvGetRunningConfig srvGetRunningConfig;
 
 	// services context classes
 	CTXPCBTVER srvVersionAndId_context;
-	CTXPCBTRDID srvReadDid_context;
-	CTXPCBTGRC srvGetRunningConfig_context;
 
 public:
 
@@ -66,14 +60,8 @@ public:
 	// updates Edit Controls on Main dialog and on Edit Codeplug
 	// dialog if it has been created. information returned by
 	// the controller are stored 
-	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
+	BOOL commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow);
 	BOOL getVersion(LPCSV p);
-
-	BOOL commReadDidAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow, int did);
-	BOOL getReadDid(DidResponse * didResponse);
-
-	BOOL commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
-	BOOL getRunningConfig();
 
 	ProtocolCommBackgroundThread(void);
 	~ProtocolCommBackgroundThread(void);

@@ -17,8 +17,6 @@ ProtocolCommBackgroundThread::ProtocolCommBackgroundThread(void) : thread(0)
 
 	// set serial context for all services handlers
 	srvVersionAndId.setSerialContext(&s);
-	srvReadDid.setSerialContext(&s);
-	srvGetRunningConfig.setSerialContext(&s);
 
 	// create mutex which will protect agains starting two paralell comm transactions
 	threadMutex = CreateMutex(NULL, FALSE, L"ProtocolCommMutex");
@@ -38,13 +36,11 @@ ProtocolCommBackgroundThread::~ProtocolCommBackgroundThread(void)
 {
 }
 
-BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow)
+BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow)
 {
 	BOOL result = false;
 
 	DWORD threadId = 0;
-
-	memset(&this->srvVersionAndId_context, 0x00, sizeof(CTXPCBTVER));
 
 	this->srvVersionAndId_context.editCodeplugWindow = editCodeplugWindow;
 	this->srvVersionAndId_context.mainWindow = mainWindow;
@@ -59,6 +55,9 @@ BOOL ProtocolCommBackgroundThread::commVersionAndUpdateGui(HWND mainWindow, HWND
 				NULL,
 				&threadId);
 
+	std::cout << "I = PCBT::commVersionAndUpdateGui, " <<  
+		std::hex << ", threadId: 0x" << threadId << std::dec << std::endl;
+
 	if (thread != NULL)
 	{
 		result = true;
@@ -71,82 +70,5 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 {
 	BOOL result = false;
 
-	if (p != NULL)
-	{
-		p->kissVersion = this->srvVersionAndId_context.srvVersionAndIdResult.kissVersion;
-		memcpy(
-			p->softwareVersion, 
-			this->srvVersionAndId_context.srvVersionAndIdResult.softwareVersion,
-			sizeof(CHAR) * 5);
-
-		p->type = this->srvVersionAndId_context.srvVersionAndIdResult.type;
-	}
-
 	return result;
-}
-
-BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow, int did)
-{
-	BOOL result = false;
-
-	DWORD threadId = 0;
-
-	memset(&this->srvReadDid_context, 0x00, sizeof(CTXPCBTRDID));
-
-	this->srvReadDid_context.readDid = &this->srvReadDid;
-	this->srvReadDid_context.mutex = this->threadMutex;
-	this->srvReadDid_context.didNumber = did;
-
-	thread = CreateThread(
-				NULL, 
-				NULL, 
-				ProtocolCommBackgroundThread_ReadDid, 
-				&this->srvReadDid_context, 
-				NULL,
-				&threadId);
-
-	if (thread != NULL)
-	{
-		result = true;
-	}
-
-	return result;
-}
-
-BOOL ProtocolCommBackgroundThread::getReadDid(DidResponse * didResponse)
-{
-	return true;
-}
-
-BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow)
-{
-	BOOL result = false;
-
-	DWORD threadId = 0;
-
-	memset(&this->srvGetRunningConfig_context, 0x00, sizeof(CTXPCBTGRC));
-
-	this->srvGetRunningConfig_context.getRunningConfig = &this->srvGetRunningConfig;
-	this->srvGetRunningConfig_context.mutex = this->threadMutex;
-	//this->srvGetRunningConfig_context.didNumber = did;
-
-	thread = CreateThread(
-				NULL, 
-				NULL, 
-				ProtocolCommBackgroundThread_GetRunningConfig, 
-				&this->srvGetRunningConfig_context, 
-				NULL,
-				&threadId);
-
-	if (thread != NULL)
-	{
-		result = true;
-	}
-
-	return result;
-}
-
-BOOL ProtocolCommBackgroundThread::getRunningConfig()
-{
-	return true;
 }
