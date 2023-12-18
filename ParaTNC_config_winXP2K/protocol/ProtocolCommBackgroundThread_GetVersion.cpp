@@ -2,6 +2,8 @@
 #include "configuration.h"
 #include "ProtocolCommBackgroundThread_GetVersion.h"
 
+#include "Resource.h"
+
 #include <iostream>
 
 DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param) 
@@ -27,6 +29,39 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 				
 				// send request to controller
 				context->getVersionAndId->sendRequest();
+
+				context->getVersionAndId->receiveSynchronously();
+
+				//// kiss protocol version
+				context->srvVersionAndIdResult.kissVersion = context->getVersionAndId->getProtocolVersion();
+				
+				//// software version 
+				const std::string softwareVersion = context->getVersionAndId->getSoftwareVersion();
+
+				// clear result structure before doing anything else
+				memset(context->srvVersionAndIdResult.softwareVersion, 0x00, 5 * sizeof(CHAR));
+				memset(context->srvVersionAndIdResult.softwareVersionW, 0x00, 5 * sizeof(WCHAR));
+
+				// copy result from string into array of chars
+				strncpy(context->srvVersionAndIdResult.softwareVersion, softwareVersion.c_str(), 5);
+
+				// convert array od CHAR into array of WCHAR
+				mbstowcs(
+					context->srvVersionAndIdResult.softwareVersionW,
+					context->srvVersionAndIdResult.softwareVersion,
+					strlen(context->srvVersionAndIdResult.softwareVersion)
+					);
+
+				//// controller type. might be ParaMETEO or ParaTNC
+				const std::string boardType = context->getVersionAndId->getBoardType();
+				if (boardType == "METEO") {
+					context->srvVersionAndIdResult.type = CONTROLLER_SOFTWARE_PARAMETEO;
+				}
+				else if (boardType == "TNC") {
+					context->srvVersionAndIdResult.type = CONTROLLER_SOFTWARE_PARATNC;
+				}
+
+				SetDlgItemText(context->mainWindow, IDC_EDIT_VERSION, context->srvVersionAndIdResult.softwareVersionW);
 
 				ReleaseMutex(context->mutex);
 			}

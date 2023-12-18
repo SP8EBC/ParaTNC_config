@@ -202,7 +202,7 @@ void SrvReadDid::callback(
 				generic_16 |= ((*it++) << 8);
 
 				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_INT16;
-				this->didResponse.first.i8 = generic_16;
+				this->didResponse.first.i16 = generic_16;
 
 				break;
 			case 3:	// int32_t
@@ -212,7 +212,7 @@ void SrvReadDid::callback(
 				generic_32 |= ((*it++) << 24);
 
 				this->didResponse.firstSize = DIDRESPONSE_DATASIZE_INT32;
-				this->didResponse.first.i8 = generic_32;
+				this->didResponse.first.i32 = generic_32;
 
 				break;
 			}
@@ -230,7 +230,7 @@ void SrvReadDid::callback(
 				generic_16 |= ((*it++) << 8);
 
 				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_INT16;
-				this->didResponse.second.i8 = generic_16;
+				this->didResponse.second.i16 = generic_16;
 
 				break;
 			case 3:	// int32_t

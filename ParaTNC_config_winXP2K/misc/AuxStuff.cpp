@@ -5,6 +5,7 @@
  *      Author: mateusz
  */
 
+#include "stdafx.h"
 #include "AuxStuff.h"
 
 AuxStuff::AuxStuff() {

@@ -250,6 +250,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="misc"
+				>
+				<File
+					RelativePath=".\misc\AuxStuff.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -392,6 +400,14 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="misc"
+				>
+				<File
+					RelativePath=".\misc\AuxStuff.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -445,6 +461,10 @@
 			<Filter
 				Name="config"
 				>
+				<File
+					RelativePath="..\shared\config\DefaultConfig.h"
+					>
+				</File>
 				<File
 					RelativePath="..\shared\config\Ver0Map.h"
 					>

@@ -148,8 +148,6 @@ bool Serial::init()
 
 void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 
-//	ssize_t transmissionResult;
-
 	DWORD numberOfBytesWritten;
 
 	// check if serial port is opened and configured

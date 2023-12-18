@@ -4,11 +4,16 @@
 #include <map>
 
 #include "ProtocolCommBackgroundThread_GetVersion.h"
+#include "ProtocolCommBackgroundThread_ReadDid.h"
+#include "ProtocolCommBackgroundThread_GetRunningConfig.h"
 
 #include "../serial/Serial.h"
 #include "../serial/SerialRxBackgroundThread.h"
 
 #include "../../shared/services/SrvGetVersionAndId.h"
+#include "../../shared/services/SrvGetRunningConfig.h"
+#include "../../shared/services/SrvReadDid.h"
+#include "../../shared/services/SrvSendStartupConfig.h"
 #include "../../shared/kiss_communication_service_ids.h"
 
 typedef std::map<uint8_t, IService*> CBKMAP;
@@ -42,9 +47,13 @@ private:
 
 	// services
 	SrvGetVersionAndId srvVersionAndId;
+	SrvReadDid srvReadDid;
+	SrvGetRunningConfig srvRunningConfig;
 
 	// services context classes
 	CTXPCBTVER srvVersionAndId_context;
+	CTXPCBTRDID srvReadDid_context;
+	CTXPCBTGRC srvGetRunningConfig_context;
 
 public:
 
@@ -60,9 +69,9 @@ public:
 	// updates Edit Controls on Main dialog and on Edit Codeplug
 	// dialog if it has been created. information returned by
 	// the controller are stored 
-	BOOL commVersionAndUpdateGui(HANDLE mainWindow, HANDLE editCodeplugWindow);
-	BOOL commReadDidAndUpdateGui(HANDLE mainWindow, HANDLE didWindow, int didNumber);
-	BOOL commRunningConfigAndUpdateGui(HANDLE mainWindow, HANDLE configWindow);
+	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
+	BOOL commReadDidAndUpdateGui(HWND mainWindow, HWND didWindow, int didNumber);
+	BOOL commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
 	BOOL getVersion(LPCSV p);
 
 	ProtocolCommBackgroundThread(void);
