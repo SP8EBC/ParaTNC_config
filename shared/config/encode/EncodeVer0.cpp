@@ -21,12 +21,18 @@ EncodeVer0::EncodeVer0() {
 
 	// prefill vector with dummy data
 	this->data.insert(this->data.begin(), CONFIG__END__OFFSET, 0xAA);
+
+	// set programming counter to initial value
+	data[CONFIG_MODE_PGM_CNTR] 		= 0;
+	data[CONFIG_MODE_PGM_CNTR + 1] 	= 0;
+	data[CONFIG_MODE_PGM_CNTR + 2] 	= 0;
+	data[CONFIG_MODE_PGM_CNTR + 3] 	= 0;
 }
 
 EncodeVer0::~EncodeVer0() {
 }
 
-void EncodeVer0::incrementProgrammingCounter() {
+uint32_t EncodeVer0::incrementProgrammingCounter() {
 	uint8_t lsb_byte = data.at(CONFIG_MODE_PGM_CNTR);
 	uint8_t nd_byte = data.at(CONFIG_MODE_PGM_CNTR + 1);
 	uint8_t rd_byte = data.at(CONFIG_MODE_PGM_CNTR + 2);
@@ -40,6 +46,8 @@ void EncodeVer0::incrementProgrammingCounter() {
 	data[CONFIG_MODE_PGM_CNTR + 1] 	= static_cast<uint8_t>((current_counter 	& 0x0000FF00u) >> 8);
 	data[CONFIG_MODE_PGM_CNTR + 2] 	= static_cast<uint8_t>((current_counter 	& 0x00FF0000u) >> 16);
 	data[CONFIG_MODE_PGM_CNTR + 3] 	= static_cast<uint8_t>((current_counter 	& 0xFF000000u) >> 24);
+
+	return current_counter;
 }
 
 void EncodeVer0::setEorW(bool _eOrW) {
@@ -105,6 +113,7 @@ void EncodeVer0::setGsmApnUsername(const std::string &username) {
 		const char * pStr = username.c_str();
 		char * pDestination = reinterpret_cast<char*>(&data.at(0)) + GSM_USERNAME_OFFSET + CONFIG_GSM_OFFSET;
 
+		memset(pDestination, 0x00, GSM_USERNAME_LEN);
 		strncpy(pDestination, pStr, username.length());
 	}
 	else {
@@ -659,5 +668,9 @@ void EncodeVer0::setGsmAprsisServerPort (uint16_t port) {
 }
 
 void EncodeVer0::setGsmAprsisPasscode	(uint32_t passcode) {
+	data[CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET] 		= static_cast<uint8_t>(passcode 	& 0x000000FFu);
+	data[CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET + 1] 	= static_cast<uint8_t>((passcode 	& 0x0000FF00u) >> 8);
+	data[CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET + 2] 	= static_cast<uint8_t>((passcode 	& 0x00FF0000u) >> 16);
+	data[CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET + 3] 	= static_cast<uint8_t>((passcode 	& 0xFF000000u) >> 24);
 
 }

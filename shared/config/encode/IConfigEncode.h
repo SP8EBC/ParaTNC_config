@@ -34,7 +34,7 @@ public:
 
 	virtual bool decodeToFile(std::string _fn) = 0;
 
-	virtual void incrementProgrammingCounter() = 0;
+	virtual uint32_t incrementProgrammingCounter() = 0;
 
 	virtual void setDigiEnabled(Digi _digi) = 0;
 	virtual void setVisvousDelayInSec(uint8_t _seconds) = 0;

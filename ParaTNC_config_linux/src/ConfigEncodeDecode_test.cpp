@@ -19,6 +19,7 @@
 
 #include "../shared/config/encode/EncodeVer0.h"
 #include "../shared/config/decode/DecodeVer0.h"
+#include "../shared/config/decode/ValidateVer0.h"
 
 #include "../shared/config/DefaultConfig.h"
 
@@ -100,7 +101,64 @@ BOOST_AUTO_TEST_CASE(defaults) {
 	BOOST_CHECK_EQUAL(decode.getBeaconTransmitPeriod(), DEFAULT_CONFIG_BEACON_PERIO);
 	BOOST_CHECK_EQUAL(decode.getWxDoubleTransmit(), DEFAULT_CONFIG_WX_DOUBLE_TX);
 
+	BOOST_CHECK_EQUAL(decode.getTemperatureSrc(), DEFAULT_CONFIG_SOURCE_TEMPERATURE);
+	BOOST_CHECK_EQUAL(decode.getPressureSrc(), DEFAULT_CONFIG_SOURCE_PRESSURE);
+	BOOST_CHECK_EQUAL(decode.getWindSrc(), DEFAULT_CONFIG_SOURCE_WIND);
+	BOOST_CHECK_EQUAL(decode.getHumiditySrc(), DEFAULT_CONFIG_SOURCE_HUMIDITY);
+
+	BOOST_CHECK_EQUAL(decode.getUmbSlaveClass(), DEFAULT_CONFIG_UMB_SLAVE_CLASS);
+	BOOST_CHECK_EQUAL(decode.getUmbSlaveId(), DEFAULT_CONFIG_UMB_SLAVE_ID);
+	BOOST_CHECK_EQUAL(decode.getUmbChannelWindspeed(), DEFAULT_CONFIG_UMB_CHANNEL_WINDSPEED);
+	BOOST_CHECK_EQUAL(decode.getUmbChannelWinggusts(), DEFAULT_CONFIG_UMB_CHANNEL_WINDGUSTS);
+	BOOST_CHECK_EQUAL(decode.getUmbChannelWinddirection(), DEFAULT_CONFIG_UMB_CHANNEL_WINDDIR);
+	BOOST_CHECK_EQUAL(decode.getUmbChannelTemperature(), DEFAULT_CONDIG_UMB_CHANNEL_TEMPERATURE);
+	BOOST_CHECK_EQUAL(decode.getUmbChannelQnh(), DEFAULT_CONFIG_UMB_CHANNEL_QNH);
+
+	BOOST_CHECK_EQUAL(decode.getRtuSlaveSpeed(), DEFAULT_CONFIG_RTU_SLAVE_SPEED);
+	BOOST_CHECK_EQUAL(decode.getRtuSlaveParity(), DEFAULT_CONFIG_RTU_SLAVE_PARITY);
+	BOOST_CHECK_EQUAL(decode.getRtuSlaveStopBits(), DEFAULT_CONFIG_RTU_STOP_BITS);
+	BOOST_CHECK_EQUAL(decode.getRtuFullWindData(), DEFAULT_CONFIG_RTU_FULL_WIND);
+	BOOST_CHECK_EQUAL(decode.getRtuConfiguredSourceWindspeed(), DEFAULT_CONFIG_RTU_SOURCE_WINDSPEED);
+	BOOST_CHECK_EQUAL(decode.getRtuConfiguredSourceWindgusts(), DEFAULT_CONFIG_RTU_SOURCE_WINDGUST);
+	BOOST_CHECK_EQUAL(decode.getRtuConfiguredSourceWinddirection(), DEFAULT_CONFIG_RTU_SOURCE_WINDDIR);
+	BOOST_CHECK_EQUAL(decode.getRtuConfiguredSourceTemperature(), DEFAULT_CONFIG_RTU_SOURCE_TEMP);
+	BOOST_CHECK_EQUAL(decode.getRtuConfiguredSourceQnh(), DEFAULT_CONFIG_RTU_SOURCE_PRESSURE);
+
+	BOOST_CHECK_EQUAL(decode.getGsmPin(), DEFAULT_CONFIG_GSM_PIN);
+	BOOST_CHECK_EQUAL(decode.getGsmApiEnable(), DEFAULT_CONFIG_GSM_API_ENABLE);
+	BOOST_CHECK_EQUAL(decode.getGsmAprsisEnable(), DEFAULT_CONFIG_APRSIS_ENABLE);
+	BOOST_CHECK_EQUAL(decode.getGsmAprsisServerPort(), DEFAULT_CONFIG_APRSIS_PORT);
+	BOOST_CHECK_EQUAL(decode.getGsmAprsisPasscode(), DEFAULT_CONFIG_APRSIS_PASSCODE);
+
+	std::string apn_name;
+	decode.getGsmApnName(apn_name);
+	BOOST_CHECK_EQUAL(apn_name, DEFAULT_CONFIG_GSM_APNNAME);
+
+	std::string apn_username;
+	decode.getGsmApnUsername(apn_username);
+	BOOST_CHECK_EQUAL(apn_username, DEFAULT_CONFIG_GSM_USERNAME);
+
+	std::string apn_password;
+	decode.getGsmApnPassword(apn_password);
+	BOOST_CHECK_EQUAL(apn_password, DEFAULT_CONFIG_GSM_PASSWORD);
+
+	std::string api_base_url;
+	decode.getGsmApiBaseUrl(api_base_url);
+	BOOST_CHECK_EQUAL(api_base_url, DEFAULT_CONFIG_GSM_API_BASEURL);
+
+	std::string aprsis_server;
+	decode.getGsmAprsisServer(aprsis_server);
+	BOOST_CHECK_EQUAL(aprsis_server, DEFAULT_CONFIG_APRSIS_SERVER);
 
 }
 
+BOOST_AUTO_TEST_CASE(validate_by_calculating_crc) {
+	EncodeVer0 encode;
+	encode.loadDefaults();
+	BOOST_CHECK_EQUAL(encode.incrementProgrammingCounter(), 2);
 
+	ValidateVer0 validate;
+	validate.calculateValidate(encode.getData());
+
+	BOOST_CHECK(validate.checkValidate(encode.getData()));
+}

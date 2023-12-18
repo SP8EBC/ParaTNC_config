@@ -25,7 +25,7 @@ public:
 
 	virtual bool decodeToFile(std::string _fn);
 
-	virtual void incrementProgrammingCounter();
+	virtual uint32_t incrementProgrammingCounter();
 
 	virtual void setEorW(bool _eOrW);
 	virtual void setRtuSlaveSpeed(uint16_t _slaveSpeedBps);
@@ -92,7 +92,7 @@ public:
 	virtual void setGsmAprsisServerPort (uint16_t port);
 	virtual void setGsmAprsisPasscode	(uint32_t passcode);
 
-	const std::vector<uint8_t>& getData() const {
+	std::vector<uint8_t>& getData() {
 		return data;
 	}
 };
