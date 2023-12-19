@@ -225,6 +225,10 @@
 			<Filter
 				Name="gui"
 				>
+				<File
+					RelativePath=".\gui\EditCodeplugDialog.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="files"
@@ -367,6 +371,10 @@
 			<Filter
 				Name="gui"
 				>
+				<File
+					RelativePath=".\gui\EditCodeplugDialog.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="files"

@@ -15,6 +15,9 @@ typedef struct {
 	IConfigDecode * configDecode;
 
 	SrvGetRunningConfig * getRunningConfig;
+	
+	uint32_t programmingCounterFromTnc; 
+
 }ProtocolCommBackgroundThread_GetRunningConfig_Context;
 
 typedef ProtocolCommBackgroundThread_GetRunningConfig_Context CTXPCBTGRC;

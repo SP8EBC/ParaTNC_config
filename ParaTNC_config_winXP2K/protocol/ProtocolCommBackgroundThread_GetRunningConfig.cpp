@@ -36,6 +36,8 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 			{
 				context->configDecode = new DecodeVer0(context->getRunningConfig->getConfigurationData());
 
+				context->programmingCounterFromTnc = context->configDecode->getProgrammingCounter();
+
 				std::string beaconDescription;
 				context->configDecode->getDescritpion(beaconDescription);
 

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "../shared/config/decode/DecodeVer0.h"
+
 ProtocolCommBackgroundThread::ProtocolCommBackgroundThread(void) : thread(0)
 {
 	// register all callbacks/handlers to supported protocol services
@@ -106,5 +108,28 @@ BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HWND mainWindow, HWND
 	
 BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow) {
 	
-	return true;
+	BOOL result = false;
+
+	DWORD threadId = 0;
+
+	this->srvGetRunningConfig_context.mutex = this->threadMutex;
+	this->srvGetRunningConfig_context.getRunningConfig = &this->srvRunningConfig;
+
+	thread = CreateThread(
+				NULL, 
+				NULL, 
+				ProtocolCommBackgroundThread_GetRunningConfig, 
+				&this->srvGetRunningConfig_context, 
+				NULL,
+				&threadId);
+
+	std::cout << "I = PCBT::commRunningConfigAndUpdateGui, " <<  
+		std::hex << ", threadId: 0x" << threadId << std::dec << std::endl;
+
+	if (thread != NULL)
+	{
+		result = true;
+	}
+
+	return result;
 }

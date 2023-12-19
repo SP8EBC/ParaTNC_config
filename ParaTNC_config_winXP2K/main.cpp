@@ -14,6 +14,8 @@
 
 #include "./protocol/ProtocolCommBackgroundThread.h"
 
+#include "./gui/EditCodeplugDialog.h"
+
 #define MAX_LOADSTRING 100
 
 class outbuf : public std::streambuf {
@@ -159,8 +161,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // Store instance handle in our global variable
 
-   //hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-   //   CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
    hWnd = CreateDialog(hInstance, MAKEINTRESOURCE(IDD_MAIN), 0, (DLGPROC)MainDialogProc);
 
    HANDLE hWndEdit = GetDlgItem(hWnd, IDC_EDIT_VERSION);
@@ -202,10 +202,10 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		// Parse the menu selections:
 		switch (wmId)
 		{
-		case IDC_START_SERIAL:
+		case IDC_BUTTON_START_SERIAL:
 			kissProtocolComm = new PCBT();
 			break;
-		case IDC_GET_VERSION:
+		case IDC_BUTTON_GET_VERSION:
 			kissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
 			//srvVersionAndId.sendRequest();
 			//serialThread->start();
@@ -218,8 +218,11 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				kissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
 			}
 			break;
-		case IDC_GET_RUNNING:
+		case IDC_BUTTON_GET_RUNNING:
 			kissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
+			break;
+		case IDC_BUTTON_EDIT_CODEPLUG_DATA:
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
@@ -255,6 +258,8 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	std::cout << "D = About, message: 0x" << std::hex << message << std::dec << std::endl;
+
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
 	{
