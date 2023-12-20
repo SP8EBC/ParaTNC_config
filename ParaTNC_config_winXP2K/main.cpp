@@ -193,6 +193,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	HDC hdc;
 	TCHAR did[6] = {0u};
 	int didNumber;
+	INT_PTR hEditCodeplugDialog = NULL;
 
 	switch (message)
 	{
@@ -222,7 +223,18 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			kissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
 			break;
 		case IDC_BUTTON_EDIT_CODEPLUG_DATA:
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
+			//hEditCodeplugDialog = CreateDialog(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, (DLGPROC)EditCodeplugDialog);
+			//if (hEditCodeplugDialog == NULL)
+			//{
+			//	std::cout << "E = " << GetLastError() << std::endl;
+			//}
+			//else {
+			//	ShowWindow(hEditCodeplugDialog, SW_SHOW);
+			//}
+			hEditCodeplugDialog = DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
+			if (hEditCodeplugDialog == -1) {
+				std::cout << "E = " << GetLastError() << std::endl;
+			}
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
