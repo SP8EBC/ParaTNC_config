@@ -6,88 +6,85 @@
 #include "commctrl.h"
 #include "Resource.h"
 
-WNDPROC		lpfnEditCodeplugSsidOldProc = NULL;
+WNDPROC		lpfnEditCodeplugSsidOldProc = NULL;	// original Window Proc function for SSID edit
+
+HWND		hEditCodeplugDlg = NULL;	// handle to this dialog window
+
+#define SSID_MIN		0
+#define SSID_MAX		15
 
 LRESULT CALLBACK	EditCodeplugDialogSsidProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam /*, 
 											   UINT_PTR uIdSubclass, DWORD_PTR dwRefData*/)
 {
+	LRESULT result = -1;
+	int number = -1;
+
+	// buffer to hold new keypress as an array od characters
+	CHAR typed[2] = {(char) wParam, 0x00};
+
+	// process only keystrokes with characters
     if(uMsg == WM_CHAR)
     {
-        if(0x8000 & GetKeyState(VK_CONTROL))
-        {
-            switch(wParam)
-            {
-                case 0x16: // ctrl-V
-                {
-                    //HandlePaste(hWnd);
-                    return 0;
-                }
-                break;
+		// special case for backspace
+		if (wParam == VK_BACK)
+		{
+			// allow backspace to go through
+			result = CallWindowProc(lpfnEditCodeplugSsidOldProc, hWnd, uMsg, wParam, lParam); 
+		}
+		else 
+		{
+			// process and allow only digits to be input
+			if (isdigit(wParam))
+			{
+				// get an integer from the edit content BEFORE this edit
+				number = GetDlgItemInt(hEditCodeplugDlg, IDC_EC_EDIT2, NULL, FALSE);
+				
+				// do not allow three and more digits numbers
+				if (number >= 10)
+				{
+					;
+				}
+				else
+				{
+					// if there is only one digit in the edit control, check if this one and 
+					// the new one do not extend over limit
+					if ( number == 1)
+					{
+						// convert new character into digit
+						int _new = atoi(typed);
 
-                case 0x03: // ctrl-C
-                case 0x18: // ctrl-X
-                {
-                    // allow through
-                }
-                break;
+						// check if new SSID will fit within limit
+						if (10 + _new <= SSID_MAX)
+						{
+							// if it is less or equal upper limit process message like normal
+							result = CallWindowProc(lpfnEditCodeplugSsidOldProc, hWnd, uMsg, wParam, lParam); 
+						}
+						else 
+						{
+							;	// if not ignore it
+						}
+					}
+					else
+					{
+						result = CallWindowProc(lpfnEditCodeplugSsidOldProc, hWnd, uMsg, wParam, lParam); 
+					}
+					
+				}
 
-                default:
-                {
-                    return 0;
-                }
-            }
-        }
-        else
-        {
-            // Only check non-digits
-            if(!isdigit(wParam))
-            {
-                switch(wParam)
-                {
-                    case _T('-'):
-                    {
-                        DWORD from = 0;
-                        DWORD to   = 0;
-                        SendMessage(hWnd, EM_GETSEL, (WPARAM)&from, (WPARAM)&to);
-                        if(0 == from)
-                        {
-                            // if to is greater than zero, we're replacing the 0th
-                            // char so we don't need to worry. If we're inserting
-                            // have to check the first char isn't already a -
-                            if(0 == to)
-                            {
-                                TCHAR buffer[2] = _T(""); // big enough for one char plus term null
-                                SendMessage(hWnd, WM_GETTEXT, (WPARAM)2, (WPARAM)buffer);
-                                if(buffer[0] == _T('-'))
-                                    return 0;
-                            }
-                            // allow through
-                        }
-                        else
-                        {
-                            return 0;
-                        }
-                    }
-                    break;
-
-                    case VK_BACK:
-                    {
-                        // allow backspace through
-                    }
-                    break;
-
-                    default:
-                    {
-                        // block everything else
-                        return 0;
-                    }
-                }
-            }
-        }
+				std::cout << "D = EditCodeplugDialogSsidProc, wParam: " << number << ", GetLastError: " << GetLastError() << std::endl;
+			}
+			else
+			{
+				;
+			}
+		}
     }
+	else
+	{
+		result = CallWindowProc(lpfnEditCodeplugSsidOldProc, hWnd, uMsg, wParam, lParam); 
+	}
 
-	return CallWindowProc(lpfnEditCodeplugSsidOldProc, hWnd, uMsg, wParam, lParam);
-	//return DefSubclassProc(hWnd, uMsg, wParam, lParam);
+	return result;
 }
 
 INT_PTR CALLBACK	EditCodeplugDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -101,6 +98,7 @@ INT_PTR CALLBACK	EditCodeplugDialog(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	switch (message)
 	{
 	case WM_INITDIALOG:
+		hEditCodeplugDlg = hDlg;
 		// get a handle to edit with SSID
 		hEditSsid = GetDlgItem(hDlg, IDC_EC_EDIT2);
 

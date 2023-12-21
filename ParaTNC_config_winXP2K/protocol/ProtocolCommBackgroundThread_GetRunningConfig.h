@@ -10,11 +10,11 @@ typedef struct {
 	// to sync serial KISS protocol communication and 
 	// elimiante a risk that two communication transactions
 	// will be started at one time
-	HANDLE mutex;
+	HANDLE hMutex;
 
-	IConfigDecode * configDecode;
+	IConfigDecode * lpcConfigDecode;
 
-	SrvGetRunningConfig * getRunningConfig;
+	SrvGetRunningConfig * lpcGetRunningConfig;
 	
 	uint32_t programmingCounterFromTnc; 
 

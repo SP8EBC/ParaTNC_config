@@ -32,15 +32,15 @@ class ProtocolCommBackgroundThread
 private:
 	// Serial port
 	SERIAL s;
-	LPSRBT serialThread;
+	LPSRBT lpcSerialThread;
 
 	// currently running thread
-	HANDLE thread;
+	HANDLE hThread;
 
 	// mutex synchronizing exclusive access to communication
-	HANDLE threadMutex;
+	HANDLE hThreadMutex;
 
-	HANDLE serviceSyncEvent;
+	HANDLE hServiceSyncEvent;
 
 	// map with service callbacks
 	CBKMAP callbackMap;

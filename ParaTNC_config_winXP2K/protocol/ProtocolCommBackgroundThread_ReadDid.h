@@ -9,12 +9,12 @@ typedef struct {
 	// to sync serial KISS protocol communication and 
 	// elimiante a risk that two communication transactions
 	// will be started at one time
-	HANDLE mutex;
+	HANDLE hMutex;
 
 	// DID number itself
 	int didNumber;
 
-	SrvReadDid * readDid;
+	SrvReadDid * lpcReadDid;
 }ProtocolCommBackgroundThread_ReadDid_Context;
 
 typedef ProtocolCommBackgroundThread_ReadDid_Context CTXPCBTRDID;

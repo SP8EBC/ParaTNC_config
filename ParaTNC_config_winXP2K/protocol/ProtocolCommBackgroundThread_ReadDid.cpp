@@ -14,10 +14,10 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 	if (param != NULL)
 	{
 		// cast thread entry parameter to context structure
-		LPCTXPCBTRDID context = static_cast<LPCTXPCBTRDID>(param);
+		LPCTXPCBTRDID lpcContext = static_cast<LPCTXPCBTRDID>(param);
 
 		// try to signalize the sync mutex
-		DWORD result = WaitForSingleObject(context->mutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
+		DWORD result = WaitForSingleObject(lpcContext->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
 		// check the result
 		if (result == WAIT_OBJECT_0) 
@@ -26,9 +26,9 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 				// if mutex is signalled to this thread and we are ready to go
 				std::cout << "I = ProtocolCommBackgroundThread_ReadDid, mutex signalled" << std::endl;
 				
-				context->readDid->sendRequestForDid((uint16_t)(context->didNumber & 0xFFFFU));
+				lpcContext->lpcReadDid->sendRequestForDid((uint16_t)(lpcContext->didNumber & 0xFFFFU));
 
-				context->readDid->receiveSynchronously();
+				lpcContext->lpcReadDid->receiveSynchronously();
 			}
 			catch (TimeoutE & ex)
 			{
@@ -48,7 +48,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 				//}
 			}
 
-			ReleaseMutex(context->mutex);
+			ReleaseMutex(lpcContext->hMutex);
 		}
 		else
 		{

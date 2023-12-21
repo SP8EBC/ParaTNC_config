@@ -8,25 +8,25 @@
  */
 typedef struct ProtocolCommBackgroundThread_GetVersion_Context {
 	// response from the controller
-	CSV srvVersionAndIdResult;
+	CSV versionAndIdResult;
 
 	// handle to main dialog which shall be updated
 	// after successfull communication with controller
-	HWND mainWindow;
+	HWND hMainWindow;
 	
 	// handle to main dialog which might be updated
 	// after successfull comm if this dialog is created
-	HWND editCodeplugWindow;
+	HWND hEditCodeplugWindow;
 
 	// mutex declared in 'ProtocolCommBackgroundThread' 
 	// to sync serial KISS protocol communication and 
 	// elimiante a risk that two communication transactions
 	// will be started at one time
-	HANDLE mutex;
+	HANDLE hMutex;
 
 	// pointer to a class instance, which is responsible for
 	// serial communication itself
-	SrvGetVersionAndId * getVersionAndId;
+	SrvGetVersionAndId * lpcGetVersionAndId;
 }ProtocolCommBackgroundThread_GetVersion_Context;
 
 typedef ProtocolCommBackgroundThread_GetVersion_Context CTXPCBTVER;

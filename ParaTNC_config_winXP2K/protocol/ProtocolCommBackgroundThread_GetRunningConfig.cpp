@@ -14,10 +14,10 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 	if (param != NULL)
 	{
 		// cast thread entry parameter to context structure
-		LPCTXPCBTGRC context = static_cast<LPCTXPCBTGRC>(param);
+		LPCTXPCBTGRC lpcContext = static_cast<LPCTXPCBTGRC>(param);
 
 		// try to signalize the sync mutex
-		DWORD result = WaitForSingleObject(context->mutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
+		DWORD result = WaitForSingleObject(lpcContext->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
 		// check the result
 		if (result == WAIT_OBJECT_0) 
@@ -26,23 +26,23 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 			std::cout << "I = ProtocolCommBackgroundThread_GetRunningConfig, mutex signalled" << std::endl;
 			
 			// send request to controller
-			context->getRunningConfig->sendRequest();
+			lpcContext->lpcGetRunningConfig->sendRequest();
 
 			// recieve a response from controller and use a callback internally here
-			context->getRunningConfig->receiveSynchronously();
+			lpcContext->lpcGetRunningConfig->receiveSynchronously();
 
 			// check if CRC checksum is correct
-			if (context->getRunningConfig->isValidatedOk()) 
+			if (lpcContext->lpcGetRunningConfig->isValidatedOk()) 
 			{
-				context->configDecode = new DecodeVer0(context->getRunningConfig->getConfigurationData());
+				lpcContext->lpcConfigDecode = new DecodeVer0(lpcContext->lpcGetRunningConfig->getConfigurationData());
 
-				context->programmingCounterFromTnc = context->configDecode->getProgrammingCounter();
+				lpcContext->programmingCounterFromTnc = lpcContext->lpcConfigDecode->getProgrammingCounter();
 
 				std::string beaconDescription;
-				context->configDecode->getDescritpion(beaconDescription);
+				lpcContext->lpcConfigDecode->getDescritpion(beaconDescription);
 
-				const float latitude = context->configDecode->getLatitude();
-				const float longitude = context->configDecode->getLongitude();
+				const float latitude = lpcContext->lpcConfigDecode->getLatitude();
+				const float longitude = lpcContext->lpcConfigDecode->getLongitude();
 
 				std::cout << "I = beaconDescription: " << beaconDescription << std::endl;
 				std::cout << "I = latitude: " << latitude << std::endl;

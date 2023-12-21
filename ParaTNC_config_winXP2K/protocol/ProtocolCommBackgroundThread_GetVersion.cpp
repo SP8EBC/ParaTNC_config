@@ -16,10 +16,10 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 		LPCTXPCBTVER context = static_cast<LPCTXPCBTVER>(param);
 
 		// check mandatory pointers, which must be set for this to work correctly
-		if ((context->mutex != NULL) && (context->getVersionAndId != NULL))
+		if ((context->hMutex != NULL) && (context->lpcGetVersionAndId != NULL))
 		{
 			// try to signalize the sync mutex
-			DWORD result = WaitForSingleObject(context->mutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
+			DWORD result = WaitForSingleObject(context->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
 			// check the result
 			if (result == WAIT_OBJECT_0) 
@@ -28,42 +28,42 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 				std::cout << "I = ProtocolCommBackgroundThread_GetVersion, mutex signalled" << std::cout;
 				
 				// send request to controller
-				context->getVersionAndId->sendRequest();
+				context->lpcGetVersionAndId->sendRequest();
 
-				context->getVersionAndId->receiveSynchronously();
+				context->lpcGetVersionAndId->receiveSynchronously();
 
 				//// kiss protocol version
-				context->srvVersionAndIdResult.kissVersion = context->getVersionAndId->getProtocolVersion();
+				context->versionAndIdResult.kissVersion = context->lpcGetVersionAndId->getProtocolVersion();
 				
 				//// software version 
-				const std::string softwareVersion = context->getVersionAndId->getSoftwareVersion();
+				const std::string softwareVersion = context->lpcGetVersionAndId->getSoftwareVersion();
 
 				// clear result structure before doing anything else
-				memset(context->srvVersionAndIdResult.softwareVersion, 0x00, 5 * sizeof(CHAR));
-				memset(context->srvVersionAndIdResult.softwareVersionW, 0x00, 5 * sizeof(WCHAR));
+				memset(context->versionAndIdResult.softwareVersion, 0x00, 5 * sizeof(CHAR));
+				memset(context->versionAndIdResult.softwareVersionW, 0x00, 5 * sizeof(WCHAR));
 
 				// copy result from string into array of chars
-				strncpy(context->srvVersionAndIdResult.softwareVersion, softwareVersion.c_str(), 5);
+				strncpy(context->versionAndIdResult.softwareVersion, softwareVersion.c_str(), 5);
 
 				// convert array od CHAR into array of WCHAR
 				mbstowcs(
-					context->srvVersionAndIdResult.softwareVersionW,
-					context->srvVersionAndIdResult.softwareVersion,
-					strlen(context->srvVersionAndIdResult.softwareVersion)
+					context->versionAndIdResult.softwareVersionW,
+					context->versionAndIdResult.softwareVersion,
+					strlen(context->versionAndIdResult.softwareVersion)
 					);
 
 				//// controller type. might be ParaMETEO or ParaTNC
-				const std::string boardType = context->getVersionAndId->getBoardType();
+				const std::string boardType = context->lpcGetVersionAndId->getBoardType();
 				if (boardType == "METEO") {
-					context->srvVersionAndIdResult.type = CONTROLLER_SOFTWARE_PARAMETEO;
+					context->versionAndIdResult.type = CONTROLLER_SOFTWARE_PARAMETEO;
 				}
 				else if (boardType == "TNC") {
-					context->srvVersionAndIdResult.type = CONTROLLER_SOFTWARE_PARATNC;
+					context->versionAndIdResult.type = CONTROLLER_SOFTWARE_PARATNC;
 				}
 
-				SetDlgItemText(context->mainWindow, IDC_EDIT_VERSION, context->srvVersionAndIdResult.softwareVersionW);
+				SetDlgItemText(context->hMainWindow, IDC_EDIT_VERSION, context->versionAndIdResult.softwareVersionW);
 
-				ReleaseMutex(context->mutex);
+				ReleaseMutex(context->hMutex);
 			}
 			else
 			{

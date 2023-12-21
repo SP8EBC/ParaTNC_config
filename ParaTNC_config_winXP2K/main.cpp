@@ -193,7 +193,6 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	HDC hdc;
 	TCHAR did[6] = {0u};
 	int didNumber;
-	INT_PTR hEditCodeplugDialog = NULL;
 
 	switch (message)
 	{
@@ -231,10 +230,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			//else {
 			//	ShowWindow(hEditCodeplugDialog, SW_SHOW);
 			//}
-			hEditCodeplugDialog = DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
-			if (hEditCodeplugDialog == -1) {
-				std::cout << "E = " << GetLastError() << std::endl;
-			}
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);
