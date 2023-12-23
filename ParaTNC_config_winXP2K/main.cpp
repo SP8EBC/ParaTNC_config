@@ -14,7 +14,7 @@
 
 #include "./protocol/ProtocolCommBackgroundThread.h"
 
-#include "./gui/EditCodeplugDialog.h"
+#include "./gui/EditCodeplugDialog_Basic.h"
 
 #define MAX_LOADSTRING 100
 
@@ -230,7 +230,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			//else {
 			//	ShowWindow(hEditCodeplugDialog, SW_SHOW);
 			//}
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, EditCodeplugDialog);
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG_BASIC), hWnd, EditCodeplugDialog_Basic);
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);

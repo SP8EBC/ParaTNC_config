@@ -226,7 +226,7 @@
 				Name="gui"
 				>
 				<File
-					RelativePath=".\gui\EditCodeplugDialog.cpp"
+					RelativePath=".\gui\EditCodeplugDialog_Basic.cpp"
 					>
 				</File>
 			</Filter>
@@ -372,7 +372,7 @@
 				Name="gui"
 				>
 				<File
-					RelativePath=".\gui\EditCodeplugDialog.h"
+					RelativePath=".\gui\EditCodeplugDialog_Basic.h"
 					>
 				</File>
 			</Filter>

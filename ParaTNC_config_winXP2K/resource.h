@@ -18,6 +18,7 @@
 #define IDD_DIALOG1                     129
 #define IDS_COMM_TIMEOUT_MESSAGE_GETVER 130
 #define IDD_EDIT_CODEPLUG               131
+#define IDD_EDIT_CODEPLUG_BASIC         131
 #define IDC_CHECK1                      1000
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON_START_SERIAL         1002
@@ -32,7 +33,23 @@
 #define IDC_EC_T_CALLSIGN               1010
 #define IDC_EC_T_SSID                   1011
 #define IDC_EC_SPIN_SSID                1013
-#define IDC_EC_EDIT2                    1014
+#define IDC_EC_EDIT_SSID                1014
+#define IDC_EC_EDIT_LATITUDE            1016
+#define IDC_EC_COMBO_NS                 1017
+#define IDC_EC_T_LATITUDE               1018
+#define IDC_EC_T_LONGITUDE              1019
+#define IDC_EC_EDIT_LONGITUDE           1020
+#define IDC_EC_COMBO_WE                 1021
+#define IDC_EC_COMBO_SYMBOL             1022
+#define IDC_EC_EDIT_DESCRIPTION         1023
+#define IDC_EC_COMBO_PATH               1024
+#define IDC_EC_CHECK_BCNSTARTUP         1025
+#define IDC_EC_CHECK_DOUBLEWX           1026
+#define IDC_EC_T_DESCR                  1027
+#define IDC_SLIDER1                     1028
+#define IDC_EC_SLIDER_INTERVAL_WX       1028
+#define IDC_EC_T_PATHTYPE               1029
+#define IDC_EC_T_PERIOD_WX              1030
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -42,7 +59,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        132
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
