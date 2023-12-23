@@ -14,10 +14,20 @@ HWND		hEditCodeplugDialog_Basic_ComboNS		= NULL;
 HWND		hEditCodeplugDialog_Basic_ComboWE		= NULL;
 HWND		hEditCodeplugDialog_Basic_ComboSymbol	= NULL;
 
-HWND		hEditCodeplugDialog_Basic_SliderWxInterval	= NULL;
+HWND		hEditCodeplugDialog_Basic_SliderWxInterval		= NULL;
+HWND		hEditCodeplugDialog_Basic_LabelWxInterval		= NULL;
+HWND		hEditCodeplugDialog_Basic_SliderBeaconInterval	= NULL;
 
 #define SSID_MIN		0
 #define SSID_MAX		15
+
+#define WX_INTERVAL_MIN		4
+#define WX_INTERVAL_MAX		10
+#define WX_INTERVAL_DEF		5
+
+#define BEACON_INTERVAL_MIN	2	// 10 minutes
+#define BEACON_INTERVAL_MAX	10	// 50 minutes
+#define BEACON_INTERVAL_DEF	5	// 25 minutes
 
 const static TCHAR szN[2] = {L'N', 0};
 const static TCHAR szS[2] = {L'S', 0};
@@ -37,7 +47,17 @@ static LPCWSTR szPATHWIDE1		= L"WIDE1-1\0";
 static LPCWSTR szPATHWIDE21		= L"WIDE2-1\0";
 static LPCWSTR szPATHWIDE22		= L"WIDE2-2\0";
 
-LRESULT CALLBACK	EditCodeplugDialogSsidProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static void EditCodeplugDialog_Basic_SetSliderLabel(int label, LRESULT value)
+{
+	TCHAR buffer[9];
+	memset(buffer, 0x00, 0x9 * sizeof(TCHAR));
+
+	_snwprintf(buffer, 0x9, L"%d min", value);
+
+	SetDlgItemText(hEditCodeplugDialog_Basic, label, buffer);
+}
+
+LRESULT CALLBACK	EditCodeplugDialog_Basic_SsidProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT result = -1;
 	int number = -1;
@@ -124,10 +144,9 @@ LRESULT CALLBACK	EditCodeplugDialogSsidProc(HWND hWnd, UINT uMsg, WPARAM wParam,
 
 INT_PTR CALLBACK	EditCodeplugDialog_Basic(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	std::cout << "D = EditCodeplugDialog_Basic, message: 0x" << std::hex << message << std::dec << std::endl;
-
 	HWND		hEditSsid	= NULL;
-
+	LRESULT wxIntervalPosition = -1;
+	LRESULT beaconIntervalPosition = -1;
 
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
@@ -141,6 +160,7 @@ INT_PTR CALLBACK	EditCodeplugDialog_Basic(HWND hDlg, UINT message, WPARAM wParam
 		hEditCodeplugDialog_Basic_ComboWE = GetDlgItem(hDlg, IDC_EC_COMBO_WE);
 		hEditCodeplugDialog_Basic_ComboSymbol = GetDlgItem(hDlg, IDC_EC_COMBO_SYMBOL);
 		hEditCodeplugDialog_Basic_SliderWxInterval = GetDlgItem(hDlg, IDC_EC_SLIDER_INTERVAL_WX);
+		hEditCodeplugDialog_Basic_SliderBeaconInterval = GetDlgItem(hDlg, IDC_EC_SLIDER_INTERVAL_BEACON);
 
 		// add entries to North/South combo box
 		SendMessage(hEditCodeplugDialog_Basic_ComboNS, CB_ADDSTRING, 0, (LPARAM)szN);
@@ -159,9 +179,18 @@ INT_PTR CALLBACK	EditCodeplugDialog_Basic(HWND hDlg, UINT message, WPARAM wParam
 		SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_ADDSTRING, 0, (LPARAM)szRXIGATE);
 
 		// set range for weather interval slider
-//		SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(4, 10));
+		SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(WX_INTERVAL_MIN, WX_INTERVAL_MAX));
+        SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)WX_INTERVAL_DEF);
+		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_WX, WX_INTERVAL_DEF);
 
-		lpfnEditCodeplugDialog_Basic_SsidOldProc = (WNDPROC)SetWindowLongPtr(hEditSsid, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialogSsidProc);
+		// set range for beacon interval
+		SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(BEACON_INTERVAL_MIN, BEACON_INTERVAL_MAX));
+        SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)BEACON_INTERVAL_DEF);
+		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_BEACON, BEACON_INTERVAL_DEF);
+
+
+		lpfnEditCodeplugDialog_Basic_SsidOldProc = (WNDPROC)SetWindowLongPtr(hEditSsid, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialog_Basic_SsidProc);
+		
 		return (INT_PTR)TRUE;
 
 	case WM_COMMAND:
@@ -170,6 +199,16 @@ INT_PTR CALLBACK	EditCodeplugDialog_Basic(HWND hDlg, UINT message, WPARAM wParam
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
+		break;
+	case WM_HSCROLL:
+		wxIntervalPosition = SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_GETPOS, 0, 0);
+		beaconIntervalPosition = SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_GETPOS, 0, 0);
+
+		beaconIntervalPosition *= (LRESULT)5;
+
+		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_WX, wxIntervalPosition);
+		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_BEACON, beaconIntervalPosition);
+		std::cout << "D = EditCodeplugDialog_Basic, WM_HSCROLL, slider wx position: " << wxIntervalPosition << std::endl;
 		break;
 	case WM_DESTROY:
 		SetWindowLongPtr(hEditSsid, GWLP_WNDPROC, (LONG_PTR)lpfnEditCodeplugDialog_Basic_SsidOldProc);

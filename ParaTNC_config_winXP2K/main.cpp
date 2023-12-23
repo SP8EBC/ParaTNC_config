@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "main.h"
-
+#include "commctrl.h"
 
 #include <iostream>
 #include <fstream>
@@ -80,6 +80,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
 	LoadString(hInstance, IDC_PARATNC_CONFIG_VS2005, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
+
+	InitCommonControls();
 
 	// Perform application initialization:
 	if (!InitInstance (hInstance, nCmdShow))
