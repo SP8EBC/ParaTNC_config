@@ -170,8 +170,6 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 	SYSTEMTIME receivingStart, currentTime;
 
-	DWORD eventMask;
-
 	ReceivingState receivingState = RX_ST_WAITING_FOR_FEND;
 
 	if (serialState == SERIAL_NOT_CONFIGURED) {

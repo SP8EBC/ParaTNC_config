@@ -36,11 +36,15 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HWND hWnd;
 
 // KISS protocol communication handler
-LPPCBT kissProtocolComm;
+LPPCBT lpsKissProtocolComm;
 
 // 
 TCHAR szEditVersionText[64];
 LPCTSTR szText = L"1234test";
+
+// locales to be used for function operating on strings and characters
+_locale_t localeEnglish;
+std::locale cLocaleEnglish( "English_US" );
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -74,7 +78,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	printf("dupa\r\n");
 	std::cout << "dupa druga" << std::endl;
 
-	//callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvVersionAndId));
+	localeEnglish = _create_locale(LC_ALL, "English");
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -205,10 +209,10 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		switch (wmId)
 		{
 		case IDC_BUTTON_START_SERIAL:
-			kissProtocolComm = new PCBT();
+			lpsKissProtocolComm = new PCBT();
 			break;
 		case IDC_BUTTON_GET_VERSION:
-			kissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
+			lpsKissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
 			//srvVersionAndId.sendRequest();
 			//serialThread->start();
 			break;
@@ -217,11 +221,11 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			didNumber = _wcstoi64(did, NULL, 16);
 			if (didNumber > 0x0 && didNumber < 0xFFFF) 
 			{
-				kissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
+				lpsKissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
 			}
 			break;
 		case IDC_BUTTON_GET_RUNNING:
-			kissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
+			lpsKissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
 			break;
 		case IDC_BUTTON_EDIT_CODEPLUG_DATA:
 			//hEditCodeplugDialog = CreateDialog(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, (DLGPROC)EditCodeplugDialog);
