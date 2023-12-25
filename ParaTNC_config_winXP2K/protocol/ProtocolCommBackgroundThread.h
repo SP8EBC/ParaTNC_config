@@ -71,7 +71,9 @@ public:
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
 	BOOL commReadDidAndUpdateGui(HWND mainWindow, HWND didWindow, int didNumber);
-	BOOL commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
+	BOOL commRunningConfigAndUpdateGui(VOID(*lpfnNewConfigCallback)(VOID),
+										std::vector<uint8_t> * lpvOutConfigData);
+	
 	BOOL getVersion(LPCSV p);
 
 	ProtocolCommBackgroundThread(void);

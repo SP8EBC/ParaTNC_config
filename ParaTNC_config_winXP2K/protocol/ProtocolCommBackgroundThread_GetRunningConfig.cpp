@@ -34,9 +34,29 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 			// check if CRC checksum is correct
 			if (lpcContext->lpcGetRunningConfig->isValidatedOk()) 
 			{
-				lpcContext->lpcConfigDecode = new DecodeVer0(lpcContext->lpcGetRunningConfig->getConfigurationData());
+				// make a reference to data received from the controller
+				const std::vector<uint8_t>& dataFromTnc = lpcContext->lpcGetRunningConfig->getConfigurationData();
 
+				// create decode class and put a data received from controller there
+				lpcContext->lpcConfigDecode = new DecodeVer0(dataFromTnc);
+
+				// store programming cointer of current running config in the controller
 				lpcContext->programmingCounterFromTnc = lpcContext->lpcConfigDecode->getProgrammingCounter();
+
+				// erase all previous content of the vector with config edited by a user
+				lpcContext->lpvEditConfig->clear();
+
+				// copy content received from the controller into application global 
+				lpcContext->lpvEditConfig->insert(
+								lpcContext->lpvEditConfig->begin(),
+								dataFromTnc.begin(),
+								dataFromTnc.end());
+										
+				// execute callback if it is set
+				if (lpcContext->lpfnEditConfigUpdateCallback != NULL)
+				{
+					lpcContext->lpfnEditConfigUpdateCallback();
+				}
 
 				std::string beaconDescription;
 				lpcContext->lpcConfigDecode->getDescritpion(beaconDescription);

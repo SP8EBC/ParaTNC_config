@@ -106,7 +106,10 @@ BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HWND mainWindow, HWND
 	return result;
 }
 	
-BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow) {
+BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(
+										VOID(*lpfnNewConfigCallback)(VOID),
+										std::vector<uint8_t> * lpvOutConfigData) 
+{
 	
 	BOOL result = false;
 
@@ -114,6 +117,8 @@ BOOL ProtocolCommBackgroundThread::commRunningConfigAndUpdateGui(HWND mainWindow
 
 	this->srvGetRunningConfig_context.hMutex = this->hThreadMutex;
 	this->srvGetRunningConfig_context.lpcGetRunningConfig = &this->srvRunningConfig;
+	this->srvGetRunningConfig_context.lpvEditConfig = lpvOutConfigData;
+	this->srvGetRunningConfig_context.lpfnEditConfigUpdateCallback = lpfnNewConfigCallback;
 
 	hThread = CreateThread(
 				NULL, 

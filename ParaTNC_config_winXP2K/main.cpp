@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "main.h"
+#include "codeplug.h"
 #include "commctrl.h"
 
 #include <iostream>
@@ -225,7 +226,7 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			}
 			break;
 		case IDC_BUTTON_GET_RUNNING:
-			lpsKissProtocolComm->commRunningConfigAndUpdateGui(NULL, NULL);
+			lpsKissProtocolComm->commRunningConfigAndUpdateGui(NULL, &vCodeplug_EditedConfig);
 			break;
 		case IDC_BUTTON_EDIT_CODEPLUG_DATA:
 			//hEditCodeplugDialog = CreateDialog(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, (DLGPROC)EditCodeplugDialog);
