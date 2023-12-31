@@ -15,7 +15,9 @@
 #include <string.h>
 #include <stdexcept>
 
-EncodeVer0::EncodeVer0() {
+EncodeVer0::EncodeVer0(std::vector<uint8_t> & in ) : data(in){
+
+	//this->data = std::vector<uint8_t>();
 
 	this->data.reserve(CONFIG__END__OFFSET - 1);
 

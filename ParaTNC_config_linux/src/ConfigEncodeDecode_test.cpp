@@ -43,20 +43,23 @@ BOOST_GLOBAL_FIXTURE (MyConfig);
 
 BOOST_AUTO_TEST_CASE(beacon_description) {
 
+	std::vector<uint8_t> data;
+
 	std::string test("test123");
 	std::string test_output;
 
-	EncodeVer0 encode;
+	EncodeVer0 encode(data);
 	encode.setDescritpion(test);
 
-	DecodeVer0 decode(encode.getData());
+	DecodeVer0 decode(data);
 	decode.getDescritpion(test_output);
 
 	BOOST_CHECK_EQUAL(test_output, test);
 }
 
 BOOST_AUTO_TEST_CASE(symbols) {
-	EncodeVer0 encode;
+	std::vector<uint8_t> data;
+	EncodeVer0 encode(data);
 
 	encode.setSymbol(SYMBOL_HOUSE);
 	DecodeVer0 decode(encode.getData());
@@ -76,10 +79,12 @@ BOOST_AUTO_TEST_CASE(symbols) {
 }
 
 BOOST_AUTO_TEST_CASE(defaults) {
-	EncodeVer0 encode;
+	std::vector<uint8_t> data;
+	EncodeVer0 encode(data);
+
 	encode.loadDefaults();
 
-	DecodeVer0 decode(encode.getData());
+	DecodeVer0 decode(data);
 
 	std::string description;
 	decode.getDescritpion(description);
@@ -153,7 +158,9 @@ BOOST_AUTO_TEST_CASE(defaults) {
 }
 
 BOOST_AUTO_TEST_CASE(validate_by_calculating_crc) {
-	EncodeVer0 encode;
+	std::vector<uint8_t> data;
+	EncodeVer0 encode(data);
+
 	encode.loadDefaults();
 	BOOST_CHECK_EQUAL(encode.incrementProgrammingCounter(), 2);
 

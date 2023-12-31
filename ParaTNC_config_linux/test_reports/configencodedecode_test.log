@@ -1,61 +1,61 @@
 Running 4 test cases...
 Entering test module "DECODEENCODE"
 ../src/ConfigEncodeDecode_test.cpp(44): Entering test case "beacon_description"
-../src/ConfigEncodeDecode_test.cpp(55): info: check test_output == test has passed
-../src/ConfigEncodeDecode_test.cpp(44): Leaving test case "beacon_description"; testing time: 83us
-../src/ConfigEncodeDecode_test.cpp(58): Entering test case "symbols"
-../src/ConfigEncodeDecode_test.cpp(63): info: check decode.getSymbol() == SYMBOL_HOUSE has passed
-../src/ConfigEncodeDecode_test.cpp(67): info: check decode2.getSymbol() == SYMBOL_IGATE has passed
-../src/ConfigEncodeDecode_test.cpp(71): info: check decode3.getSymbol() == SYMBOL_RXIGATE has passed
-../src/ConfigEncodeDecode_test.cpp(75): info: check decode4.getSymbol() == SYMBOL_SAILBOAT has passed
-../src/ConfigEncodeDecode_test.cpp(58): Leaving test case "symbols"; testing time: 79us
-../src/ConfigEncodeDecode_test.cpp(78): Entering test case "defaults"
-../src/ConfigEncodeDecode_test.cpp(86): info: check description == "update this text" has passed
-../src/ConfigEncodeDecode_test.cpp(90): info: check call == "N0CALL" has passed
-../src/ConfigEncodeDecode_test.cpp(92): info: check decode.getLatitude() == 50.000f has passed
-../src/ConfigEncodeDecode_test.cpp(93): info: check decode.getLongitude() == 19.0000f has passed
-../src/ConfigEncodeDecode_test.cpp(94): info: check decode.getSsid() == 0 has passed
-../src/ConfigEncodeDecode_test.cpp(95): info: check decode.getNorS() == false has passed
-../src/ConfigEncodeDecode_test.cpp(96): info: check decode.getEorW() == false has passed
-../src/ConfigEncodeDecode_test.cpp(97): info: check decode.getSymbol() == SYMBOL_WIDE1_DIGI has passed
-../src/ConfigEncodeDecode_test.cpp(98): info: check decode.getPath() == PATH_WIDE21 has passed
-../src/ConfigEncodeDecode_test.cpp(99): info: check decode.getBeaconAtStartup() == false has passed
-../src/ConfigEncodeDecode_test.cpp(100): info: check decode.getWxTransmitPeriod() == 5 has passed
-../src/ConfigEncodeDecode_test.cpp(101): info: check decode.getBeaconTransmitPeriod() == 67 has passed
-../src/ConfigEncodeDecode_test.cpp(102): info: check decode.getWxDoubleTransmit() == false has passed
-../src/ConfigEncodeDecode_test.cpp(104): info: check decode.getTemperatureSrc() == WX_SOURCE_INTERNAL has passed
-../src/ConfigEncodeDecode_test.cpp(105): info: check decode.getPressureSrc() == WX_SOURCE_INTERNAL has passed
-../src/ConfigEncodeDecode_test.cpp(106): info: check decode.getWindSrc() == WX_SOURCE_INTERNAL has passed
-../src/ConfigEncodeDecode_test.cpp(107): info: check decode.getHumiditySrc() == WX_SOURCE_INTERNAL has passed
-../src/ConfigEncodeDecode_test.cpp(109): info: check decode.getUmbSlaveClass() == 0 has passed
-../src/ConfigEncodeDecode_test.cpp(110): info: check decode.getUmbSlaveId() == 0 has passed
-../src/ConfigEncodeDecode_test.cpp(111): info: check decode.getUmbChannelWindspeed() == 100 has passed
-../src/ConfigEncodeDecode_test.cpp(112): info: check decode.getUmbChannelWinggusts() == 100 has passed
-../src/ConfigEncodeDecode_test.cpp(113): info: check decode.getUmbChannelWinddirection() == 100 has passed
-../src/ConfigEncodeDecode_test.cpp(114): info: check decode.getUmbChannelTemperature() == 100 has passed
-../src/ConfigEncodeDecode_test.cpp(115): info: check decode.getUmbChannelQnh() == 100 has passed
-../src/ConfigEncodeDecode_test.cpp(117): info: check decode.getRtuSlaveSpeed() == 9600u has passed
-../src/ConfigEncodeDecode_test.cpp(118): info: check decode.getRtuSlaveParity() == 0 has passed
-../src/ConfigEncodeDecode_test.cpp(119): info: check decode.getRtuSlaveStopBits() == 2 has passed
-../src/ConfigEncodeDecode_test.cpp(120): info: check decode.getRtuFullWindData() == false has passed
-../src/ConfigEncodeDecode_test.cpp(121): info: check decode.getRtuConfiguredSourceWindspeed() == 4 has passed
-../src/ConfigEncodeDecode_test.cpp(122): info: check decode.getRtuConfiguredSourceWindgusts() == 5 has passed
-../src/ConfigEncodeDecode_test.cpp(123): info: check decode.getRtuConfiguredSourceWinddirection() == 6 has passed
-../src/ConfigEncodeDecode_test.cpp(124): info: check decode.getRtuConfiguredSourceTemperature() == 1 has passed
-../src/ConfigEncodeDecode_test.cpp(125): info: check decode.getRtuConfiguredSourceQnh() == 3 has passed
-../src/ConfigEncodeDecode_test.cpp(127): info: check decode.getGsmPin() == 1234 has passed
-../src/ConfigEncodeDecode_test.cpp(128): info: check decode.getGsmApiEnable() == false has passed
-../src/ConfigEncodeDecode_test.cpp(129): info: check decode.getGsmAprsisEnable() == true has passed
-../src/ConfigEncodeDecode_test.cpp(130): info: check decode.getGsmAprsisServerPort() == 14580 has passed
-../src/ConfigEncodeDecode_test.cpp(131): info: check decode.getGsmAprsisPasscode() == 16823 has passed
-../src/ConfigEncodeDecode_test.cpp(135): info: check apn_name == "internet" has passed
-../src/ConfigEncodeDecode_test.cpp(139): info: check apn_username == "username" has passed
-../src/ConfigEncodeDecode_test.cpp(143): info: check apn_password == "password" has passed
-../src/ConfigEncodeDecode_test.cpp(147): info: check api_base_url == "http://78.88.56.14:8080/" has passed
-../src/ConfigEncodeDecode_test.cpp(151): info: check aprsis_server == "euro.aprs2.net" has passed
-../src/ConfigEncodeDecode_test.cpp(78): Leaving test case "defaults"; testing time: 186us
-../src/ConfigEncodeDecode_test.cpp(155): Entering test case "validate_by_calculating_crc"
-../src/ConfigEncodeDecode_test.cpp(158): info: check encode.incrementProgrammingCounter() == 2 has passed
-../src/ConfigEncodeDecode_test.cpp(163): info: check validate.checkValidate(encode.getData()) has passed
-../src/ConfigEncodeDecode_test.cpp(155): Leaving test case "validate_by_calculating_crc"; testing time: 178us
-Leaving test module "DECODEENCODE"; testing time: 552us
+../src/ConfigEncodeDecode_test.cpp(57): info: check test_output == test has passed
+../src/ConfigEncodeDecode_test.cpp(44): Leaving test case "beacon_description"; testing time: 101us
+../src/ConfigEncodeDecode_test.cpp(60): Entering test case "symbols"
+../src/ConfigEncodeDecode_test.cpp(66): info: check decode.getSymbol() == SYMBOL_HOUSE has passed
+../src/ConfigEncodeDecode_test.cpp(70): info: check decode2.getSymbol() == SYMBOL_IGATE has passed
+../src/ConfigEncodeDecode_test.cpp(74): info: check decode3.getSymbol() == SYMBOL_RXIGATE has passed
+../src/ConfigEncodeDecode_test.cpp(78): info: check decode4.getSymbol() == SYMBOL_SAILBOAT has passed
+../src/ConfigEncodeDecode_test.cpp(60): Leaving test case "symbols"; testing time: 94us
+../src/ConfigEncodeDecode_test.cpp(81): Entering test case "defaults"
+../src/ConfigEncodeDecode_test.cpp(91): info: check description == "update this text" has passed
+../src/ConfigEncodeDecode_test.cpp(95): info: check call == "N0CALL" has passed
+../src/ConfigEncodeDecode_test.cpp(97): info: check decode.getLatitude() == 50.000f has passed
+../src/ConfigEncodeDecode_test.cpp(98): info: check decode.getLongitude() == 19.0000f has passed
+../src/ConfigEncodeDecode_test.cpp(99): info: check decode.getSsid() == 0 has passed
+../src/ConfigEncodeDecode_test.cpp(100): info: check decode.getNorS() == false has passed
+../src/ConfigEncodeDecode_test.cpp(101): info: check decode.getEorW() == false has passed
+../src/ConfigEncodeDecode_test.cpp(102): info: check decode.getSymbol() == SYMBOL_WIDE1_DIGI has passed
+../src/ConfigEncodeDecode_test.cpp(103): info: check decode.getPath() == PATH_WIDE21 has passed
+../src/ConfigEncodeDecode_test.cpp(104): info: check decode.getBeaconAtStartup() == false has passed
+../src/ConfigEncodeDecode_test.cpp(105): info: check decode.getWxTransmitPeriod() == 5 has passed
+../src/ConfigEncodeDecode_test.cpp(106): info: check decode.getBeaconTransmitPeriod() == 67 has passed
+../src/ConfigEncodeDecode_test.cpp(107): info: check decode.getWxDoubleTransmit() == false has passed
+../src/ConfigEncodeDecode_test.cpp(109): info: check decode.getTemperatureSrc() == WX_SOURCE_INTERNAL has passed
+../src/ConfigEncodeDecode_test.cpp(110): info: check decode.getPressureSrc() == WX_SOURCE_INTERNAL has passed
+../src/ConfigEncodeDecode_test.cpp(111): info: check decode.getWindSrc() == WX_SOURCE_INTERNAL has passed
+../src/ConfigEncodeDecode_test.cpp(112): info: check decode.getHumiditySrc() == WX_SOURCE_INTERNAL has passed
+../src/ConfigEncodeDecode_test.cpp(114): info: check decode.getUmbSlaveClass() == 0 has passed
+../src/ConfigEncodeDecode_test.cpp(115): info: check decode.getUmbSlaveId() == 0 has passed
+../src/ConfigEncodeDecode_test.cpp(116): info: check decode.getUmbChannelWindspeed() == 100 has passed
+../src/ConfigEncodeDecode_test.cpp(117): info: check decode.getUmbChannelWinggusts() == 100 has passed
+../src/ConfigEncodeDecode_test.cpp(118): info: check decode.getUmbChannelWinddirection() == 100 has passed
+../src/ConfigEncodeDecode_test.cpp(119): info: check decode.getUmbChannelTemperature() == 100 has passed
+../src/ConfigEncodeDecode_test.cpp(120): info: check decode.getUmbChannelQnh() == 100 has passed
+../src/ConfigEncodeDecode_test.cpp(122): info: check decode.getRtuSlaveSpeed() == 9600u has passed
+../src/ConfigEncodeDecode_test.cpp(123): info: check decode.getRtuSlaveParity() == 0 has passed
+../src/ConfigEncodeDecode_test.cpp(124): info: check decode.getRtuSlaveStopBits() == 2 has passed
+../src/ConfigEncodeDecode_test.cpp(125): info: check decode.getRtuFullWindData() == false has passed
+../src/ConfigEncodeDecode_test.cpp(126): info: check decode.getRtuConfiguredSourceWindspeed() == 4 has passed
+../src/ConfigEncodeDecode_test.cpp(127): info: check decode.getRtuConfiguredSourceWindgusts() == 5 has passed
+../src/ConfigEncodeDecode_test.cpp(128): info: check decode.getRtuConfiguredSourceWinddirection() == 6 has passed
+../src/ConfigEncodeDecode_test.cpp(129): info: check decode.getRtuConfiguredSourceTemperature() == 1 has passed
+../src/ConfigEncodeDecode_test.cpp(130): info: check decode.getRtuConfiguredSourceQnh() == 3 has passed
+../src/ConfigEncodeDecode_test.cpp(132): info: check decode.getGsmPin() == 1234 has passed
+../src/ConfigEncodeDecode_test.cpp(133): info: check decode.getGsmApiEnable() == false has passed
+../src/ConfigEncodeDecode_test.cpp(134): info: check decode.getGsmAprsisEnable() == true has passed
+../src/ConfigEncodeDecode_test.cpp(135): info: check decode.getGsmAprsisServerPort() == 14580 has passed
+../src/ConfigEncodeDecode_test.cpp(136): info: check decode.getGsmAprsisPasscode() == 16823 has passed
+../src/ConfigEncodeDecode_test.cpp(140): info: check apn_name == "internet" has passed
+../src/ConfigEncodeDecode_test.cpp(144): info: check apn_username == "username" has passed
+../src/ConfigEncodeDecode_test.cpp(148): info: check apn_password == "password" has passed
+../src/ConfigEncodeDecode_test.cpp(152): info: check api_base_url == "http://78.88.56.14:8080/" has passed
+../src/ConfigEncodeDecode_test.cpp(156): info: check aprsis_server == "euro.aprs2.net" has passed
+../src/ConfigEncodeDecode_test.cpp(81): Leaving test case "defaults"; testing time: 209us
+../src/ConfigEncodeDecode_test.cpp(160): Entering test case "validate_by_calculating_crc"
+../src/ConfigEncodeDecode_test.cpp(165): info: check encode.incrementProgrammingCounter() == 2 has passed
+../src/ConfigEncodeDecode_test.cpp(170): info: check validate.checkValidate(encode.getData()) has passed
+../src/ConfigEncodeDecode_test.cpp(160): Leaving test case "validate_by_calculating_crc"; testing time: 217us
+Leaving test module "DECODEENCODE"; testing time: 652us

@@ -17,10 +17,10 @@ class EncodeVer0: public IConfigEcode {
 	/**
 	 * Configuration data to send to the controller
 	 */
-	std::vector<uint8_t> data;
+	std::vector<uint8_t> & data;
 
 public:
-	EncodeVer0();
+	EncodeVer0(std::vector<uint8_t> & in);
 	virtual ~EncodeVer0();
 
 	virtual bool decodeToFile(std::string _fn);
