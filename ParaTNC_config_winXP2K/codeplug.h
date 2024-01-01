@@ -7,3 +7,9 @@
 
 extern std::vector<uint8_t> vCodeplug_EditedConfig;
 
+extern IConfigDecode * lpcCodeplug_ConfigDecode;
+extern IConfigEcode * lpcCodeplug_ConfigEncode;
+
+void Codeplug_NewDataCallback();
+bool Codeplug_CheckIsLoaded(HWND hParentWnd);
+

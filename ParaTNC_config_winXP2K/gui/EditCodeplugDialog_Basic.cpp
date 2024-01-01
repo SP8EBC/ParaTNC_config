@@ -1,12 +1,13 @@
 #include "stdafx.h"
 #include "EditCodeplugDialog_Basic.h"
+#include "codeplug.h"
+#include "main.h"
+#include "Resource.h"
+
 #include <iostream>
 #include <iomanip>
 
 #include "commctrl.h"
-
-#include "Resource.h"
-#include "main.h"
 
 WNDPROC		lpfnEditCodeplugDialog_Basic_SsidOldProc = NULL;	// original Window Proc function for SSID edit
 WNDPROC		lpfnEditCodeplugDialog_Basic_CallsignOldProc = NULL;
@@ -75,6 +76,85 @@ static void EditCodeplugDialog_Basic_SetSliderLabel(int label, LRESULT value)
 	_snwprintf(buffer, 0x9, L"%d min", value);
 
 	SetDlgItemText(hEditCodeplugDialog_Basic, label, buffer);
+}
+
+//
+//  FUNCTION: EditCodeplugDialog_Basic_Load()
+//
+//
+//
+static void EditCodeplugDialog_Basic_Load() 
+{
+	// get all data from codeplug
+	uint8_t beacon_interval = lpcCodeplug_ConfigDecode->getBeaconTransmitPeriod();
+	uint8_t wx_interval = lpcCodeplug_ConfigDecode->getWxTransmitPeriod();
+	uint8_t ssid = lpcCodeplug_ConfigDecode->getSsid();
+	float longitude = lpcCodeplug_ConfigDecode->getLongitude();
+	float latitude = lpcCodeplug_ConfigDecode->getLatitude();
+	bool true_for_n_false_for_s = lpcCodeplug_ConfigDecode->getNorS();
+	bool true_for_e_false_for_w = lpcCodeplug_ConfigDecode->getEorW();
+	AprsSymbol symbol = lpcCodeplug_ConfigDecode->getSymbol();
+	AprsPath path = lpcCodeplug_ConfigDecode->getPath();
+	bool beacon_at_stratup = lpcCodeplug_ConfigDecode->getBeaconAtStartup();
+	bool double_weather_data = lpcCodeplug_ConfigDecode->getWxDoubleTransmit();
+
+	std::string callsign;
+	lpcCodeplug_ConfigDecode->getCallsign(callsign);
+
+	std::string beacon_description;
+	lpcCodeplug_ConfigDecode->getDescritpion(beacon_description);
+	WCHAR beacon_description_wide[128];
+
+	// check if wx frame interval is not out of range
+	if (wx_interval >= WX_INTERVAL_MIN && wx_interval <= WX_INTERVAL_MAX)
+	{
+		;
+	}
+	else
+	{
+		std::cout	<< "W = EditCodeplugDialog_Basic_Load, WX packets itnerval out of range: " 
+					<< (int) wx_interval << std::endl;
+		wx_interval = WX_INTERVAL_MAX;
+		lpcCodeplug_ConfigEncode->setWxTransmitPeriod(wx_interval);
+	}
+	
+	// check if beacon frame interval is not out of range
+	if (beacon_interval >= BEACON_INTERVAL_MIN * 5 && beacon_interval <= BEACON_INTERVAL_MAX * 5)
+	{
+		;
+	}
+	else
+	{
+		std::cout	<< "W = EditCodeplugDialog_Basic_Load, beacons itnerval out of range: " 
+					<< (int) beacon_interval << std::endl;
+		beacon_interval = BEACON_INTERVAL_MAX * 5;
+		lpcCodeplug_ConfigEncode->setBeaconTransmitPeriod(beacon_interval);
+	}
+	
+	// set weather packets interval and beacon interval
+	SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)wx_interval);
+	SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)beacon_interval);
+	EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_WX, wx_interval);
+	EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_BEACON, beacon_interval);
+
+	// convert station (beacon packet) description from std::string to wide character string
+	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
+	mbstowcs(beacon_description_wide, beacon_description.c_str(), 128);
+
+	// set text edit 
+	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_DESCRIPTION, beacon_description_wide);
+
+	// convert from std::string to wide character string
+	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
+	mbstowcs(beacon_description_wide, callsign.c_str(), 128);
+
+	// set text edit with callsign
+	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_CALLSIGN, beacon_description_wide);
+
+	// convert SSID to string
+	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
+	_itow((int)ssid, beacon_description_wide, 10);
+	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_SSID, beacon_description_wide);
 }
 
 //
@@ -444,19 +524,16 @@ INT_PTR CALLBACK	EditCodeplugDialog_Basic(HWND hDlg, UINT message, WPARAM wParam
 
 		// set range for weather interval slider
 		SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(WX_INTERVAL_MIN, WX_INTERVAL_MAX));
-        SendMessage(hEditCodeplugDialog_Basic_SliderWxInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)WX_INTERVAL_DEF);
-		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_WX, WX_INTERVAL_DEF);
 
 		// set range for beacon interval
 		SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_SETRANGE, (WPARAM)TRUE, (LPARAM)MAKELONG(BEACON_INTERVAL_MIN, BEACON_INTERVAL_MAX));
-        SendMessage(hEditCodeplugDialog_Basic_SliderBeaconInterval, TBM_SETPOS, (WPARAM)TRUE, (LPARAM)BEACON_INTERVAL_DEF);
-		EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_BEACON, BEACON_INTERVAL_DEF);
-
 
 		lpfnEditCodeplugDialog_Basic_SsidOldProc = (WNDPROC)SetWindowLongPtr(hEditSsid, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialog_Basic_SsidProc);
 		lpfnEditCodeplugDialog_Basic_CallsignOldProc = (WNDPROC)SetWindowLongPtr(hEditCall, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialog_Basic_CallsignProc);
 		lpfnEditCodeplugDialog_Basic_LatitudeOldProc = (WNDPROC)SetWindowLongPtr(hEditLatutude, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialog_Basic_LatitudeProc);
 		lpfnEditCodeplugDialog_Basic_LongitudeOldProc = (WNDPROC)SetWindowLongPtr(hEditLongitude, GWLP_WNDPROC, (LONG_PTR)EditCodeplugDialog_Basic_LongitudeProc);
+
+		EditCodeplugDialog_Basic_Load();
 
 		return (INT_PTR)TRUE;
 

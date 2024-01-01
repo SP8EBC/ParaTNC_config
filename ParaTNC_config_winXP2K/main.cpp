@@ -214,8 +214,6 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			break;
 		case IDC_BUTTON_GET_VERSION:
 			lpsKissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
-			//srvVersionAndId.sendRequest();
-			//serialThread->start();
 			break;
 		case IDC_BUTTON_READ_DID:
 			GetDlgItemText(hWnd, IDC_DID_NUM, did, 5);
@@ -226,18 +224,12 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			}
 			break;
 		case IDC_BUTTON_GET_RUNNING:
-			lpsKissProtocolComm->commRunningConfigAndUpdateGui(NULL, &vCodeplug_EditedConfig);
+			lpsKissProtocolComm->commRunningConfigAndUpdateGui(&Codeplug_NewDataCallback, &vCodeplug_EditedConfig);
 			break;
 		case IDC_BUTTON_EDIT_CODEPLUG_DATA:
-			//hEditCodeplugDialog = CreateDialog(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG), hWnd, (DLGPROC)EditCodeplugDialog);
-			//if (hEditCodeplugDialog == NULL)
-			//{
-			//	std::cout << "E = " << GetLastError() << std::endl;
-			//}
-			//else {
-			//	ShowWindow(hEditCodeplugDialog, SW_SHOW);
-			//}
-			DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG_BASIC), hWnd, EditCodeplugDialog_Basic);
+			if (Codeplug_CheckIsLoaded(hWnd) == TRUE) {
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_EDIT_CODEPLUG_BASIC), hWnd, EditCodeplugDialog_Basic);
+			}
 			break;
 		case IDCANCEL:
 			DestroyWindow(hWnd);

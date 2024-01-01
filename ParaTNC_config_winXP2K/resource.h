@@ -10,6 +10,7 @@
 #define IDS_COMM_TIMEOUT_TITLE          104
 #define IDM_EXIT                        105
 #define IDS_EDIT_CODEPLUG_DATA          105
+#define IDS_NO_CODEPLUG                 106
 #define IDI_PARATNC_CONFIG_VS2005       107
 #define IDD_MAIN                        107
 #define IDI_SMALL                       108

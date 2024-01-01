@@ -51,22 +51,14 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 								lpcContext->lpvEditConfig->begin(),
 								dataFromTnc.begin(),
 								dataFromTnc.end());
-										
+				
+				delete lpcContext->lpcConfigDecode;
+
 				// execute callback if it is set
 				if (lpcContext->lpfnEditConfigUpdateCallback != NULL)
 				{
 					lpcContext->lpfnEditConfigUpdateCallback();
 				}
-
-				std::string beaconDescription;
-				lpcContext->lpcConfigDecode->getDescritpion(beaconDescription);
-
-				const float latitude = lpcContext->lpcConfigDecode->getLatitude();
-				const float longitude = lpcContext->lpcConfigDecode->getLongitude();
-
-				std::cout << "I = beaconDescription: " << beaconDescription << std::endl;
-				std::cout << "I = latitude: " << latitude << std::endl;
-				std::cout << "I = longitude: " << longitude << std::endl;
 			}
 			else
 			{

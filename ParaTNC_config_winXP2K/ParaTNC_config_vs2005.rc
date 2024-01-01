@@ -222,6 +222,7 @@ BEGIN
     IDS_APP_TITLE           "ParaTNC_config_vs2005"
     IDS_COMM_TIMEOUT_TITLE  "Serial Communication Timeout"
     IDS_EDIT_CODEPLUG_DATA  "Edit Codeplug Data"
+    IDS_NO_CODEPLUG         "Codeplug data hasn't been loaded. Please open it from file or upload from controller"
     IDC_PARATNC_CONFIG_VS2005 "PARATNC_CONFIG_VS2005"
 END
 

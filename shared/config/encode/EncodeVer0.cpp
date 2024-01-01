@@ -17,18 +17,19 @@
 
 EncodeVer0::EncodeVer0(std::vector<uint8_t> & in ) : data(in){
 
-	//this->data = std::vector<uint8_t>();
+	if (in.size() == 0)
+	{
+		this->data.reserve(CONFIG__END__OFFSET - 1);
 
-	this->data.reserve(CONFIG__END__OFFSET - 1);
+		// prefill vector with dummy data
+		this->data.insert(this->data.begin(), CONFIG__END__OFFSET, 0xAA);
 
-	// prefill vector with dummy data
-	this->data.insert(this->data.begin(), CONFIG__END__OFFSET, 0xAA);
-
-	// set programming counter to initial value
-	data[CONFIG_MODE_PGM_CNTR] 		= 0;
-	data[CONFIG_MODE_PGM_CNTR + 1] 	= 0;
-	data[CONFIG_MODE_PGM_CNTR + 2] 	= 0;
-	data[CONFIG_MODE_PGM_CNTR + 3] 	= 0;
+		// set programming counter to initial value
+		data[CONFIG_MODE_PGM_CNTR] 		= 0;
+		data[CONFIG_MODE_PGM_CNTR + 1] 	= 0;
+		data[CONFIG_MODE_PGM_CNTR + 2] 	= 0;
+		data[CONFIG_MODE_PGM_CNTR + 3] 	= 0;
+	}
 }
 
 EncodeVer0::~EncodeVer0() {

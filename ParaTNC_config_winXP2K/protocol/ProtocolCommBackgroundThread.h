@@ -60,7 +60,8 @@ public:
 	// all methods with names startig from 'comm' performs serial I/O
 	// asynchronously in background thread. each of them stored result 
 	// obtained from a controller in some private structure or another object.
-	// in most of cases it also updates GUI elements, like text edits etc.
+	// in some it also updates GUI elements, like text edits etc. although 
+	// this is not a rule and the name itself is a little bit unfortunate
 
 	// all methods with names starting from 'get' only returns data which 
 	// had been received from the controller before. 
