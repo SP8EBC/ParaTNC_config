@@ -37,7 +37,7 @@ public:
 	virtual AprsPath getPath()  ;
 	virtual uint8_t getRtuConfiguredSourceWindgusts()  ;
 	virtual bool getGsmAprsisEnable()  ;
-	virtual bool getNorS()  ;
+	virtual CardinalDirection getNorS()  ;
 	virtual std::string getDigiFilterPrefixList(uint8_t entry)  ;
 	virtual uint16_t getUmbChannelWinddirection()  ;
 	virtual uint8_t getRtuConfiguredSourceWinddirection()  ;
@@ -51,7 +51,7 @@ public:
 	virtual void getCallsign(std::string &call)  ;
 	virtual uint16_t getUmbSlaveId()  ;
 	virtual uint8_t getDigiRadiusFilter()  ;
-	virtual bool getEorW()  ;
+	virtual CardinalDirection getEorW()  ;
 	virtual WeatherSource getWindSrc()  ;
 	virtual AprsSymbol getSymbol()  ;
 	virtual bool getVictronEnabled()  ;

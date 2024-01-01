@@ -2,21 +2,21 @@ Running 4 test cases...
 Entering test module "DECODEENCODE"
 ../src/ConfigEncodeDecode_test.cpp(44): Entering test case "beacon_description"
 ../src/ConfigEncodeDecode_test.cpp(57): info: check test_output == test has passed
-../src/ConfigEncodeDecode_test.cpp(44): Leaving test case "beacon_description"; testing time: 101us
+../src/ConfigEncodeDecode_test.cpp(44): Leaving test case "beacon_description"; testing time: 252us
 ../src/ConfigEncodeDecode_test.cpp(60): Entering test case "symbols"
 ../src/ConfigEncodeDecode_test.cpp(66): info: check decode.getSymbol() == SYMBOL_HOUSE has passed
 ../src/ConfigEncodeDecode_test.cpp(70): info: check decode2.getSymbol() == SYMBOL_IGATE has passed
 ../src/ConfigEncodeDecode_test.cpp(74): info: check decode3.getSymbol() == SYMBOL_RXIGATE has passed
 ../src/ConfigEncodeDecode_test.cpp(78): info: check decode4.getSymbol() == SYMBOL_SAILBOAT has passed
-../src/ConfigEncodeDecode_test.cpp(60): Leaving test case "symbols"; testing time: 94us
+../src/ConfigEncodeDecode_test.cpp(60): Leaving test case "symbols"; testing time: 237us
 ../src/ConfigEncodeDecode_test.cpp(81): Entering test case "defaults"
 ../src/ConfigEncodeDecode_test.cpp(91): info: check description == "update this text" has passed
 ../src/ConfigEncodeDecode_test.cpp(95): info: check call == "N0CALL" has passed
 ../src/ConfigEncodeDecode_test.cpp(97): info: check decode.getLatitude() == 50.000f has passed
 ../src/ConfigEncodeDecode_test.cpp(98): info: check decode.getLongitude() == 19.0000f has passed
 ../src/ConfigEncodeDecode_test.cpp(99): info: check decode.getSsid() == 0 has passed
-../src/ConfigEncodeDecode_test.cpp(100): info: check decode.getNorS() == false has passed
-../src/ConfigEncodeDecode_test.cpp(101): info: check decode.getEorW() == false has passed
+../src/ConfigEncodeDecode_test.cpp(100): info: check decode.getNorS() == NORTH has passed
+../src/ConfigEncodeDecode_test.cpp(101): info: check decode.getEorW() == EAST has passed
 ../src/ConfigEncodeDecode_test.cpp(102): info: check decode.getSymbol() == SYMBOL_WIDE1_DIGI has passed
 ../src/ConfigEncodeDecode_test.cpp(103): info: check decode.getPath() == PATH_WIDE21 has passed
 ../src/ConfigEncodeDecode_test.cpp(104): info: check decode.getBeaconAtStartup() == false has passed
@@ -53,9 +53,9 @@ Entering test module "DECODEENCODE"
 ../src/ConfigEncodeDecode_test.cpp(148): info: check apn_password == "password" has passed
 ../src/ConfigEncodeDecode_test.cpp(152): info: check api_base_url == "http://78.88.56.14:8080/" has passed
 ../src/ConfigEncodeDecode_test.cpp(156): info: check aprsis_server == "euro.aprs2.net" has passed
-../src/ConfigEncodeDecode_test.cpp(81): Leaving test case "defaults"; testing time: 209us
+../src/ConfigEncodeDecode_test.cpp(81): Leaving test case "defaults"; testing time: 537us
 ../src/ConfigEncodeDecode_test.cpp(160): Entering test case "validate_by_calculating_crc"
 ../src/ConfigEncodeDecode_test.cpp(165): info: check encode.incrementProgrammingCounter() == 2 has passed
 ../src/ConfigEncodeDecode_test.cpp(170): info: check validate.checkValidate(encode.getData()) has passed
-../src/ConfigEncodeDecode_test.cpp(160): Leaving test case "validate_by_calculating_crc"; testing time: 217us
-Leaving test module "DECODEENCODE"; testing time: 652us
+../src/ConfigEncodeDecode_test.cpp(160): Leaving test case "validate_by_calculating_crc"; testing time: 577us
+Leaving test module "DECODEENCODE"; testing time: 1673us

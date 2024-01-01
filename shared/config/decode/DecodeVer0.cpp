@@ -231,14 +231,14 @@ bool DecodeVer0::getGsmAprsisEnable() {
 	}
 }
 
-bool DecodeVer0::getNorS() {
+CardinalDirection DecodeVer0::getNorS() {
 	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET );
 
-	if (byte == 1) {
-		return true;
+	if (byte == 'S') {
+		return SOUTH;
 	}
 	else {
-		return false;
+		return NORTH;
 	}
 }
 
@@ -351,14 +351,14 @@ uint8_t DecodeVer0::getDigiRadiusFilter() {
 
 }
 
-bool DecodeVer0::getEorW() {
+CardinalDirection DecodeVer0::getEorW() {
 	uint8_t byte = data.at(CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET);
 
-	if (byte == 1) {
-		return true;
+	if (byte == 'E') {
+		return EAST;
 	}
 	else {
-		return false;
+		return WEST;
 	}
 }
 

@@ -20,7 +20,7 @@
 #include "../../types/Digi.h"
 #include "../../types/DigiFilter.h"
 #include "../../types/ButtonFunction.h"
-
+#include "../../types/CardinalDirection.h"
 
 class IConfigDecode {
 public:
@@ -57,9 +57,9 @@ public:
 	virtual void getCallsign(std::string & call) = 0;
 	virtual uint8_t getSsid() = 0;
 	virtual float getLatitude() = 0;
-	virtual bool getNorS() = 0;
+	virtual CardinalDirection getNorS() = 0;
 	virtual float getLongitude() = 0;
-	virtual bool getEorW() = 0;
+	virtual CardinalDirection getEorW() = 0;
 	virtual void getDescritpion(std::string & description) = 0;
 	virtual AprsSymbol getSymbol() = 0;
 	virtual AprsPath getPath() = 0;

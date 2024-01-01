@@ -27,7 +27,7 @@ public:
 
 	virtual uint32_t incrementProgrammingCounter();
 
-	virtual void setEorW(bool _eOrW);
+	virtual void setEorW(CardinalDirection _eOrW);
 	virtual void setRtuSlaveSpeed(uint16_t _slaveSpeedBps);
 	virtual void setGsmAprsisEnable(bool _apsisEnable);
 	virtual void setCallsign(const std::string &call);
@@ -73,7 +73,7 @@ public:
 	virtual void setDigiFilterPrefixList(uint8_t entry, std::string &_value);
 	virtual void setGsmApiEnable(bool _apiEnable);
 	virtual void setRtuConfiguredSourceTemperature(uint8_t _rtuSrcTemperature);
-	virtual void setNorS(bool _nOrS);
+	virtual void setNorS(CardinalDirection _nOrS);
 	virtual void setUmbSlaveId(uint16_t _slaveId);
 	virtual void setGsmApiBaseUrl(const std::string &password);
 	virtual void setLongitude(float _longitude);

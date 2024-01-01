@@ -20,6 +20,7 @@
 #include "../../types/Digi.h"
 #include "../../types/DigiFilter.h"
 #include "../../types/ButtonFunction.h"
+#include "../../types/CardinalDirection.h"
 
 #include "../DefaultConfig.h"
 
@@ -61,9 +62,9 @@ public:
 	virtual void setCallsign(const std::string & call) = 0;
 	virtual void setSsid(uint8_t _ssid) = 0;
 	virtual void setLatitude(float _latitude) = 0;
-	virtual void setNorS(bool _nOrS) = 0;
+	virtual void setNorS(CardinalDirection _nOrS) = 0;
 	virtual void setLongitude(float _longitude) = 0;
-	virtual void setEorW(bool _eOrW) = 0;
+	virtual void setEorW(CardinalDirection _eOrW) = 0;
 	virtual void setDescritpion(const std::string & description) = 0;
 	virtual void setSymbol(AprsSymbol _symbol) = 0;
 	virtual void setPath(const AprsPath _path) = 0;

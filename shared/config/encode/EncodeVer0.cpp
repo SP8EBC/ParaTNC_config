@@ -53,12 +53,12 @@ uint32_t EncodeVer0::incrementProgrammingCounter() {
 	return current_counter;
 }
 
-void EncodeVer0::setEorW(bool _eOrW) {
-	if (_eOrW) {
-		data[CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET] = 1;
+void EncodeVer0::setEorW(CardinalDirection _eOrW) {
+	if (_eOrW == EAST) {
+		data[CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET] = 'E';
 	}
 	else {
-		data[CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET] = 0;
+		data[CONFIG_BASIC_OFFSET + BASIC_WE_OFFSET] = 'W';
 	}
 }
 
@@ -526,12 +526,12 @@ void EncodeVer0::setRtuConfiguredSourceTemperature(uint8_t _rtuSrcTemperature) {
 
 }
 
-void EncodeVer0::setNorS(bool _nOrS) {
-	if (_nOrS) {
-		data[CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET] = 1;
+void EncodeVer0::setNorS(CardinalDirection _nOrS) {
+	if (_nOrS == NORTH) {
+		data[CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET] = 'N';
 	}
 	else {
-		data[CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET] = 0;
+		data[CONFIG_BASIC_OFFSET + BASIC_NS_OFFSET] = 'S';
 	}
 }
 
