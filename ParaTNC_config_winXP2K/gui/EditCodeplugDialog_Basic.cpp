@@ -85,6 +85,10 @@ static void EditCodeplugDialog_Basic_SetSliderLabel(int label, LRESULT value)
 //
 static void EditCodeplugDialog_Basic_Load() 
 {
+#define FLOAT_TO_STRING_BUFFER_LN	16
+	char float_to_string_buffer[FLOAT_TO_STRING_BUFFER_LN];
+	int float_sign = 0, float_decimal = 0;	// not really used
+
 	// get all data from codeplug
 	uint8_t beacon_interval = lpcCodeplug_ConfigDecode->getBeaconTransmitPeriod();
 	uint8_t wx_interval = lpcCodeplug_ConfigDecode->getWxTransmitPeriod();
@@ -101,9 +105,15 @@ static void EditCodeplugDialog_Basic_Load()
 	std::string callsign;
 	lpcCodeplug_ConfigDecode->getCallsign(callsign);
 
+#define BEACON_DESCRIPTION_WIDE_LN	128
 	std::string beacon_description;
 	lpcCodeplug_ConfigDecode->getDescritpion(beacon_description);
-	WCHAR beacon_description_wide[128];
+	TCHAR beacon_description_wide[BEACON_DESCRIPTION_WIDE_LN];
+
+	// latitude and longitude are stored in format with decimal point
+	// moved two places right
+	longitude /= 100.0f;
+	latitude /= 100.0f;
 
 	// check if wx frame interval is not out of range
 	if (wx_interval >= WX_INTERVAL_MIN && wx_interval <= WX_INTERVAL_MAX)
@@ -138,23 +148,44 @@ static void EditCodeplugDialog_Basic_Load()
 	EditCodeplugDialog_Basic_SetSliderLabel(IDC_EC_T_VAL_PERIOD_BEACON, beacon_interval);
 
 	// convert station (beacon packet) description from std::string to wide character string
-	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
-	mbstowcs(beacon_description_wide, beacon_description.c_str(), 128);
+	//memset(beacon_description_wide, 0, sizeof(WCHAR) * BEACON_DESCRIPTION_WIDE_LN);
+	mbstowcs(beacon_description_wide, beacon_description.c_str(), BEACON_DESCRIPTION_WIDE_LN);
 
 	// set text edit 
 	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_DESCRIPTION, beacon_description_wide);
 
 	// convert from std::string to wide character string
-	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
-	mbstowcs(beacon_description_wide, callsign.c_str(), 128);
+	//memset(beacon_description_wide, 0, sizeof(WCHAR) * BEACON_DESCRIPTION_WIDE_LN);
+	mbstowcs(beacon_description_wide, callsign.c_str(), BEACON_DESCRIPTION_WIDE_LN);
 
 	// set text edit with callsign
 	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_CALLSIGN, beacon_description_wide);
 
 	// convert SSID to string
-	memset(beacon_description_wide, 0, sizeof(WCHAR) * 128);
+	//memset(beacon_description_wide, 0, sizeof(WCHAR) * BEACON_DESCRIPTION_WIDE_LN);
 	_itow((int)ssid, beacon_description_wide, 10);
 	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_SSID, beacon_description_wide);
+
+	// convert latitude to string
+	memset(float_to_string_buffer, 0, sizeof(char) * FLOAT_TO_STRING_BUFFER_LN);
+	_gcvt_s(float_to_string_buffer, FLOAT_TO_STRING_BUFFER_LN, latitude, 6);
+	_mbstowcs_l(beacon_description_wide, float_to_string_buffer, FLOAT_TO_STRING_BUFFER_LN, localeEnglish);
+	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_LATITUDE, beacon_description_wide);
+
+	// convert longitude to string
+	memset(float_to_string_buffer, 0, sizeof(char) * FLOAT_TO_STRING_BUFFER_LN);
+	_gcvt_s(float_to_string_buffer, FLOAT_TO_STRING_BUFFER_LN, longitude, 6);
+	_mbstowcs_l(beacon_description_wide, float_to_string_buffer, FLOAT_TO_STRING_BUFFER_LN, localeEnglish);
+	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_LONGITUDE, beacon_description_wide);
+
+	if (true_for_e_false_for_w)
+	{
+		SendMessage(hEditCodeplugDialog_Basic_ComboWE, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);		
+	}
+	else
+	{
+		SendMessage(hEditCodeplugDialog_Basic_ComboWE, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);	
+	}
 }
 
 //
