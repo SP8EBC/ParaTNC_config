@@ -20,6 +20,7 @@
 #define IDS_COMM_TIMEOUT_MESSAGE_GETVER 130
 #define IDD_EDIT_CODEPLUG               131
 #define IDD_EDIT_CODEPLUG_BASIC         131
+#define IDD_DIAG_READ_DID               132
 #define IDC_CHECK1                      1000
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON_START_SERIAL         1002
@@ -54,6 +55,20 @@
 #define IDC_EC_T_VAL_PERIOD_WX          1032
 #define IDC_EC_T_VAL_PERIOD_BEACON      1033
 #define IDC_EC_T_PERIOD_BEACON          1034
+#define IDC_RDID_LIST                   1035
+#define IDC_RDID_EDIT_DIDNAME           1036
+#define IDC_EDIT1                       1037
+#define IDC_RDID_EDIT_DIDDESCR          1037
+#define IDC_EDIT2                       1038
+#define IDC_RDID_EDIT_1ST_NAME          1038
+#define IDC_RDID_EDIT_2ND_NAME          1039
+#define IDC_EDIT4                       1040
+#define IDC_RDID_EDIT_2ND_VALUE         1040
+#define IDC_RDID_EDIT_3RD_NAME          1041
+#define IDC_RDID_EDIT_1ST_VALUE         1042
+#define IDC_EDIT5                       1043
+#define IDC_RDID_EDIT_3RD_VALUE         1043
+#define IDREADDID                       1044
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -61,9 +76,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1035
+#define _APS_NEXT_CONTROL_VALUE         1045
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

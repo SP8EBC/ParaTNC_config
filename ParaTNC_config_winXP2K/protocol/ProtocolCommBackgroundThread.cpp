@@ -77,7 +77,7 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 	return result;
 }
 
-BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(HWND mainWindow, HWND didWindow, int didNumber) {
+BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse*), int didNumber) {
 
 	BOOL result = false;
 

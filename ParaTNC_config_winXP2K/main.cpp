@@ -16,6 +16,9 @@
 #include "./protocol/ProtocolCommBackgroundThread.h"
 
 #include "./gui/EditCodeplugDialog_Basic.h"
+#include "./gui/ReadDidDialog.h"
+
+#include "./files/DiagnosticDescription.h"
 
 #define MAX_LOADSTRING 100
 
@@ -80,6 +83,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	std::cout << "dupa druga" << std::endl;
 
 	localeEnglish = _create_locale(LC_ALL, "English");
+
+	DiagnosticDescription_Init();
 
 	// Initialize global strings
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -216,12 +221,13 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 			lpsKissProtocolComm->commVersionAndUpdateGui(hWnd, NULL);
 			break;
 		case IDC_BUTTON_READ_DID:
-			GetDlgItemText(hWnd, IDC_DID_NUM, did, 5);
-			didNumber = _wcstoi64(did, NULL, 16);
-			if (didNumber > 0x0 && didNumber < 0xFFFF) 
-			{
-				lpsKissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
-			}
+			//GetDlgItemText(hWnd, IDC_DID_NUM, did, 5);
+			//didNumber = _wcstoi64(did, NULL, 16);
+			//if (didNumber > 0x0 && didNumber < 0xFFFF) 
+			//{
+			//	lpsKissProtocolComm->commReadDidAndUpdateGui(NULL, NULL, didNumber);
+			//}
+			DialogBox(hInst, MAKEINTRESOURCE(IDD_DIAG_READ_DID), hWnd, ReadDidDialog);
 			break;
 		case IDC_BUTTON_GET_RUNNING:
 			lpsKissProtocolComm->commRunningConfigAndUpdateGui(&Codeplug_NewDataCallback, &vCodeplug_EditedConfig);

@@ -45,7 +45,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 				// copy result from string into array of chars
 				strncpy(context->versionAndIdResult.softwareVersion, softwareVersion.c_str(), 5);
 
-				// convert array od CHAR into array of WCHAR
+				// convert array od CHAR into array of TCHAR
 				mbstowcs(
 					context->versionAndIdResult.softwareVersionW,
 					context->versionAndIdResult.softwareVersion,

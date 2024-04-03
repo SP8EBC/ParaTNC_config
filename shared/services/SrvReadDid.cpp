@@ -243,6 +243,8 @@ void SrvReadDid::callback(
 				this->didResponse.second.i32 = generic_32;
 
 				break;
+			default:
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_EMPTY;
 			}
 
 			switch (third_size) {
@@ -271,6 +273,8 @@ void SrvReadDid::callback(
 				this->didResponse.third.i32 = generic_32;
 
 				break;
+			default:
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_EMPTY;
 			}
 		}
 
