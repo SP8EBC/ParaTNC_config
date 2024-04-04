@@ -13,8 +13,6 @@
 #include <map>
 #include <stdlib.h>
 
-#include "./protocol/ProtocolCommBackgroundThread.h"
-
 #include "./gui/EditCodeplugDialog_Basic.h"
 #include "./gui/ReadDidDialog.h"
 

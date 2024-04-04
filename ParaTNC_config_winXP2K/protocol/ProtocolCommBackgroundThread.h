@@ -71,7 +71,7 @@ public:
 	// dialog if it has been created. information returned by
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
-	BOOL commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse*), int didNumber);
+	BOOL commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse), int didNumber);
 	BOOL commRunningConfigAndUpdateGui(VOID(*lpfnNewConfigCallback)(VOID),
 										std::vector<uint8_t> * lpvOutConfigData);
 	

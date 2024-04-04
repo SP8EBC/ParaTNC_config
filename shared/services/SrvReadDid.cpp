@@ -109,7 +109,7 @@ void SrvReadDid::callback(
 		const uint8_t did_msb = *it;
 		it++;
 
-		this->didResponse.did = did_lsb | (did_msb << 16);
+		this->didResponse.did = did_lsb | (did_msb << 8);
 
 		const uint8_t size_byte = *it;
 

@@ -29,6 +29,14 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 				lpcContext->lpcReadDid->sendRequestForDid((uint16_t)(lpcContext->didNumber & 0xFFFFU));
 
 				lpcContext->lpcReadDid->receiveSynchronously();
+
+				// get decoded response
+				DidResponse response = lpcContext->lpcReadDid->getDidResponse();
+
+				if (lpcContext->lpfnUpdateGuiCallback != NULL)
+				{
+					lpcContext->lpfnUpdateGuiCallback(response);
+				}
 			}
 			catch (TimeoutE & ex)
 			{

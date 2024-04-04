@@ -1,9 +1,12 @@
 #include "stdafx.h"
+#include "main.h"
 #include "ReadDidDialog.h"
 #include "Resource.h"
 #include "../files/DiagnosticDescription.h"
 
-WNDPROC		lpfnReadDidDialog_OldProc = NULL;	// original Window Proc function
+#include <iostream>
+
+WNDPROC		lpfnReadDidDialog_DidListOldProc = NULL; // original Window Proc function for DID list
 
 HWND		hReadDidDialog = NULL;	// handle to this dialog window
 
@@ -16,6 +19,15 @@ HWND		hReadDidDialog_Edit3rdName			= NULL;
 HWND		hReadDidDialog_Edit1stValue			= NULL;
 HWND		hReadDidDialog_Edit2ndValue			= NULL;
 HWND		hReadDidDialog_Edit3rdValue			= NULL;
+HWND		hReadDidDialog_StaticId				= NULL;	// Static text to display selected data ID
+HWND		hReadDidDialog_StaticRawHexResponse	= NULL;	// Raw response received from RS232
+HWND		hReadDidDialog_CheckboxUnscaled		= NULL;
+
+UINT		ReadDidDialog_SelectedListIndex		= 0;		
+UINT		ReadDidDialog_SelectedDid			= 0;	// DID selected on the list
+UINT		ReadDidDialog_ListIdxOfQueriedDid	= 0;
+UINT		ReadDidDialog_QueriedDid			= 0;
+
 
 //
 //  FUNCTION: ReadDidDialog_FillDialogWithDiagDescription()
@@ -28,7 +40,7 @@ static VOID	ReadDidDialog_FillDialogWithDiagDescription()
 {
 	if (hReadDidDialog_List != NULL && hReadDidDialog != NULL)
 	{
-		std::vector<DDD> & ddd = vDiagnosticDescription_DidDefs;
+		const std::vector<DDD> & ddd = vDiagnosticDescription_DidDefs;
 		const size_t siz = ddd.size();
 
 		for (size_t i = 0; i < siz; i++)
@@ -39,7 +51,58 @@ static VOID	ReadDidDialog_FillDialogWithDiagDescription()
 }
 
 //
-//  FUNCTION: ReadDidDialog_Update(DidResponse *)
+//  FUNCTION: ReadDidDialog_SetDialogControlsToDidInformation(int didIndex)
+//
+//  PURPOSE: Updates EDITTEXT controls with information about selected did
+//
+//
+//
+static VOID ReadDidDialog_SetDialogControlsWithDidInformation(int didIndex)
+{
+	const std::vector<DDD> & ddd = vDiagnosticDescription_DidDefs;
+	const size_t siz = ddd.size();
+
+	if (didIndex < (int)siz)
+	{
+		// get definition information for a did stored in a certain index. 
+		// an assumption is that a vector of diagnostic description information
+		// stores elements in the same order they are displayed on a list
+		const DDD & didDefinition = ddd.at(didIndex);
+
+		// set text edit with DID name
+		SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_DIDNAME, (LPCWSTR)didDefinition.didName);
+
+		// set text edit with DID description
+		SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_DIDDESCR, (LPCWSTR)didDefinition.didDescription);
+
+		// set static text with DID 
+		TCHAR buffer[5];
+		_sntprintf_s(buffer, 5, 5, _T("%X"), didDefinition.id);
+		SetDlgItemText(hReadDidDialog, IDC_RDID_STATIC_ID, (LPCWSTR)buffer);
+
+		// store DID which is selected
+		ReadDidDialog_SelectedDid = didDefinition.id;
+
+		if (didDefinition.first.isUsed())
+		{
+			SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_NAME, (LPCWSTR)didDefinition.first.name);
+		}
+
+		if (didDefinition.second.isUsed())
+		{
+			SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_2ND_NAME, (LPCWSTR)didDefinition.second.name);
+		}
+
+		if (didDefinition.third.isUsed())
+		{
+			SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_3RD_NAME, (LPCWSTR)didDefinition.third.name);
+		}
+
+	}
+}
+
+//
+//  FUNCTION: ReadDidDialog_Update(DidResponse)
 //
 //  PURPOSE: Updates all controls in the dialog with information read from the controller
 //
@@ -49,9 +112,121 @@ static VOID	ReadDidDialog_FillDialogWithDiagDescription()
 //  WM_DESTROY		- post a quit message and return
 //
 //
-void	ReadDidDialog_Update(DidResponse * didResponse)
+void	ReadDidDialog_Update(DidResponse didResponse)
 {
+	TCHAR buffer[64];
+	memset(buffer, 0x00, sizeof(TCHAR) * 64);
+	const int idFromResponse = didResponse.did;
 
+	std::cout << "I = ReadDidDialog_Update, idFromResponse: 0x" << std::hex << idFromResponse << std::dec << std::endl;
+
+	const DDD & didDefinition = vDiagnosticDescription_DidDefs.at(ReadDidDialog_ListIdxOfQueriedDid);
+
+	if (idFromResponse == ReadDidDialog_QueriedDid)
+	{
+		if (didDefinition.first.isUsed())
+		{
+			switch(didResponse.firstSize) 
+			{
+			case DIDRESPONSE_DATASIZE_EMPTY:
+			case DIDRESPONSE_DATASIZE_INT8:
+				if (didDefinition.first.isScaled())
+				{
+					const float val = didDefinition.first.scale(didResponse.first.i8);
+					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
+				}
+				else
+				{
+					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i8);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
+				}
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT16:
+				if (didDefinition.first.isScaled())
+				{
+					const float val = didDefinition.first.scale(didResponse.first.i16);
+					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_2ND_VALUE, (LPCWSTR)buffer);
+				}
+				else
+				{
+					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i16);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
+				}
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT32:
+				if (didDefinition.first.isScaled())
+				{
+					const float val = didDefinition.first.scale(didResponse.first.i32);
+					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_3RD_VALUE, (LPCWSTR)buffer);
+				}
+				else
+				{
+					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i32);
+					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
+				}
+
+				break;
+			case DIDRESPONSE_DATASIZE_FLOAT:
+				break;
+			case DIDRESPONSE_DATASIZE_STRING:
+				_mbstowcs_l(buffer, didResponse.first.str, 64, localeEnglish);
+				break;
+			}
+		}
+	}
+}
+
+//
+//  FUNCTION: ReadDidDialog_ListProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE: Handles events generated by clicking on entries on DID list or pressing up-down cursor key
+//
+//  WM_INITDIALOG	- Initialized a dialog, set properties for all controls
+//  WM_COMMAND		- Handles an event from clicking certain controls, like OK or Cancel button
+//	WM_HSCROLL		- Handles an event from moving sliders
+//  WM_DESTROY		- post a quit message and return
+//
+//
+static LRESULT CALLBACK	ReadDidDialog_ListProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT result = -1;
+	int number = -1;
+
+	// if character is OK and a message shall be passed to 'CallWindowProc'
+	BOOL passMessage = true;
+
+	int wmId    = LOWORD(wParam);
+	int wmEvent = HIWORD(wParam);
+
+	// KEYDOWN is not an event from down arrow cursor key. It is the event
+	// generated when a key is pressed down and periodically if it is held pressed
+	if (uMsg == WM_CAPTURECHANGED || uMsg == WM_KEYDOWN)
+	{
+		// get an index of currently selected index 
+		LRESULT selectedItem = SendMessage(hReadDidDialog_List,(UINT)LB_GETCURSEL, 0, 0);  
+
+		ReadDidDialog_SelectedListIndex = (UINT)selectedItem;
+
+		ReadDidDialog_SetDialogControlsWithDidInformation(ReadDidDialog_SelectedDid);
+
+		std::cout << "D = ReadDidDialog_ListProc, " << std::hex <<
+				"uMsg: 0x" << uMsg << ", " << 
+				"selectedItem: 0x" << selectedItem << 
+				std::dec << std::endl;
+	}
+
+
+	if (passMessage)
+	{
+		result = CallWindowProc(lpfnReadDidDialog_DidListOldProc, hWnd, uMsg, wParam, lParam); 
+	}
+
+	return result;
 }
 
 //
@@ -84,9 +259,17 @@ INT_PTR CALLBACK		ReadDidDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			hReadDidDialog_Edit2ndValue			= GetDlgItem(hDlg, IDC_RDID_EDIT_2ND_VALUE);
 			hReadDidDialog_Edit3rdValue			= GetDlgItem(hDlg, IDC_RDID_EDIT_3RD_VALUE);
 
+			hReadDidDialog_StaticId				= GetDlgItem(hDlg, IDC_RDID_STATIC_ID);
+			hReadDidDialog_StaticRawHexResponse	= GetDlgItem(hDlg, IDC_RDID_STATIC_RAW);
+			hReadDidDialog_CheckboxUnscaled		= GetDlgItem(hDlg, IDC_RDID_CHECK_UNSCALED);
+
+			// set a tip text
 			SetDlgItemText(hDlg, IDC_RDID_EDIT_DIDNAME, _T("Please use the list on the left to select a DID You want to read"));
 
 			ReadDidDialog_FillDialogWithDiagDescription();
+			
+			// set window proc function for DID list
+			lpfnReadDidDialog_DidListOldProc = (WNDPROC)SetWindowLongPtr(hReadDidDialog_List, GWLP_WNDPROC, (LONG_PTR)ReadDidDialog_ListProc);
 
 			return (INT_PTR)TRUE;
 		case WM_COMMAND:
@@ -97,6 +280,10 @@ INT_PTR CALLBACK		ReadDidDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 			}
 			if (LOWORD(wParam) == IDREADDID)
 			{
+				std::cout << "D = ReadDidDialog_ListProc, IDREADDID, ReadDidDialog_SelectedDid: 0x" << std::hex << ReadDidDialog_SelectedDid << std::dec << std::endl;
+				ReadDidDialog_ListIdxOfQueriedDid = ReadDidDialog_SelectedListIndex;
+				ReadDidDialog_QueriedDid = ReadDidDialog_SelectedDid;
+				lpsKissProtocolComm->commReadDidAndUpdateGui(ReadDidDialog_Update, ReadDidDialog_QueriedDid);
 				return (INT_PTR)TRUE;
 			}
 			break;

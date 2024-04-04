@@ -77,7 +77,7 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 	return result;
 }
 
-BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse*), int didNumber) {
+BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse), int didNumber) {
 
 	BOOL result = false;
 
@@ -86,6 +86,7 @@ BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCa
 	this->srvReadDid_context.didNumber = didNumber;
 	this->srvReadDid_context.hMutex = this->hThreadMutex;
 	this->srvReadDid_context.lpcReadDid = &this->srvReadDid;
+	this->srvReadDid_context.lpfnUpdateGuiCallback = lpfnUpdateGuiCallback;
 
 	hThread = CreateThread(
 				NULL, 
