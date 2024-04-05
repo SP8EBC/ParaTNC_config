@@ -58,7 +58,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	/**
 	 * Sends request to read given DID

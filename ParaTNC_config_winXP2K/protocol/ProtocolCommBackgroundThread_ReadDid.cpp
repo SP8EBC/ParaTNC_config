@@ -6,6 +6,7 @@
 #include "../shared/exceptions/TimeoutE.h"
 
 #include <iostream>
+#include "assert.h"
 
 DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 {
@@ -19,6 +20,8 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 		// try to signalize the sync mutex
 		DWORD result = WaitForSingleObject(lpcContext->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
+		assert(result != WAIT_ABANDONED);
+
 		// check the result
 		if (result == WAIT_OBJECT_0) 
 		{
@@ -28,7 +31,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 				
 				lpcContext->lpcReadDid->sendRequestForDid((uint16_t)(lpcContext->didNumber & 0xFFFFU));
 
-				lpcContext->lpcReadDid->receiveSynchronously();
+				lpcContext->lpcReadDid->receiveSynchronously(lpcContext->lpfnNrcCbk);
 
 				// get decoded response
 				DidResponse response = lpcContext->lpcReadDid->getDidResponse();

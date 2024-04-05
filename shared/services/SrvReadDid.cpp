@@ -29,7 +29,7 @@ void SrvReadDid::sendRequest() {
 	}
 }
 
-void SrvReadDid::receiveSynchronously() {
+void SrvReadDid::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
 		std::vector<uint8_t> response;
 
@@ -44,6 +44,11 @@ void SrvReadDid::receiveSynchronously() {
 			{
 				std::cout << "E = SrvReadDid::receiveSynchronously, NRC received: 0x" << 
 					std::hex << response[2] << std::dec << std::endl;
+
+				if (cbk != NULL)
+				{
+					cbk(response[2]);
+				}
 			}
 			else if (frameType == KISS_READ_DID_RESP)
 			{
@@ -86,7 +91,7 @@ void SrvReadDid::callback(
 
 	std::vector<uint8_t>::const_iterator it = frame->begin();
 
-	std::cout << "I = SrvReadDid::callback";
+	std::cout << "I = SrvReadDid::callback" << std::endl;
 
 	int8_t generic_8;
 	int16_t generic_16;

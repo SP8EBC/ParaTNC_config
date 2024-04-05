@@ -3,8 +3,10 @@
 #include "ReadDidDialog.h"
 #include "Resource.h"
 #include "../files/DiagnosticDescription.h"
+#include "../misc/AuxStuff.h"
 
 #include <iostream>
+#include "assert.h"
 
 WNDPROC		lpfnReadDidDialog_DidListOldProc = NULL; // original Window Proc function for DID list
 
@@ -28,7 +30,6 @@ UINT		ReadDidDialog_SelectedDid			= 0;	// DID selected on the list
 UINT		ReadDidDialog_ListIdxOfQueriedDid	= 0;
 UINT		ReadDidDialog_QueriedDid			= 0;
 
-
 //
 //  FUNCTION: ReadDidDialog_FillDialogWithDiagDescription()
 //
@@ -51,6 +52,29 @@ static VOID	ReadDidDialog_FillDialogWithDiagDescription()
 }
 
 //
+//  FUNCTION: ReadDidDialog_NrcCallback(uint16_t nrc)
+//
+//  PURPOSE: Display error message box that a NRC is received
+//
+//
+//
+static VOID ReadDidDialog_NrcCallback(uint16_t nrc)
+{
+	assert(hReadDidDialog != NULL);
+
+	//BOOL intres = IS_INTRESOURCE(IDS_COMM_TIMEOUT_TITLE);
+	WORD LangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
+	
+	TCHAR szTitle[64];
+	LoadString(NULL, IDS_NRC_RECEIVED_TITLE, szTitle, 64);
+	
+	TCHAR szMessage[64];
+	LoadString(NULL, AuxStuff::getResourceIdForNrc(nrc), szMessage, 64);
+
+	MessageBox(hReadDidDialog, szMessage, szTitle, MB_OK | MB_ICONERROR);
+}
+
+//
 //  FUNCTION: ReadDidDialog_SetDialogControlsToDidInformation(int didIndex)
 //
 //  PURPOSE: Updates EDITTEXT controls with information about selected did
@@ -61,6 +85,11 @@ static VOID ReadDidDialog_SetDialogControlsWithDidInformation(int didIndex)
 {
 	const std::vector<DDD> & ddd = vDiagnosticDescription_DidDefs;
 	const size_t siz = ddd.size();
+
+	std::cout << "D = ReadDidDialog_SetDialogControlsWith..., " << std::hex <<
+			"didIndex: 0x" << didIndex << ", " << 
+			"siz: 0x" << siz << 
+			std::dec << std::endl;
 
 	if (didIndex < (int)siz)
 	{
@@ -74,6 +103,8 @@ static VOID ReadDidDialog_SetDialogControlsWithDidInformation(int didIndex)
 
 		// set text edit with DID description
 		SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_DIDDESCR, (LPCWSTR)didDefinition.didDescription);
+
+		//SendMessage(hReadDidDialog_EditDidDescsription, EM_SETMARGINS, (WPARAM)EC_RIGHTMARGIN, MAKELPARAM(0, 50));
 
 		// set static text with DID 
 		TCHAR buffer[5];
@@ -212,12 +243,7 @@ static LRESULT CALLBACK	ReadDidDialog_ListProc(HWND hWnd, UINT uMsg, WPARAM wPar
 
 		ReadDidDialog_SelectedListIndex = (UINT)selectedItem;
 
-		ReadDidDialog_SetDialogControlsWithDidInformation(ReadDidDialog_SelectedDid);
-
-		std::cout << "D = ReadDidDialog_ListProc, " << std::hex <<
-				"uMsg: 0x" << uMsg << ", " << 
-				"selectedItem: 0x" << selectedItem << 
-				std::dec << std::endl;
+		ReadDidDialog_SetDialogControlsWithDidInformation(selectedItem);
 	}
 
 
@@ -283,7 +309,7 @@ INT_PTR CALLBACK		ReadDidDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				std::cout << "D = ReadDidDialog_ListProc, IDREADDID, ReadDidDialog_SelectedDid: 0x" << std::hex << ReadDidDialog_SelectedDid << std::dec << std::endl;
 				ReadDidDialog_ListIdxOfQueriedDid = ReadDidDialog_SelectedListIndex;
 				ReadDidDialog_QueriedDid = ReadDidDialog_SelectedDid;
-				lpsKissProtocolComm->commReadDidAndUpdateGui(ReadDidDialog_Update, ReadDidDialog_QueriedDid);
+				lpsKissProtocolComm->commReadDidAndUpdateGui(ReadDidDialog_Update, ReadDidDialog_NrcCallback, ReadDidDialog_QueriedDid);
 				return (INT_PTR)TRUE;
 			}
 			break;

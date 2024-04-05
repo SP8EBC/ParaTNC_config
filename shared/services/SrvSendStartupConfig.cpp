@@ -142,7 +142,7 @@ void SrvSendStartupConfig::sendRequest() {
  * This method is one exception from the rest of services. This shall be
  * used standalone, w/o call to sendRequest before.
  */
-void SrvSendStartupConfig::receiveSynchronously() {
+void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
 		size_t howManyFrames = dataForDownload.size() / singleFrameLn;
 

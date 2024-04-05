@@ -53,3 +53,28 @@ AppWizard uses "TODO:" comments to indicate parts of the source code you
 should add to or customize.
 
 /////////////////////////////////////////////////////////////////////////////
+Serial and KISS Protocol Handling code:
+
+serial/Serial.cpp
+	Contains class Serial, which handles low level serial I/O using WinAPI.
+	It also handles HDLC protocol to an extent it is used for KISS protocol,
+	so it adds FEND at the begining of a transmission. It also detects FEND 
+	during receiving to switch rx state machine
+	
+serial/SerialRxBackgroundThread.cpp
+	Contains class SerialRxBackgroundThread, which uses Serial class and
+	receives data asynchronously in the background. It uses internal 
+	callback map, to invoke handler specific for certain KISS diagnostics
+	serive. It is not used in case of this application, due to the fact
+	that Windows is not able to transmit and receive data via the same serial
+	port in the same time. 
+	
+protocol/ProtocolCommBackgroundThread.cpp
+	Cotains class ProtocolCommBackgroundThread, which handless KISS diagnostics
+	transction-wise. It is a middleware between Serial class (responsible for
+	low level and WinAPI specific I/O) and shared library code, which decodes
+	and encodes KISS diagnostics protocol data. Internally it uses a mutex to
+	synchronize possible concurent access to serial port. It contains methods
+	which creates background thread where KISS diagnostics comm transactions
+	are handled. Callback are used to signalize main UI thread that diagnostic
+	communication is done and a data is available.

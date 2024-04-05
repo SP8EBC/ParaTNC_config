@@ -145,7 +145,7 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,336,190,50,29
     LISTBOX         IDC_RDID_LIST,7,7,79,212,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_RDID_EDIT_DIDNAME,97,7,214,12,ES_AUTOHSCROLL | ES_READONLY
-    EDITTEXT        IDC_RDID_EDIT_DIDDESCR,97,27,289,30,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_RDID_EDIT_DIDDESCR,97,27,289,30,ES_MULTILINE | ES_READONLY | WS_VSCROLL
     EDITTEXT        IDC_RDID_EDIT_1ST_NAME,101,72,89,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_RDID_EDIT_2ND_NAME,200,72,89,12,ES_AUTOHSCROLL | ES_READONLY
     EDITTEXT        IDC_RDID_EDIT_3RD_NAME,299,72,87,12,ES_AUTOHSCROLL | ES_READONLY
@@ -281,12 +281,40 @@ BEGIN
     IDS_COMM_TIMEOUT_TITLE  "Serial Communication Timeout"
     IDS_EDIT_CODEPLUG_DATA  "Edit Codeplug Data"
     IDS_NO_CODEPLUG         "Codeplug data hasn't been loaded. Please open it from file or upload from controller"
+    IDS_NRC_RECEIVED_TITLE  "Negative Response Code received"
+    IDS_NRC_RECEIVED        "NRC has been received from controller"
     IDC_PARATNC_CONFIG_VS2005 "PARATNC_CONFIG_VS2005"
+    IDS_NRC_GENERAL_REJECT  "NRC General Reject has been received"
+    IDS_NRC_SERVICE_NOT_SUPPORTED 
+                            "Requested Diagnostics Service is not supported by the controller"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_COMM_TIMEOUT_MESSAGE_GETVER "Cannot get controller firmware version"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NRC_SUBFUNCTION_NOT_SUPPORTED 
+                            "Requested Subfunction is not supported by the controller"
+    IDS_NRC_INCORRECT_MESSAGE_LN_FORMAT 
+                            "Message lenght or structure is not recognized by the controller"
+    IDS_NRC_RESPONSE_TOO_LONG 
+                            "A transmission buffer in the controller is too small for a response"
+    IDS_NRC_REPEAT_REQUEST  "Controller is too busy and cannot handle request at the moment"
+    IDS_NRC_CONDITIONS_NOT_CORRECT 
+                            "Internal state of the controller prohibits diagnostics request exec"
+    IDS_NRC_REQUEST_SEQ_ERROR "Sequence Error"
+    IDS_NRC_REQ_OUT_OF_RANGE 
+                            "Request is out of range, ie. trying to read non existing DID"
+    IDS_NRC_SECURITY_ACCESS_DENIED "Security access denied"
+    IDS_NRC_INVALID_KEY     "Unlocking security access failed due to wrong key"
+    IDS_NRC_EXCEED_NUMBER_OF_ATEMPTS 
+                            "Too many failed tries to unlock security access"
+    IDS_NRC_DOWNLOAD_NOT_ACCEPTED "Data file transfer rejected"
+    IDS_NRC_GENERAL_PROGRAMMING_FAIL 
+                            "Critical error while erasing or programming flash memory"
 END
 
 #endif    // English (U.S.) resources

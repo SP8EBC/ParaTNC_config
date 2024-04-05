@@ -5,6 +5,7 @@
 #include "Resource.h"
 
 #include <iostream>
+#include "assert.h"
 
 DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param) 
 {
@@ -21,6 +22,8 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 			// try to signalize the sync mutex
 			DWORD result = WaitForSingleObject(context->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
+			assert(result != WAIT_ABANDONED);
+
 			// check the result
 			if (result == WAIT_OBJECT_0) 
 			{
@@ -30,7 +33,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetVersion(LPVOID param)
 				// send request to controller
 				context->lpcGetVersionAndId->sendRequest();
 
-				context->lpcGetVersionAndId->receiveSynchronously();
+				context->lpcGetVersionAndId->receiveSynchronously(NULL);
 
 				//// kiss protocol version
 				context->versionAndIdResult.kissVersion = context->lpcGetVersionAndId->getProtocolVersion();

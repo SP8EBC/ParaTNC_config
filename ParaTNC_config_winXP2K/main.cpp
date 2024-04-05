@@ -202,7 +202,6 @@ LRESULT CALLBACK MainDialogProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	PAINTSTRUCT ps;
 	HDC hdc;
 	TCHAR did[6] = {0u};
-	int didNumber;
 
 	switch (message)
 	{

@@ -42,7 +42,7 @@ void SrvGetVersionAndId::sendRequest() {
 
 }
 
-void SrvGetVersionAndId::receiveSynchronously() {
+void SrvGetVersionAndId::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
 		std::vector<uint8_t> response;
 
@@ -57,6 +57,11 @@ void SrvGetVersionAndId::receiveSynchronously() {
 			{
 				std::cout << "E = SrvGetVersionAndId::receiveSynchronously, NRC received: 0x" << 
 					std::hex << response[2] << std::dec << std::endl;
+
+				if (cbk != NULL) 
+				{
+					cbk(response[2]);
+				}
 			}
 			else if (frameType == KISS_VERSION_AND_ID) 
 			{

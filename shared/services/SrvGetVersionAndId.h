@@ -54,7 +54,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	virtual ~SrvGetVersionAndId();
 	SrvGetVersionAndId& operator=(const SrvGetVersionAndId &other);

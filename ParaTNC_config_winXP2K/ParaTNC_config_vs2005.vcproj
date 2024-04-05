@@ -477,10 +477,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\shared\kiss_communication_nrc_t.h"
-				>
-			</File>
-			<File
 				RelativePath="..\shared\kiss_communication_service_ids.h"
 				>
 			</File>

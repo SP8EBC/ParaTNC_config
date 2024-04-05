@@ -19,6 +19,9 @@ struct ProtocolCommBackgroundThread_ReadDid_Context {
 	// callback invoked to notify that correct response from controller has been received
 	VOID(*lpfnUpdateGuiCallback)(DidResponse);
 
+	// calback invoked when NRC is received
+	IService_NegativeResponseCodeCbk lpfnNrcCbk;
+
 	// pointer to a receive handler, which is responsible for performing low-level srial i/o
 	// and decoding data received from the controller
 	SrvReadDid * lpcReadDid;
@@ -26,6 +29,7 @@ struct ProtocolCommBackgroundThread_ReadDid_Context {
 	ProtocolCommBackgroundThread_ReadDid_Context::ProtocolCommBackgroundThread_ReadDid_Context()
 	{
 		lpfnUpdateGuiCallback = NULL;
+		lpfnNrcCbk = NULL;
 	}
 };
 
