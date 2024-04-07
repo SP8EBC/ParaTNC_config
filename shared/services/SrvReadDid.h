@@ -70,7 +70,7 @@ public:
 	 * Returns
 	 * @return
 	 */
-	std::vector<uint8_t> getRawResponse();
+	std::vector<uint8_t>& getRawResponse();
 
 	SrvReadDid();
 	virtual ~SrvReadDid();

@@ -5,6 +5,8 @@
 
 #include "../shared/types/DidResponse.h"
 
+typedef VOID(*CBKRDIDRDY)(DidResponse, const std::vector<uint8_t> &);
+
 struct ProtocolCommBackgroundThread_ReadDid_Context {
 
 	// mutex declared in 'ProtocolCommBackgroundThread' 
@@ -17,7 +19,7 @@ struct ProtocolCommBackgroundThread_ReadDid_Context {
 	int didNumber;
 
 	// callback invoked to notify that correct response from controller has been received
-	VOID(*lpfnUpdateGuiCallback)(DidResponse);
+	CBKRDIDRDY lpfnUpdateGuiCallback;
 
 	// calback invoked when NRC is received
 	IService_NegativeResponseCodeCbk lpfnNrcCbk;

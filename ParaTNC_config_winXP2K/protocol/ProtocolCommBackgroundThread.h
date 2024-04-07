@@ -71,7 +71,7 @@ public:
 	// dialog if it has been created. information returned by
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
-	BOOL commReadDidAndUpdateGui(VOID(*lpfnUpdateGuiCallback)(DidResponse),
+	BOOL commReadDidAndUpdateGui(CBKRDIDRDY lpfnUpdateGuiCallback,
 								 IService_NegativeResponseCodeCbk lpfnNrcCalback,
 								 int didNumber);
 	BOOL commRunningConfigAndUpdateGui(VOID(*lpfnNewConfigCallback)(VOID),

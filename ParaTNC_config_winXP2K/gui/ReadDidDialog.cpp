@@ -25,6 +25,7 @@ HWND		hReadDidDialog_StaticId				= NULL;	// Static text to display selected data
 HWND		hReadDidDialog_StaticRawHexResponse	= NULL;	// Raw response received from RS232
 HWND		hReadDidDialog_CheckboxUnscaled		= NULL;
 
+UINT		ReadDidDialog_StateCheckboxUnscaled = 0;
 UINT		ReadDidDialog_SelectedListIndex		= 0;		
 UINT		ReadDidDialog_SelectedDid			= 0;	// DID selected on the list
 UINT		ReadDidDialog_ListIdxOfQueriedDid	= 0;
@@ -54,7 +55,10 @@ static VOID	ReadDidDialog_FillDialogWithDiagDescription()
 //
 //  FUNCTION: ReadDidDialog_NrcCallback(uint16_t nrc)
 //
-//  PURPOSE: Display error message box that a NRC is received
+//	PARAMETERS:
+//				uint16_t nrc
+// 
+//  PURPOSE: Display error message box with an info, that a NRC is received
 //
 //
 //
@@ -62,7 +66,6 @@ static VOID ReadDidDialog_NrcCallback(uint16_t nrc)
 {
 	assert(hReadDidDialog != NULL);
 
-	//BOOL intres = IS_INTRESOURCE(IDS_COMM_TIMEOUT_TITLE);
 	WORD LangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	
 	TCHAR szTitle[64];
@@ -76,6 +79,9 @@ static VOID ReadDidDialog_NrcCallback(uint16_t nrc)
 
 //
 //  FUNCTION: ReadDidDialog_SetDialogControlsToDidInformation(int didIndex)
+//
+//	PARAMETERS:
+//				int didIndex
 //
 //  PURPOSE: Updates EDITTEXT controls with information about selected did
 //
@@ -132,8 +138,81 @@ static VOID ReadDidDialog_SetDialogControlsWithDidInformation(int didIndex)
 	}
 }
 
+static VOID ReadDidDialog_Update_RenderValue(int dialogItem, int32_t value, const DDDD& definition, const bool displayUnscaled)
+{
+	TCHAR buffer[64];
+	memset(buffer, 0x00, sizeof(TCHAR) * 64);
+
+	assert(dialogItem != 0);
+
+	BYTE precision = definition.precisionAfterDecimal;
+
+	if (definition.isScaled() && !displayUnscaled)
+	{
+		float scaledValue = definition.scale(value);
+
+		if (precision == 1)
+		{
+			_sntprintf_s(buffer, 64, 64, _T("%.1f"), scaledValue);
+		}
+		else if (precision == 2)
+		{
+			_sntprintf_s(buffer, 64, 64, _T("%.2f"), scaledValue);
+		}
+		else
+		{
+			_sntprintf_s(buffer, 64, 64, _T("%d"), (int32_t)scaledValue);
+		}
+	}
+	else
+	{
+		_sntprintf_s(buffer, 64, 64, _T("%d"), value);
+	}
+
+	SetDlgItemText(hReadDidDialog, dialogItem, (LPCWSTR)buffer);
+}
+
+static VOID ReadDidDialog_Update_RenderValue(int dialogItem, float value, const DDDD& definition, const bool displayUnscaled)
+{
+	TCHAR buffer[64];
+	memset(buffer, 0x00, sizeof(TCHAR) * 64);
+
+	assert(dialogItem != 0);
+
+	BYTE precision = definition.precisionAfterDecimal;
+	float scaledValue = 0.0f;
+
+	if (definition.isScaled() && !displayUnscaled)
+	{
+		float scaledValue = definition.scale(value);
+	}
+	else
+	{
+		float scaledValue = value;
+	}
+
+	if (precision == 1)
+	{
+		_sntprintf_s(buffer, 64, 64, _T("%.1f"), scaledValue);
+	}
+	else if (precision == 2)
+	{
+		_sntprintf_s(buffer, 64, 64, _T("%.2f"), scaledValue);
+	}
+	else
+	{
+		_sntprintf_s(buffer, 64, 64, _T("%f"), scaledValue);
+	}
+
+	SetDlgItemText(hReadDidDialog, dialogItem, (LPCWSTR)buffer);
+}
+
 //
 //  FUNCTION: ReadDidDialog_Update(DidResponse)
+//
+//	PARAMETERS:
+//				DidResponse didResponse
+//
 //
 //  PURPOSE: Updates all controls in the dialog with information read from the controller
 //
@@ -143,15 +222,22 @@ static VOID ReadDidDialog_SetDialogControlsWithDidInformation(int didIndex)
 //  WM_DESTROY		- post a quit message and return
 //
 //
-void	ReadDidDialog_Update(DidResponse didResponse)
+static VOID	ReadDidDialog_Update(DidResponse didResponse, const std::vector<uint8_t> & rawResponse)
 {
-	TCHAR buffer[64];
-	memset(buffer, 0x00, sizeof(TCHAR) * 64);
+	const int bufferSize = 100;
+	TCHAR buffer[bufferSize];
+	memset(buffer, 0x00, sizeof(TCHAR) * bufferSize);
 	const int idFromResponse = didResponse.did;
 
 	std::cout << "I = ReadDidDialog_Update, idFromResponse: 0x" << std::hex << idFromResponse << std::dec << std::endl;
 
 	const DDD & didDefinition = vDiagnosticDescription_DidDefs.at(ReadDidDialog_ListIdxOfQueriedDid);
+
+	bool notScale = false;
+	if (ReadDidDialog_StateCheckboxUnscaled == BST_CHECKED)
+	{
+		notScale = true;
+	}
 
 	if (idFromResponse == ReadDidDialog_QueriedDid)
 	{
@@ -161,55 +247,96 @@ void	ReadDidDialog_Update(DidResponse didResponse)
 			{
 			case DIDRESPONSE_DATASIZE_EMPTY:
 			case DIDRESPONSE_DATASIZE_INT8:
-				if (didDefinition.first.isScaled())
-				{
-					const float val = didDefinition.first.scale(didResponse.first.i8);
-					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
-				}
-				else
-				{
-					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i8);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
-				}
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_1ST_VALUE, didResponse.first.i8, didDefinition.first, notScale);
 
 				break;
 			case DIDRESPONSE_DATASIZE_INT16:
-				if (didDefinition.first.isScaled())
-				{
-					const float val = didDefinition.first.scale(didResponse.first.i16);
-					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_2ND_VALUE, (LPCWSTR)buffer);
-				}
-				else
-				{
-					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i16);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
-				}
+			ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_1ST_VALUE, didResponse.first.i16, didDefinition.first, notScale);
 
 				break;
 			case DIDRESPONSE_DATASIZE_INT32:
-				if (didDefinition.first.isScaled())
-				{
-					const float val = didDefinition.first.scale(didResponse.first.i32);
-					_sntprintf_s(buffer, 64, 64, _T("%f"), val);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_3RD_VALUE, (LPCWSTR)buffer);
-				}
-				else
-				{
-					_sntprintf_s(buffer, 64, 64, _T("%d"), (int)didResponse.first.i32);
-					SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
-				}
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_1ST_VALUE, didResponse.first.i32, didDefinition.first, notScale);
 
 				break;
 			case DIDRESPONSE_DATASIZE_FLOAT:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_1ST_VALUE, didResponse.first.f, didDefinition.first, notScale);
 				break;
 			case DIDRESPONSE_DATASIZE_STRING:
-				_mbstowcs_l(buffer, didResponse.first.str, 64, localeEnglish);
+				_mbstowcs_l(buffer, didResponse.first.str, bufferSize, localeEnglish);
+				SetDlgItemText(hReadDidDialog, IDC_RDID_EDIT_1ST_VALUE, (LPCWSTR)buffer);
 				break;
-			}
+			} // switch(didResponse.firstSize) 
+		} // if (didDefinition.first.isUsed())
+
+		if (didDefinition.second.isUsed())
+		{
+			// can't send more than one string in single DID
+			assert(didResponse.secondSize != DIDRESPONSE_DATASIZE_STRING);
+
+			switch(didResponse.secondSize) 
+			{
+			case DIDRESPONSE_DATASIZE_EMPTY:
+			case DIDRESPONSE_DATASIZE_INT8:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_2ND_VALUE, didResponse.second.i8, didDefinition.second, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT16:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_2ND_VALUE, didResponse.second.i16, didDefinition.second, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT32:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_2ND_VALUE, didResponse.second.i32, didDefinition.second, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_FLOAT:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_2ND_VALUE, didResponse.second.f, didDefinition.second, notScale);
+				break;
+			} // switch(didResponse.secondSize) 
+		} // if (didDefinition.second.isUsed())
+
+		if (didDefinition.third.isUsed())
+		{
+			// can't send more than one string in single DID
+			assert(didResponse.thirdSize != DIDRESPONSE_DATASIZE_STRING);
+
+			switch(didResponse.thirdSize) 
+			{
+			case DIDRESPONSE_DATASIZE_EMPTY:
+			case DIDRESPONSE_DATASIZE_INT8:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_3RD_VALUE, didResponse.third.i8, didDefinition.third, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT16:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_3RD_VALUE, didResponse.third.i16, didDefinition.third, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_INT32:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_3RD_VALUE, didResponse.third.i32, didDefinition.third, notScale);
+
+				break;
+			case DIDRESPONSE_DATASIZE_FLOAT:
+				ReadDidDialog_Update_RenderValue(IDC_RDID_EDIT_3RD_VALUE, didResponse.second.f, didDefinition.second, notScale);
+				break;
+			} // switch(didResponse.thirdSize) 
+		} // if (didDefinition.third.isUsed())
+	} // if (idFromResponse == ReadDidDialog_QueriedDid)
+
+	memset(buffer, 0x00, sizeof(TCHAR) * bufferSize);
+	const int chrsPerB = 5;
+
+	if ((int)rawResponse.size() < (bufferSize / chrsPerB))
+	{
+		for (int i = 0; i < (int)rawResponse.size(); i++)
+		{
+			_sntprintf_s((buffer + (i * chrsPerB)), bufferSize - (i * chrsPerB), chrsPerB, _T("0x%02X "), rawResponse[i]);
 		}
 	}
+	else
+	{
+		_sntprintf_s(buffer, bufferSize, bufferSize, _T("Response to long to display here"));
+	}
+
+	SetDlgItemText(hReadDidDialog, IDC_RDID_STATIC_RAW, (LPCWSTR)buffer);
 }
 
 //
@@ -309,6 +436,7 @@ INT_PTR CALLBACK		ReadDidDialog(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 				std::cout << "D = ReadDidDialog_ListProc, IDREADDID, ReadDidDialog_SelectedDid: 0x" << std::hex << ReadDidDialog_SelectedDid << std::dec << std::endl;
 				ReadDidDialog_ListIdxOfQueriedDid = ReadDidDialog_SelectedListIndex;
 				ReadDidDialog_QueriedDid = ReadDidDialog_SelectedDid;
+				ReadDidDialog_StateCheckboxUnscaled = IsDlgButtonChecked(hReadDidDialog, IDC_RDID_CHECK_UNSCALED);
 				lpsKissProtocolComm->commReadDidAndUpdateGui(ReadDidDialog_Update, ReadDidDialog_NrcCallback, ReadDidDialog_QueriedDid);
 				return (INT_PTR)TRUE;
 			}

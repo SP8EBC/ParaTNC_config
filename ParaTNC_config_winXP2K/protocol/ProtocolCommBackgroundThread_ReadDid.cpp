@@ -38,7 +38,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_ReadDid(LPVOID param)
 
 				if (lpcContext->lpfnUpdateGuiCallback != NULL)
 				{
-					lpcContext->lpfnUpdateGuiCallback(response);
+					lpcContext->lpfnUpdateGuiCallback(response, lpcContext->lpcReadDid->getRawResponse());
 				}
 			}
 			catch (TimeoutE & ex)

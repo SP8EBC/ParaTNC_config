@@ -39,6 +39,11 @@ struct DiagnosticDescription_DidData{
 
 	int scalingD;
 
+	// this parameter has sense only if DID response has
+	// DIDRESPONSE_DATASIZE_FLOAT format or it has integer
+	// format and scalingD set to anything but 1 or -1
+	BYTE precisionAfterDecimal;
+
 	// name displayed as a text description of this data
 	TCHAR name[DIAGNOSTICDESCRIPTION_DATA_NAME_LN];
 

@@ -78,7 +78,7 @@ BOOL ProtocolCommBackgroundThread::getVersion(LPCSV p)
 }
 
 BOOL ProtocolCommBackgroundThread::commReadDidAndUpdateGui(
-										VOID(*lpfnUpdateGuiCallback)(DidResponse), 
+										CBKRDIDRDY lpfnUpdateGuiCallback, 
 										IService_NegativeResponseCodeCbk lpfnNrcCalback,
 										int didNumber) 
 {
