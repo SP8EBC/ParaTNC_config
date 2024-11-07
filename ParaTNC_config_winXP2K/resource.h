@@ -13,13 +13,30 @@
 #define IDS_NO_CODEPLUG                 106
 #define IDI_PARATNC_CONFIG_VS2005       107
 #define IDD_MAIN                        107
+#define IDS_NRC_RECEIVED_TITLE          107
 #define IDI_SMALL                       108
+#define IDS_NRC_RECEIVED                108
 #define IDC_PARATNC_CONFIG_VS2005       109
+#define IDS_NRC_GENERAL_REJECT          110
+#define IDS_NRC_SERVICE_NOT_SUPPORTED   111
+#define IDS_NRC_SUBFUNCTION_NOT_SUPPORTED 112
+#define IDS_NRC_INCORRECT_MESSAGE_LN_FORMAT 113
+#define IDS_NRC_RESPONSE_TOO_LONG       114
+#define IDS_NRC_REPEAT_REQUEST          115
+#define IDS_NRC_CONDITIONS_NOT_CORRECT  116
+#define IDS_NRC_REQUEST_SEQ_ERROR       117
+#define IDS_NRC_REQ_OUT_OF_RANGE        118
+#define IDS_NRC_SECURITY_ACCESS_DENIED  119
+#define IDS_NRC_INVALID_KEY             120
+#define IDS_NRC_EXCEED_NUMBER_OF_ATEMPTS 121
+#define IDS_NRC_DOWNLOAD_NOT_ACCEPTED   122
+#define IDS_NRC_GENERAL_PROGRAMMING_FAIL 123
 #define IDR_MAINFRAME                   128
 #define IDD_DIALOG1                     129
 #define IDS_COMM_TIMEOUT_MESSAGE_GETVER 130
 #define IDD_EDIT_CODEPLUG               131
 #define IDD_EDIT_CODEPLUG_BASIC         131
+#define IDD_DIAG_READ_DID               132
 #define IDC_CHECK1                      1000
 #define IDC_BUTTON1                     1001
 #define IDC_BUTTON_START_SERIAL         1002
@@ -54,6 +71,31 @@
 #define IDC_EC_T_VAL_PERIOD_WX          1032
 #define IDC_EC_T_VAL_PERIOD_BEACON      1033
 #define IDC_EC_T_PERIOD_BEACON          1034
+#define IDC_RDID_LIST                   1035
+#define IDC_RDID_EDIT_DIDNAME           1036
+#define IDC_EDIT1                       1037
+#define IDC_RDID_EDIT_DIDDESCR          1037
+#define IDC_EDIT2                       1038
+#define IDC_RDID_EDIT_1ST_NAME          1038
+#define IDC_RDID_EDIT_2ND_NAME          1039
+#define IDC_EDIT4                       1040
+#define IDC_RDID_EDIT_2ND_VALUE         1040
+#define IDC_RDID_EDIT_3RD_NAME          1041
+#define IDC_RDID_EDIT_1ST_VALUE         1042
+#define IDC_EDIT5                       1043
+#define IDC_RDID_EDIT_3RD_VALUE         1043
+#define IDREADDID                       1044
+#define IDREADALLDID                    1045
+#define IDC_RDID_STATIC                 1046
+#define IDC_RDID_STATIC2                1047
+#define IDC_RDID_STATIC3                1048
+#define IDC_RDID_STATIC_IDLABEL         1049
+#define IDC_RDID_STATIC_ID              1050
+#define IDC_CHECK2                      1051
+#define IDC_RDID_CHECK_RAWDISP          1051
+#define IDC_RDID_CHECK_UNSCALED         1051
+#define IDC_RDID_STATIC_RAWRESP         1052
+#define IDC_RDID_STATIC_RAW             1053
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -61,9 +103,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        132
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1035
+#define _APS_NEXT_CONTROL_VALUE         1054
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

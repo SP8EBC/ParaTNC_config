@@ -159,7 +159,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		// send FEND at begining
 		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
 
-		WriteFile(serialPort, &frame[0], frame.size(), &numberOfBytesWritten, NULL);
+		WriteFile(serialPort, &frame[0], (DWORD)frame.size(), &numberOfBytesWritten, NULL);
 
 		WriteFile(serialPort, FEND, 1, &numberOfBytesWritten, NULL);
 

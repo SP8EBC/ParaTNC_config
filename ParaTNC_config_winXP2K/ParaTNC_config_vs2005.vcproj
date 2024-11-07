@@ -235,10 +235,18 @@
 					RelativePath=".\gui\EditCodeplugDialog_Basic.cpp"
 					>
 				</File>
+				<File
+					RelativePath=".\gui\ReadDidDialog.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="files"
 				>
+				<File
+					RelativePath=".\files\DiagnosticDescription.cpp"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="protocol"
@@ -385,16 +393,28 @@
 					RelativePath=".\gui\EditCodeplugDialog_Basic.h"
 					>
 				</File>
+				<File
+					RelativePath=".\gui\ReadDidDialog.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="files"
 				>
+				<File
+					RelativePath=".\files\DiagnosticDescription.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="types"
 				>
 				<File
 					RelativePath=".\types\ControllerSoftwareVersion.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DiagnosticDescription_Did.h"
 					>
 				</File>
 			</Filter>
@@ -454,10 +474,6 @@
 			</File>
 			<File
 				RelativePath="..\shared\kiss_communication.h"
-				>
-			</File>
-			<File
-				RelativePath="..\shared\kiss_communication_nrc_t.h"
 				>
 			</File>
 			<File
@@ -649,6 +665,10 @@
 				</File>
 				<File
 					RelativePath="..\shared\types\CurrentConfigRegion.h"
+					>
+				</File>
+				<File
+					RelativePath="..\shared\types\DidResponse.h"
 					>
 				</File>
 				<File

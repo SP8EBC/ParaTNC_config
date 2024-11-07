@@ -6,6 +6,7 @@
 #include "../shared/exceptions/TimeoutE.h"
 
 #include <iostream>
+#include "assert.h"
 
 DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 {
@@ -19,6 +20,8 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 		// try to signalize the sync mutex
 		DWORD result = WaitForSingleObject(lpcContext->hMutex, CONFIG_WAITFORSINGLEOBJECT_COMM_THREADMUTEX);
 
+		assert(result != WAIT_ABANDONED);
+
 		// check the result
 		if (result == WAIT_OBJECT_0) 
 		{
@@ -29,7 +32,7 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 			lpcContext->lpcGetRunningConfig->sendRequest();
 
 			// recieve a response from controller and use a callback internally here
-			lpcContext->lpcGetRunningConfig->receiveSynchronously();
+			lpcContext->lpcGetRunningConfig->receiveSynchronously(NULL);
 
 			// check if CRC checksum is correct
 			if (lpcContext->lpcGetRunningConfig->isValidatedOk()) 
@@ -65,6 +68,8 @@ DWORD WINAPI ProtocolCommBackgroundThread_GetRunningConfig(LPVOID param)
 				std::cout << "E = ProtocolCommBackgroundThread_GetRunningConfig, configuration data corrupted!" << std::endl;
 		
 			}
+
+			ReleaseMutex(lpcContext->hMutex);
 			
 		}
 		else

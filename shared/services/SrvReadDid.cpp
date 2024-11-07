@@ -29,26 +29,31 @@ void SrvReadDid::sendRequest() {
 	}
 }
 
-void SrvReadDid::receiveSynchronously() {
+void SrvReadDid::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
-		std::vector<uint8_t> response;
+		this->responseData.clear();
 
 		// receive a response
-		s->receiveKissFrame(response);
+		s->receiveKissFrame(this->responseData);
 
-		if (response.size() > 1) {
+		if (this->responseData.size() > 1) {
 			// get frame type, which was received
-			uint8_t frameType = response[1];
+			uint8_t frameType = this->responseData[1];
 
 			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) 
 			{
 				std::cout << "E = SrvReadDid::receiveSynchronously, NRC received: 0x" << 
-					std::hex << response[2] << std::dec << std::endl;
+					std::hex << this->responseData[2] << std::dec << std::endl;
+
+				if (cbk != NULL)
+				{
+					cbk(this->responseData[2]);
+				}
 			}
 			else if (frameType == KISS_READ_DID_RESP)
 			{
 				// use callback manualy
-				this->callback(&response);
+				this->callback(&this->responseData);
 			}
 			else
 			{
@@ -81,12 +86,17 @@ void SrvReadDid::sendRequestForDid(uint16_t did) {
 
 }
 
+std::vector<uint8_t>& SrvReadDid::getRawResponse()
+{
+	return this->responseData;
+}
+
 void SrvReadDid::callback(
 		const std::vector<unsigned char, std::allocator<unsigned char> > *frame) {
 
 	std::vector<uint8_t>::const_iterator it = frame->begin();
 
-	std::cout << "I = SrvReadDid::callback";
+	std::cout << "I = SrvReadDid::callback" << std::endl;
 
 	int8_t generic_8;
 	int16_t generic_16;
@@ -109,7 +119,7 @@ void SrvReadDid::callback(
 		const uint8_t did_msb = *it;
 		it++;
 
-		this->didResponse.did = did_lsb | (did_msb << 16);
+		this->didResponse.did = did_lsb | (did_msb << 8);
 
 		const uint8_t size_byte = *it;
 
@@ -243,6 +253,8 @@ void SrvReadDid::callback(
 				this->didResponse.second.i32 = generic_32;
 
 				break;
+			default:
+				this->didResponse.secondSize = DIDRESPONSE_DATASIZE_EMPTY;
 			}
 
 			switch (third_size) {
@@ -271,6 +283,8 @@ void SrvReadDid::callback(
 				this->didResponse.third.i32 = generic_32;
 
 				break;
+			default:
+				this->didResponse.thirdSize = DIDRESPONSE_DATASIZE_EMPTY;
 			}
 		}
 

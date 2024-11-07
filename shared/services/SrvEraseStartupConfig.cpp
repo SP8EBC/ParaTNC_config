@@ -34,7 +34,7 @@ SrvEraseStartupConfig::SrvEraseStartupConfig() {
 SrvEraseStartupConfig::~SrvEraseStartupConfig() {
 }
 
-void SrvEraseStartupConfig::receiveSynchronously() {
+void SrvEraseStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
 		std::vector<uint8_t> response;
 

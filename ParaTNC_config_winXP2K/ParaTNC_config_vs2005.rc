@@ -136,6 +136,34 @@ BEGIN
     LTEXT           "4 min",IDC_EC_T_VAL_PERIOD_BEACON,353,122,21,8
 END
 
+IDD_DIAG_READ_DID DIALOGEX 0, 0, 393, 226
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Diagnostics: Read Data by ID"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Read",IDREADDID,97,190,97,29
+    PUSHBUTTON      "Cancel",IDCANCEL,336,190,50,29
+    LISTBOX         IDC_RDID_LIST,7,7,79,212,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_RDID_EDIT_DIDNAME,97,7,214,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_RDID_EDIT_DIDDESCR,97,27,289,30,ES_MULTILINE | ES_READONLY | WS_VSCROLL
+    EDITTEXT        IDC_RDID_EDIT_1ST_NAME,101,72,89,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_RDID_EDIT_2ND_NAME,200,72,89,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_RDID_EDIT_3RD_NAME,299,72,87,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_RDID_EDIT_1ST_VALUE,101,87,89,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_RDID_EDIT_2ND_VALUE,200,87,89,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_RDID_EDIT_3RD_VALUE,299,87,87,12,ES_AUTOHSCROLL
+    GROUPBOX        "1st Data",IDC_RDID_STATIC,97,62,97,44
+    LTEXT           "ID [hex]",IDC_RDID_STATIC_IDLABEL,317,7,28,12,SS_CENTERIMAGE
+    GROUPBOX        "2nd Data",IDC_RDID_STATIC2,196,62,97,44
+    GROUPBOX        "3rd Data",IDC_RDID_STATIC3,295,62,93,44
+    PUSHBUTTON      "Read All && Make Report",IDREADALLDID,196,190,97,29
+    LTEXT           "1234",IDC_RDID_STATIC_ID,346,7,40,12,SS_CENTERIMAGE | SS_SUNKEN
+    CONTROL         "Display unscaled raw values",IDC_RDID_CHECK_UNSCALED,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,97,175,196,11
+    GROUPBOX        "Raw response received from controller via RS232",IDC_RDID_STATIC_RAWRESP,97,112,291,59
+    LTEXT           "Hex raw response",IDC_RDID_STATIC_RAW,101,125,285,38,SS_SUNKEN
+END
+
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -208,6 +236,36 @@ BEGIN
         HORZGUIDE, 139
         HORZGUIDE, 147
     END
+
+    IDD_DIAG_READ_DID, DIALOG
+    BEGIN
+        VERTGUIDE, 97
+        VERTGUIDE, 101
+        VERTGUIDE, 190
+        VERTGUIDE, 194
+        VERTGUIDE, 196
+        VERTGUIDE, 200
+        VERTGUIDE, 289
+        VERTGUIDE, 293
+        VERTGUIDE, 295
+        VERTGUIDE, 299
+        VERTGUIDE, 311
+        VERTGUIDE, 317
+        VERTGUIDE, 386
+        VERTGUIDE, 388
+        VERTGUIDE, 392
+        HORZGUIDE, 7
+        HORZGUIDE, 19
+        HORZGUIDE, 62
+        HORZGUIDE, 72
+        HORZGUIDE, 87
+        HORZGUIDE, 106
+        HORZGUIDE, 112
+        HORZGUIDE, 171
+        HORZGUIDE, 180
+        HORZGUIDE, 190
+        HORZGUIDE, 219
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -223,12 +281,40 @@ BEGIN
     IDS_COMM_TIMEOUT_TITLE  "Serial Communication Timeout"
     IDS_EDIT_CODEPLUG_DATA  "Edit Codeplug Data"
     IDS_NO_CODEPLUG         "Codeplug data hasn't been loaded. Please open it from file or upload from controller"
+    IDS_NRC_RECEIVED_TITLE  "Negative Response Code received"
+    IDS_NRC_RECEIVED        "NRC has been received from controller"
     IDC_PARATNC_CONFIG_VS2005 "PARATNC_CONFIG_VS2005"
+    IDS_NRC_GENERAL_REJECT  "NRC General Reject has been received"
+    IDS_NRC_SERVICE_NOT_SUPPORTED 
+                            "Requested Diagnostics Service is not supported by the controller"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_COMM_TIMEOUT_MESSAGE_GETVER "Cannot get controller firmware version"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NRC_SUBFUNCTION_NOT_SUPPORTED 
+                            "Requested Subfunction is not supported by the controller"
+    IDS_NRC_INCORRECT_MESSAGE_LN_FORMAT 
+                            "Message lenght or structure is not recognized by the controller"
+    IDS_NRC_RESPONSE_TOO_LONG 
+                            "A transmission buffer in the controller is too small for a response"
+    IDS_NRC_REPEAT_REQUEST  "Controller is too busy and cannot handle request at the moment"
+    IDS_NRC_CONDITIONS_NOT_CORRECT 
+                            "Internal state of the controller prohibits diagnostics request exec"
+    IDS_NRC_REQUEST_SEQ_ERROR "Sequence Error"
+    IDS_NRC_REQ_OUT_OF_RANGE 
+                            "Request is out of range, ie. trying to read non existing DID"
+    IDS_NRC_SECURITY_ACCESS_DENIED "Security access denied"
+    IDS_NRC_INVALID_KEY     "Unlocking security access failed due to wrong key"
+    IDS_NRC_EXCEED_NUMBER_OF_ATEMPTS 
+                            "Too many failed tries to unlock security access"
+    IDS_NRC_DOWNLOAD_NOT_ACCEPTED "Data file transfer rejected"
+    IDS_NRC_GENERAL_PROGRAMMING_FAIL 
+                            "Critical error while erasing or programming flash memory"
 END
 
 #endif    // English (U.S.) resources

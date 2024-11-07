@@ -105,7 +105,7 @@ void SrvGetRunningConfig::sendRequest() {
 
 }
 
-void SrvGetRunningConfig::receiveSynchronously() {
+void SrvGetRunningConfig::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 
 	bool hasFirstFrame = false;
 

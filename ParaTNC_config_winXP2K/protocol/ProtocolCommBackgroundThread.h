@@ -40,7 +40,7 @@ private:
 	// mutex synchronizing exclusive access to communication
 	HANDLE hThreadMutex;
 
-	HANDLE hServiceSyncEvent;
+	//HANDLE hServiceSyncEvent;
 
 	// map with service callbacks
 	CBKMAP callbackMap;
@@ -71,7 +71,9 @@ public:
 	// dialog if it has been created. information returned by
 	// the controller are stored 
 	BOOL commVersionAndUpdateGui(HWND mainWindow, HWND editCodeplugWindow);
-	BOOL commReadDidAndUpdateGui(HWND mainWindow, HWND didWindow, int didNumber);
+	BOOL commReadDidAndUpdateGui(CBKRDIDRDY lpfnUpdateGuiCallback,
+								 IService_NegativeResponseCodeCbk lpfnNrcCalback,
+								 int didNumber);
 	BOOL commRunningConfigAndUpdateGui(VOID(*lpfnNewConfigCallback)(VOID),
 										std::vector<uint8_t> * lpvOutConfigData);
 	

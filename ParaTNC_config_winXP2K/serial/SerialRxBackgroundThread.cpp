@@ -31,7 +31,7 @@ DWORD WINAPI SerialRxBackgroundThread::EntryPoint(LPVOID param) {
 	}
 	catch (TimeoutE & ex) {
 		// timeout while receiving a frame, something is wrong
-
+		(void)ex;
 		// exit from the main loop
 		std::cout << "E = SerialWorker::worker, timeout" << std::endl;
 		return 1;

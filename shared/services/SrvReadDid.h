@@ -58,7 +58,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	/**
 	 * Sends request to read given DID
@@ -70,7 +70,7 @@ public:
 	 * Returns
 	 * @return
 	 */
-	std::vector<uint8_t> getRawResponse();
+	std::vector<uint8_t>& getRawResponse();
 
 	SrvReadDid();
 	virtual ~SrvReadDid();

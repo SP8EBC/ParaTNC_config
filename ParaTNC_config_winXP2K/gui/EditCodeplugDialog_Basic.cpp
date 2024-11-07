@@ -95,8 +95,8 @@ static void EditCodeplugDialog_Basic_Load()
 	uint8_t ssid = lpcCodeplug_ConfigDecode->getSsid();
 	float longitude = lpcCodeplug_ConfigDecode->getLongitude();
 	float latitude = lpcCodeplug_ConfigDecode->getLatitude();
-	bool true_for_n_false_for_s = lpcCodeplug_ConfigDecode->getNorS();
-	bool true_for_e_false_for_w = lpcCodeplug_ConfigDecode->getEorW();
+	CardinalDirection n_or_s = lpcCodeplug_ConfigDecode->getNorS();
+	CardinalDirection e_or_w = lpcCodeplug_ConfigDecode->getEorW();
 	AprsSymbol symbol = lpcCodeplug_ConfigDecode->getSymbol();
 	AprsPath path = lpcCodeplug_ConfigDecode->getPath();
 	bool beacon_at_stratup = lpcCodeplug_ConfigDecode->getBeaconAtStartup();
@@ -178,13 +178,43 @@ static void EditCodeplugDialog_Basic_Load()
 	_mbstowcs_l(beacon_description_wide, float_to_string_buffer, FLOAT_TO_STRING_BUFFER_LN, localeEnglish);
 	SetDlgItemText(hEditCodeplugDialog_Basic, IDC_EC_EDIT_LONGITUDE, beacon_description_wide);
 
-	if (true_for_e_false_for_w)
+	if (n_or_s == NORTH)
 	{
-		SendMessage(hEditCodeplugDialog_Basic_ComboWE, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);		
+		SendMessage(hEditCodeplugDialog_Basic_ComboNS, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);		
 	}
-	else
+	else if (n_or_s == SOUTH)
+	{
+		SendMessage(hEditCodeplugDialog_Basic_ComboNS, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);	
+	}
+
+	if (e_or_w == EAST)
+	{
+		SendMessage(hEditCodeplugDialog_Basic_ComboWE, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);	
+	}
+	else if (e_or_w == WEST)
 	{
 		SendMessage(hEditCodeplugDialog_Basic_ComboWE, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);	
+	}
+
+	// path
+	switch (path)
+	{
+		case PATH_NOPATH: SendMessage(hEditCodeplugDialog_Basic_ComboDigipath, CB_SETCURSEL, (WPARAM)0, (LPARAM)0);	break;
+		case PATH_WIDE11: SendMessage(hEditCodeplugDialog_Basic_ComboDigipath, CB_SETCURSEL, (WPARAM)1, (LPARAM)0);	break;
+		case PATH_WIDE21: SendMessage(hEditCodeplugDialog_Basic_ComboDigipath, CB_SETCURSEL, (WPARAM)2, (LPARAM)0);	break;
+		case PATH_WIDE11_WIDE21: SendMessage(hEditCodeplugDialog_Basic_ComboDigipath, CB_SETCURSEL, (WPARAM)2, (LPARAM)0);	break;
+		case PATH_WIDE22: SendMessage(hEditCodeplugDialog_Basic_ComboDigipath, CB_SETCURSEL, (WPARAM)3, (LPARAM)0);	break;
+	}
+
+	// symbol aka icon
+	switch (symbol) 
+	{
+	case SYMBOL_DIGI: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 0, (LPARAM)0); break;
+	case SYMBOL_WIDE1_DIGI: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 1, (LPARAM)0); break;
+	case SYMBOL_HOUSE: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 2, (LPARAM)0); break;
+	case SYMBOL_RXIGATE: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 4, (LPARAM)0); break;
+	case SYMBOL_IGATE: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 3, (LPARAM)0); break;
+	case SYMBOL_SAILBOAT: SendMessage(hEditCodeplugDialog_Basic_ComboSymbol, CB_SETCURSEL, 5, (LPARAM)0); break;
 	}
 }
 
