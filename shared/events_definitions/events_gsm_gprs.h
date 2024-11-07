@@ -1,0 +1,16 @@
+/*
+ * events_gsm_gprs.h
+ *
+ *  Created on: Jul 28, 2024
+ *      Author: mateusz
+ */
+
+#ifndef EVENTS_DEFINITIONS_EVENTS_GSM_GPRS_H_
+#define EVENTS_DEFINITIONS_EVENTS_GSM_GPRS_H_
+
+
+#define EVENTS_GSM_GPRS_ERR_APN_CONFIGURATION_MISSING		(0x01U)
+#define EVENTS_GSM_GPRS_WARN_ASYNC_MSG_DETECTED				(0x02U)
+
+
+#endif /* EVENTS_DEFINITIONS_EVENTS_GSM_GPRS_H_ */

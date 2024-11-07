@@ -26,6 +26,7 @@ SUBDIRS := \
 shared/config/decode \
 shared/config/encode \
 shared/crc \
+shared \
 shared/exceptions \
 shared/services \
 src \

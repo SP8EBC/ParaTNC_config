@@ -12,10 +12,13 @@
 #include "../shared/services/SrvEraseStartupConfig.h"
 #include "../shared/services/SrvSendStartupConfig.h"
 #include "../shared/services/SrvReadDid.h"
+#include "../shared/services/SrvReadMemory.h"
 
 #include "../shared/config/decode/DecodeVer0.h"
 
 #include "../shared/kiss_communication_service_ids.h"
+
+#include "../shared/event_log.h"
 
 std::map<uint8_t, IService*> callbackMap;
 
@@ -26,6 +29,7 @@ SrvGetVersionAndId srvGetVersion;
 SrvEraseStartupConfig srvEraseConfig;
 SrvSendStartupConfig srvSendStartupConfig(128);
 SrvReadDid srvReadDid;
+SrvReadMemory srvReadMemory;
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -39,9 +43,9 @@ IConfigDecode * decode;
 
 const uint16_t did_list[] = {
 						0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
-						0x1500U, 0x1501U, 0x1502U, 0x1503U, 0x1504U, 0x1505U,
-						0x2000U, 0x2001U, 0x2002U, 0x2003U, 0x2004U, 0x2005U,
-						0x2006U, 0x2007U, 0x2222U, 0x5555U};
+						0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
+						0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
+						0x1500U, 0x1502U, 0x1503U, 0xF000U, 0xFF00U};
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -59,17 +63,20 @@ int main(int argc, char *argv[]) {
 	srvEraseConfig.setSerialContext(&s);
 	srvSendStartupConfig.setSerialContext(&s);
 	srvReadDid.setSerialContext(&s);
+	srvReadMemory.setSerialContext(&s);
 
 	srvGetVersion.setConditionVariable(&cond1);
 	srvRunningConfig.setConditionVariable(&cond1);
 	srvEraseConfig.setConditionVariable(&cond1);
 	srvReadDid.setConditionVariable(&cond1);
+	srvReadMemory.setConditionVariable(&cond1);
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 
 	SerialRxBackgroundWorker worker(&s, callbackMap);
 
@@ -106,7 +113,18 @@ int main(int argc, char *argv[]) {
         // wait for configuration to be received
         pthread_cond_wait(&cond1, &lock);
         pthread_mutex_unlock(&lock);
+
+
     }
+
+    srvReadMemory.sendRequestForMemoryRange(0x0805A800u, sizeof(event_log_t));
+    s.waitForTransmissionDone();
+
+    pthread_mutex_lock(&lock);
+    // wait for configuration to be received
+    pthread_cond_wait(&cond1, &lock);
+    pthread_mutex_unlock(&lock);
+
 
 	srvRunningConfig.sendRequest();
 	s.waitForTransmissionDone();

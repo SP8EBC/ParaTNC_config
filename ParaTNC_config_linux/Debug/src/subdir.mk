@@ -6,27 +6,27 @@
 CPP_SRCS += \
 ../src/AuxStuff.cpp \
 ../src/AuxStuff_test.cpp \
-../src/ConfigEncodeDecode_test.cpp \
-../src/ProgramConfig.cpp 
+../src/ProgramConfig.cpp \
+../src/main.cpp 
 
 CPP_DEPS += \
 ./src/AuxStuff.d \
 ./src/AuxStuff_test.d \
-./src/ConfigEncodeDecode_test.d \
-./src/ProgramConfig.d 
+./src/ProgramConfig.d \
+./src/main.d 
 
 OBJS += \
 ./src/AuxStuff.o \
 ./src/AuxStuff_test.o \
-./src/ConfigEncodeDecode_test.o \
-./src/ProgramConfig.o 
+./src/ProgramConfig.o \
+./src/main.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++98 -I../src/shared -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++98 -D_XOPEN_SOURCE=600 -I../src/shared -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -34,7 +34,7 @@ src/%.o: ../src/%.cpp src/subdir.mk
 clean: clean-src
 
 clean-src:
-	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/ConfigEncodeDecode_test.d ./src/ConfigEncodeDecode_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o
+	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/main.d ./src/main.o
 
 .PHONY: clean-src
 
