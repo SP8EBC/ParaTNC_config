@@ -89,7 +89,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	SrvSendStartupConfig(int singleFrameLn);
 	virtual ~SrvSendStartupConfig();

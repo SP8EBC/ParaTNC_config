@@ -18,12 +18,13 @@
 
 const std::vector<uint8_t> SrvGetRunningConfig::requestData((size_t)1, KISS_GET_RUNNING_CONFIG);
 
-SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0) {
+SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissFrames(0), validatedOk(false) {
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	syncEvent = OpenEvent(EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
 #else
 	conditionVariable = 0;
 #endif
+	lastReceivedKissFrameNumber = 0;
 	s = 0;
 	validate = new ValidateVer0();
 }
@@ -62,6 +63,7 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 	else {
 		// if transfer is initiated
 		uint8_t currentFrame = frame->at(3);
+		lastReceivedKissFrameNumber = currentFrame;
 		std::cout << "I = SrvGetRunningConfig::callback, current frame seq id: " << (int)currentFrame  << ", frame size: " << frame->size() << " (0x" << std::hex << frame->size() << std::dec << ")" << std::endl;
 
 		std::vector<uint8_t>::const_iterator copyFrom = frame->begin() + 4;
@@ -75,7 +77,7 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 //			currentRegion = UNDEF;
 
 			// verify CRC
-			validate->checkValidate(configurationData);
+			this->validatedOk = validate->checkValidate(configurationData);
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 			SetEvent(syncEvent);
@@ -103,9 +105,86 @@ void SrvGetRunningConfig::sendRequest() {
 
 }
 
-void SrvGetRunningConfig::receiveSynchronously() {
-	if (s) {
+void SrvGetRunningConfig::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 
+	bool hasFirstFrame = false;
+
+	if (s) {
+		std::vector<uint8_t> response;
+
+		// receive a response
+		s->receiveKissFrame(response);
+
+		if (response.size() > 1) {
+			// get frame type, which was received
+			uint8_t frameType = response[1];
+
+			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE)
+			{
+				std::cout << "E = SrvGetRunningConfig::receiveSynchronously, NRC received: 0x" <<
+					std::hex << response[2] << std::dec << std::endl;
+			}
+			else if (frameType == KISS_RUNNING_CONFIG)
+			{
+				// use callback manualy
+				this->callback(&response);
+
+				// check if first frame has been received correctly
+				if (currentRegion == CURRENT_CONFIG_FIRST || currentRegion == CURRENT_CONFIG_SECOND) {
+					hasFirstFrame = true;
+				}
+			}
+			else
+			{
+				std::cout << "E = SrvGetRunningConfig::receiveSynchronously, response to unknown service!" << std::endl;
+			}
+
+
+		}
+
+		// continue only if first frame has been received
+		if (hasFirstFrame) {
+			std::cout << "E = SrvGetRunningConfig::receiveSynchronously, expectedKissFrames: " << expectedKissFrames << std::endl;
+
+			// receive all message in a loop. please be aware than a value of
+			// 'lastReceivedKissFrameNumber' comes from frame content, so if
+			// any frame will be skipped or missed for any reason this loop
+			// will not detect that. it can iterate less times than amount
+			// of frames it should receive.
+			while (lastReceivedKissFrameNumber + 1 != expectedKissFrames) {
+
+				// clear vector and prepare it to next frame from controler
+				response.clear();
+
+				// receive a response
+				s->receiveKissFrame(response);
+
+				if (response.size() > 1) {
+					// get frame type, which was received
+					uint8_t frameType = response[1];
+
+					if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE)
+					{
+						std::cout << "E = SrvGetRunningConfig::receiveSynchronously, NRC received: 0x" <<
+							std::hex << response[2] << std::dec << std::endl;
+					}
+					else if (frameType == KISS_RUNNING_CONFIG)
+					{
+						// use callback manualy
+						this->callback(&response);
+
+						// check if first frame has been received correctly
+						if (currentRegion == CURRENT_CONFIG_FIRST || currentRegion == CURRENT_CONFIG_SECOND) {
+							hasFirstFrame = true;
+						}
+					}
+					else
+					{
+						std::cout << "E = SrvGetRunningConfig::receiveSynchronously, response to unknown service!" << std::endl;
+					}
+				}
+			}
+		}
 	}
 }
 

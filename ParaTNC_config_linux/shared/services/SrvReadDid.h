@@ -11,6 +11,7 @@
 #include "IService.h"
 
 #include "./serial/Serial.h"
+#include "../types/DidResponse.h"
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 #include <windows.h>
@@ -46,13 +47,18 @@ class SrvReadDid: public IService {
 	 */
 	std::vector<uint8_t> responseData;
 
+	/**
+	 * Processed DID content
+	 */
+	DidResponse didResponse;
+
 public:
 	/**
 	 *
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	/**
 	 * Sends request to read given DID
@@ -64,7 +70,7 @@ public:
 	 * Returns
 	 * @return
 	 */
-	std::vector<uint8_t> getRawResponse();
+	std::vector<uint8_t>& getRawResponse();
 
 	SrvReadDid();
 	virtual ~SrvReadDid();
@@ -73,6 +79,10 @@ public:
 
 	void setSerialContext(Serial * s) {
 		this->s = s;
+	}
+
+	const DidResponse & getDidResponse() {
+		return didResponse;
 	}
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)

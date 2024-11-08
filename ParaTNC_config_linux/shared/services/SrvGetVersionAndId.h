@@ -25,6 +25,12 @@ class SrvGetVersionAndId: public IService {
 	 */
 	Serial * s;
 
+	std::string boardType;
+
+	std::string softwareVersion;
+
+	char protocolVersion;
+
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	/**
 	 * Event used to synchronize and lock another thread until
@@ -48,7 +54,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	virtual ~SrvGetVersionAndId();
 	SrvGetVersionAndId& operator=(const SrvGetVersionAndId &other);
@@ -63,6 +69,18 @@ public:
 
 	void setSerialContext(Serial * s) {
 		this->s = s;
+	}
+
+	std::string & getBoardType() {
+		return this->boardType;
+	}
+
+	std::string & getSoftwareVersion() {
+		return this->softwareVersion;
+	}
+
+	char getProtocolVersion() {
+		return this->protocolVersion;
 	}
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)

@@ -13,6 +13,7 @@
 
 #define NONSTANDARD	(uint8_t)0x0F
 
+typedef void(*IService_NegativeResponseCodeCbk)(uint16_t nrc) ;
 
 class IService {
 
@@ -29,7 +30,7 @@ public:
 
 	virtual void sendRequest() = 0;
 
-	virtual void receiveSynchronously() = 0;
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk) = 0;
 };
 
 #endif /* SRC_SERVICES_ISERVICE_H_ */

@@ -55,11 +55,21 @@ class SrvGetRunningConfig : public IService {
 	uint16_t expectedKissFrames;
 
 	/**
+	 * Frame number received in last kiss frame from TNC
+	 */
+	uint8_t lastReceivedKissFrameNumber;
+
+	/**
 	 * Configuration data extracted from frames
 	 */
 	std::vector<uint8_t> configurationData;
 
+	/**
+	 * Pointer to class used to validate (calculate CRC32 or other checksum)
+	 */
 	IConfigValidate * validate;
+
+	bool validatedOk;
 
 	void reset();
 
@@ -70,7 +80,7 @@ public:
 	 */
 	virtual void sendRequest();
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	/**
 	 * Callback to be used when a portion of configuration data
@@ -92,6 +102,10 @@ public:
 
 	void setSerialContext(Serial * s) {
 		this->s = s;
+	}
+
+	bool isValidatedOk() {
+		return validatedOk;
 	}
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)

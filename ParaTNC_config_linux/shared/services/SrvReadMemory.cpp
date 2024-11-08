@@ -40,10 +40,11 @@ void SrvReadMemory::sendRequestForMemoryRange(uint32_t address, uint8_t size) {
 		requestData.push_back(0x14u);
 
 		// address
-		requestData.push_back((uint8_t)((address & 0xFF000000u) >> 24));
-		requestData.push_back((uint8_t)((address & 0x00FF0000u) >> 16));
-		requestData.push_back((uint8_t)((address & 0x0000FF00u) >> 8));
 		requestData.push_back((uint8_t)((address & 0x000000FFu)) );
+		requestData.push_back((uint8_t)((address & 0x0000FF00u) >> 8));
+		requestData.push_back((uint8_t)((address & 0x00FF0000u) >> 16));
+		requestData.push_back((uint8_t)((address & 0xFF000000u) >> 24));
+
 
 		// size in bytes
 		requestData.push_back(size);
@@ -53,7 +54,7 @@ void SrvReadMemory::sendRequestForMemoryRange(uint32_t address, uint8_t size) {
 	}
 }
 
-void SrvReadMemory::receiveSynchronously() {
+void SrvReadMemory::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 	if (s) {
 		std::vector<uint8_t> response;
 
@@ -98,7 +99,8 @@ void SrvReadMemory::callback(
 		// this gives amount of bytes read from the memory itself.
 		const uint8_t response_size = (uint8_t)(*it) - 5;
 
-		// skip service id
+		// skip response size and service id
+		it++;
 		it++;
 
 		this->responseData.clear();

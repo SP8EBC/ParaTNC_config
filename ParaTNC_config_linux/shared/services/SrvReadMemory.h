@@ -55,7 +55,7 @@ public:
 
 	void sendRequestForMemoryRange(uint32_t address, uint8_t size);
 
-	virtual void receiveSynchronously();
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	SrvReadMemory();
 	virtual ~SrvReadMemory();
