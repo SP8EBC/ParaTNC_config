@@ -55,7 +55,9 @@ public:
 
 	void sendRequestForMemoryRange(uint32_t address, uint8_t size);
 
-	virtual void receiveSynchronously();
+	void waitForTransmissionDone();
+
+	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	SrvReadMemory();
 	virtual ~SrvReadMemory();
@@ -74,7 +76,7 @@ public:
 	}
 #endif
 
-	const std::vector<uint8_t> getResponseData() const {
+	std::vector<uint8_t> getResponseData() const {
 		return responseData;
 	}
 };
