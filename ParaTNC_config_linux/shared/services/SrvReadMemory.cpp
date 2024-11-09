@@ -49,9 +49,12 @@ void SrvReadMemory::sendRequestForMemoryRange(uint32_t address, uint8_t size) {
 		// size in bytes
 		requestData.push_back(size);
 
-
 		sendRequest();
 	}
+}
+
+void SrvReadMemory::waitForTransmissionDone() {
+	s->waitForTransmissionDone();
 }
 
 void SrvReadMemory::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {

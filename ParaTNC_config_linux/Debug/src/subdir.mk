@@ -6,18 +6,24 @@
 CPP_SRCS += \
 ../src/AuxStuff.cpp \
 ../src/AuxStuff_test.cpp \
+../src/LogDumper.cpp \
+../src/LogDumper_test.cpp \
 ../src/ProgramConfig.cpp \
 ../src/main.cpp 
 
 CPP_DEPS += \
 ./src/AuxStuff.d \
 ./src/AuxStuff_test.d \
+./src/LogDumper.d \
+./src/LogDumper_test.d \
 ./src/ProgramConfig.d \
 ./src/main.d 
 
 OBJS += \
 ./src/AuxStuff.o \
 ./src/AuxStuff_test.o \
+./src/LogDumper.o \
+./src/LogDumper_test.o \
 ./src/ProgramConfig.o \
 ./src/main.o 
 
@@ -34,7 +40,7 @@ src/%.o: ../src/%.cpp src/subdir.mk
 clean: clean-src
 
 clean-src:
-	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/main.d ./src/main.o
+	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/LogDumper.d ./src/LogDumper.o ./src/LogDumper_test.d ./src/LogDumper_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/main.d ./src/main.o
 
 .PHONY: clean-src
 

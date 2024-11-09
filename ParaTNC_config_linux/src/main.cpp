@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include <serial/SerialRxBackgroundWorker.h>
 #include "ProgramConfig.h"
+#include "LogDumper.h"
 #include "serial/Serial.h"
 #include "../shared/services/SrvGetRunningConfig.h"
 #include "../shared/services/SrvGetVersionAndId.h"
@@ -45,7 +46,14 @@ const uint16_t did_list[] = {
 						0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
 						0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
 						0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
-						0x1500U, 0x1502U, 0x1503U, 0xF000U, 0xFF00U};
+						0x1500U, 0x1502U, 0x1503U, 0xF000U, 0xFF00U, 0xFF0FU};
+
+LogDumper logDumper(srvReadMemory, cond1);
+
+uint32_t logAreaStart = 0;
+uint32_t logAreaEnd = 0;
+uint32_t logOldestEntry = 0;
+uint32_t logNewestEntry = 0;
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -83,7 +91,6 @@ int main(int argc, char *argv[]) {
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
 
-
 	if (argc > 1) {
 		s.init(argv[1], B9600);
 	}
@@ -114,43 +121,57 @@ int main(int argc, char *argv[]) {
         pthread_cond_wait(&cond1, &lock);
         pthread_mutex_unlock(&lock);
 
+        if (did_list[i] == 0xFF00U) {
+        	// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)
+        	const DidResponse& response = srvReadDid.getDidResponse();
+        	logAreaStart = (uint32_t)response.first.i32;
+        	logAreaEnd =  (uint32_t)response.second.i32;
+        }
+        else if (did_list[i] == 0xFF0FU) {
+        	//		ENTRY(0xFF0FU, nvm_event_oldestFlash, nvm_event_newestFlash, DID_EMPTY)
+        	const DidResponse& response = srvReadDid.getDidResponse();
+        	logOldestEntry = (uint32_t)response.first.i32;
+        	logNewestEntry = (uint32_t)response.second.i32;
+        }
+        else {
+        	;
+        }
 
     }
 
-    srvReadMemory.sendRequestForMemoryRange(0x0805A800u, sizeof(event_log_t));
-    s.waitForTransmissionDone();
+	std::cout << "I = main, logAreaStart at: 0x" << std::hex << logAreaStart << ", logAreaEnd at: 0x" << logAreaEnd << std::endl;
+	std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
 
-    pthread_mutex_lock(&lock);
-    // wait for configuration to be received
-    pthread_cond_wait(&cond1, &lock);
-    pthread_mutex_unlock(&lock);
+	logDumper.dumpEventsToReport(logAreaStart, logAreaEnd, "234");
 
+////////////////////////
 
-	srvRunningConfig.sendRequest();
-	s.waitForTransmissionDone();
+	// srvRunningConfig.sendRequest();
+	// s.waitForTransmissionDone();
 
-    pthread_mutex_lock(&lock);
-    // wait for configuration to be received
-    pthread_cond_wait(&cond1, &lock);
-    pthread_mutex_unlock(&lock);
+    // pthread_mutex_lock(&lock);
+    // // wait for configuration to be received
+    // pthread_cond_wait(&cond1, &lock);
+    // pthread_mutex_unlock(&lock);
 
-    srvRunningConfig.storeToBinaryFile("config.bin");
+    // srvRunningConfig.storeToBinaryFile("config.bin");
 
-    std::string callsign;
-    std::string description;
-    float lat, lon;
+    // std::string callsign;
+    // std::string description;
+    // float lat, lon;
 
-	decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
-	decode->getCallsign(callsign);
-	decode->getDescritpion(description);
-	lon = decode->getLongitude();
-	lat = decode->getLatitude();
+	// decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
+	// decode->getCallsign(callsign);
+	// decode->getDescritpion(description);
+	// lon = decode->getLongitude();
+	// lat = decode->getLatitude();
 
-	std::cout << "I = main, callsign: " << callsign << std::endl;
-	std::cout << "I = main, description: " << description << std::endl;
-	std::cout << "I = main, lon: " << lon << std::endl;
-	std::cout << "I = main, lat: " << lat << std::endl;
+	// std::cout << "I = main, callsign: " << callsign << std::endl;
+	// std::cout << "I = main, description: " << description << std::endl;
+	// std::cout << "I = main, lon: " << lon << std::endl;
+	// std::cout << "I = main, lat: " << lat << std::endl;
 
+//////////////////////////
 
 //	srvEraseConfig.sendRequest();
 //	s.waitForTransmissionDone();
