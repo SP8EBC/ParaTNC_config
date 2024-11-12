@@ -75,8 +75,22 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 			// get byte fron the iterator
 			const uint8_t byte = *it;
 
-			// write this byte to the serial port
-			transmissionResult = write(handle, &byte, 1);
+			switch (byte) {
+				case _FEND:
+					transmissionResult = write(handle, Serial::FESC, 1);			
+					transmissionResult = write(handle, Serial::TFEND, 1);	
+					break;		
+				case _FESC: 
+					transmissionResult = write(handle, Serial::FESC, 1);			
+					transmissionResult = write(handle, Serial::TFESC, 1);	
+					break;
+				default: {
+					// no special action needed
+					// write this byte to the serial port as-is
+					transmissionResult = write(handle, &byte, 1);
+					break;
+				}
+			}
 
 			// check if eror has
 			if (transmissionResult == 0) {

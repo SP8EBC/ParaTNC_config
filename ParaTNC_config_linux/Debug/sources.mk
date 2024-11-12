@@ -30,5 +30,6 @@ shared \
 shared/exceptions \
 shared/services \
 src \
+src/ctable-master/src \
 src/serial \
 
