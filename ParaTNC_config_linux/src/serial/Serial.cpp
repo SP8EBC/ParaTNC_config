@@ -167,7 +167,8 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
 			std::cout << "E = serial::receiveKissFrame, timeout has occured. " << std::endl;
 
-			continue;
+			throw TimeoutE();
+			//continue;
 		}
 
 		if (receivingState == RX_ST_STARTED) {

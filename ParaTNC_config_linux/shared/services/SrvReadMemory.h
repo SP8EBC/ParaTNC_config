@@ -47,6 +47,13 @@ class SrvReadMemory: public IService {
 	 */
 	std::vector<uint8_t> responseData;
 
+	/**
+	 * Set to true if timeout has been detected while waiting for response.
+	 * It is cleared automatically by calling @link{sendRequestForMemoryRange}
+	 * and @link{receiveSynchronously}
+	 */
+	bool timeoutDetected;
+
 public:
 	/**
 	 *
@@ -64,6 +71,8 @@ public:
 
 	virtual void callback(const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
 
+	virtual void nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread);
+
 	void setSerialContext(Serial * s) {
 		this->s = s;
 	}
@@ -78,6 +87,10 @@ public:
 
 	std::vector<uint8_t> getResponseData() const {
 		return responseData;
+	}
+
+	bool isTimeoutDetected() const {
+		return timeoutDetected;
 	}
 };
 

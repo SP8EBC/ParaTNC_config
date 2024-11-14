@@ -55,6 +55,10 @@ uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
+void timeout_callback(void) {
+	pthread_cond_signal(&cond1);
+}
+
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
 	//ProgramConfig::readConfigFromFile("");
@@ -87,6 +91,7 @@ int main(int argc, char *argv[]) {
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 
 	SerialRxBackgroundWorker worker(&s, callbackMap);
+	worker.backgroundTimeoutCallback = timeout_callback;
 
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);

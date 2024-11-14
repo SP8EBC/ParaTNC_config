@@ -1,0 +1,3 @@
+Running 1 test case...
+Entering test module "LOGDUMPER"
+../src/LogDumperTextFile_test.cpp(37): Entering test case "basic"

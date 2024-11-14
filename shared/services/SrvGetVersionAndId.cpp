@@ -12,6 +12,7 @@
 #include <algorithm>
 
 #include "../shared/kiss_communication_service_ids.h"
+#include "../shared/exceptions/TimeoutE.h"
 
 /**
  * Request
@@ -137,4 +138,7 @@ void SrvGetVersionAndId::callback(
 	}
 #endif
 
+}
+
+void SrvGetVersionAndId::nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
 }

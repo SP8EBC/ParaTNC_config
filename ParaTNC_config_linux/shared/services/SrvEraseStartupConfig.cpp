@@ -7,7 +7,7 @@
 #include "stdafx.h"
 
 #include "SrvEraseStartupConfig.h"
-#include "../types/NRC.h"
+//#include "../types/NRC.h"
 #include "../kiss_communication_service_ids.h"
 
 #include <vector>
@@ -70,7 +70,7 @@ void SrvEraseStartupConfig::callback(
 
 	operationResult = (kiss_communication_nrc_t)result;
 
-	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
+	std::cout << "I = SrvEraseStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << operationResult << std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	SetEvent(syncEvent);
@@ -80,4 +80,8 @@ void SrvEraseStartupConfig::callback(
 	}
 #endif
 
+}
+
+void SrvEraseStartupConfig::nrcCallback(
+		const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
 }

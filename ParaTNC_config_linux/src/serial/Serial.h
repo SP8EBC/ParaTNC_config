@@ -73,6 +73,11 @@ class Serial {
 	 */
 	int rawArrayIterator;
 
+	/**
+	 * How many timeouts have been detected so far
+	 */
+	int timeouts;
+
 	const static uint8_t FEND[1];		//!< FEND control byte
 	const static uint8_t FESC[1];		//!< FESC control byte
 	const static uint8_t TFEND[1];		//!< TFEND control byte

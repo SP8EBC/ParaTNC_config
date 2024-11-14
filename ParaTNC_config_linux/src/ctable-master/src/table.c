@@ -10,54 +10,6 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-struct Cell
-{
-    char *text;         // Actual content to be displayed
-    size_t text_height; // Number of lines
-    size_t text_width;  // Maximum width of lines
-
-    // Settings
-    TableHAlign h_align;           // Non default, how to place text in col width
-    TableVAlign v_align;           // Non default, how to place text in col width
-    TableBorderStyle border_left;  // Non-default border left
-    TableBorderStyle border_above; // Non-default border above
-    size_t span_x;                 // How many cols to span over
-    size_t span_y;                 // How many rows to span over
-
-    // Generated
-    bool override_v_align;      // Default set for each col in table
-    bool override_h_align;      // Default set for each col in table
-    bool override_border_left;  // Default set for each col in table
-    bool override_border_above; // Default set in row
-
-    bool is_set;          // Indicates whether data is valid
-    bool text_needs_free; // When set to true, text will be freed on free_table
-    size_t x;             // Column position
-    size_t y;             // Row position
-    struct Cell *parent;  // Cell that spans into this cell
-};
-
-struct Row
-{
-    struct Cell cells[TABLE_MAX_COLS]; // All cells of this row from left to right
-    struct Row *next_row;              // Pointer to next row or NULL if last row
-    TableBorderStyle border_above;     // Default border above (can be overwritten in cell)
-    int border_above_counter;       // Counts cells that override their border_above
-};
-
-struct Table
-{
-    size_t num_cols;                         // Number of columns (max. of num_cells over all rows)
-    size_t num_rows;                         // Number of rows (length of linked list)
-    struct Row *first_row;                   // Start of linked list to rows
-    struct Row *curr_row;                    // Marker of row of next inserted cell
-    size_t curr_col;                         // Marker of col of next inserted cell
-    TableBorderStyle borders_left[TABLE_MAX_COLS]; // Default left border of cols
-    TableHAlign h_aligns[TABLE_MAX_COLS];          // Default horizontal alignment of cols
-    TableVAlign v_aligns[TABLE_MAX_COLS];          // Default vertical alignment of cols
-    int border_left_counters[TABLE_MAX_COLS];   // Counts cells that override their border_left
-};
-
 // Represents a size contraint in one dimension imposed by a single cell
 struct Constraint
 {

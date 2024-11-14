@@ -88,6 +88,8 @@ public:
 	 */
 	virtual void callback(const std::vector<uint8_t> * frame);
 
+	virtual void nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread);
+
 	/**
 	 * Save configuration into binary file
 	 * @param _in filename

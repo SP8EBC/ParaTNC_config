@@ -7,7 +7,7 @@
 
 #include "SrvReadMemory.h"
 #include "../shared/kiss_communication_service_ids.h"
-
+#include "../shared/exceptions/TimeoutE.h"
 
 #include <iostream>
 
@@ -18,9 +18,12 @@ SrvReadMemory::SrvReadMemory() {
 	conditionVariable = 0;
 	s = 0;
 #endif
+	timeoutDetected = false;
 }
 
 void SrvReadMemory::sendRequest() {
+	timeoutDetected = false;
+
 	if (s != 0 && this->requestData.size() > 0) {
 		s->transmitKissFrame(this->requestData);
 	}
@@ -58,32 +61,39 @@ void SrvReadMemory::waitForTransmissionDone() {
 }
 
 void SrvReadMemory::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
+	timeoutDetected = false;
+
 	if (s) {
 		std::vector<uint8_t> response;
 
-		// receive a response
-		s->receiveKissFrame(response);
+		try {
+			// receive a response
+			s->receiveKissFrame(response);
 
-		if (response.size() > 1) {
-			// get frame type, which was received
-			uint8_t frameType = response[1];
+			if (response.size() > 1) {
+				// get frame type, which was received
+				uint8_t frameType = response[1];
 
-			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE)
-			{
-				std::cout << "E = SrvReadMemory::receiveSynchronously, NRC received: 0x" <<
-					std::hex << response[2] << std::dec << std::endl;
+				if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE)
+				{
+					std::cout << "E = SrvReadMemory::receiveSynchronously, NRC received: 0x" <<
+						std::hex << response[2] << std::dec << std::endl;
+				}
+				else if (frameType == KISS_READ_MEM_ADDR_RESP)
+				{
+					// use callback manualy
+					this->callback(&response);
+				}
+				else
+				{
+					std::cout << "E = SrvReadMemory::receiveSynchronously, response to unknown service!" << std::endl;
+				}
+
+
 			}
-			else if (frameType == KISS_READ_MEM_ADDR_RESP)
-			{
-				// use callback manualy
-				this->callback(&response);
-			}
-			else
-			{
-				std::cout << "E = SrvReadMemory::receiveSynchronously, response to unknown service!" << std::endl;
-			}
-
-
+		}
+		catch (TimeoutE & ex) {
+			this->nrcCallback(NRC_NOT_DEFINED_BUT_TIMEOUT, false);
 		}
 	}
 }
@@ -126,4 +136,11 @@ void SrvReadMemory::callback(
 		pthread_cond_signal(conditionVariable);
 	}
 #endif
+}
+
+void SrvReadMemory::nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
+
+	timeoutDetected = true;
+
+	pthread_cond_signal(conditionVariable);
 }

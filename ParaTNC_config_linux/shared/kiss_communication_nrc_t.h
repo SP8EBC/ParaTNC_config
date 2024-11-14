@@ -164,7 +164,15 @@ typedef enum kiss_communication_nrc_t {
 	 * document, therefore it is not listed in the list of applicable response
 	 * codes of the diagnostic services.
 	 */
-	NRC_SERVICE_NOT_SUPPORTED_IN_ACTIVE_SESSION = 0x7F
+	NRC_SERVICE_NOT_SUPPORTED_IN_ACTIVE_SESSION = 0x7F,
+
+	/**
+	 * This value is not defined by UDS specification. It was added to have
+	 * an option to notify a service handler that a timeout has occured
+	 * while waiting for a response.
+	 */
+	NRC_NOT_DEFINED_BUT_TIMEOUT = 0xFF
+
 
 
 

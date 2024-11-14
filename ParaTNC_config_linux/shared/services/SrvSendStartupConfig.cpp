@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "../shared/kiss_communication_service_ids.h"
+#include "AuxStuff.h"
 
 /**
  * How startup config is sent to the controller:
@@ -194,7 +195,7 @@ void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk
 
 				operationResult = (kiss_communication_nrc_t)result;
 
-				std::cout << "I = SrvSendStartupConfig::receiveSynchronously, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
+				std::cout << "I = SrvSendStartupConfig::receiveSynchronously, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << AuxStuff::nrcToString(operationResult) << std::endl;
 
 			}
 
@@ -222,7 +223,7 @@ void SrvSendStartupConfig::callback(
 
 	operationResult = (kiss_communication_nrc_t)result;
 
-	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << nrcToString(operationResult) << std::endl;
+	std::cout << "I = SrvSendStartupConfig::callback, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << AuxStuff::nrcToString(operationResult) << std::endl;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	SetEvent(internalSync);
@@ -235,4 +236,8 @@ void SrvSendStartupConfig::callback(
 		pthread_cond_signal(conditionVariable);
 	}
 #endif
+}
+
+void SrvSendStartupConfig::nrcCallback(
+		const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
 }

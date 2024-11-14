@@ -7,6 +7,7 @@
 
 #include "../AuxStuff.h"
 #include "../shared/kiss_communication_service_ids.h"
+#include "../shared/exceptions/TimeoutE.h"
 #include <pthread.h>
 #include <serial/SerialRxBackgroundWorker.h>
 
@@ -81,26 +82,33 @@ void SerialRxBackgroundWorker::worker(void) {
 		// clean buffer
 		receivedData.clear();
 
-		// receive KISS packet from controller
-		ctx->receiveKissFrame(receivedData);
+		try {
+			// receive KISS packet from controller
+			ctx->receiveKissFrame(receivedData);
 
-		// check if anything has been recieved
-		if (receivedData.size() > 0) {
-			// get frame type
-			uint8_t frameType = receivedData.at(1);
+			// check if anything has been recieved
+			if (receivedData.size() > 0) {
+				// get frame type
+				uint8_t frameType = receivedData.at(1);
 
-			if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
-				std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(receivedData.at(2)) << std::endl;
-			}
-			else {
-				serviceCallback = this->callbackMap.at(frameType);
-
-				if (serviceCallback != NULL) {
-					// invoke callback
-					serviceCallback->callback(&receivedData);
+				if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
+					std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(receivedData.at(2)) << std::endl;
 				}
-			}
+				else {
+					serviceCallback = this->callbackMap.at(frameType);
 
+					if (serviceCallback != NULL) {
+						// invoke callback
+						serviceCallback->callback(&receivedData);
+					}
+				}
+
+			}
+		}
+		catch (TimeoutE & ex) {
+			if (this->backgroundTimeoutCallback != NULL) {
+				this->backgroundTimeoutCallback();
+			}
 		}
 	}	while (workerLoop);
 

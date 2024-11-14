@@ -72,7 +72,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="glibc-2.35|src/ConfigEncodeDecode_test.cpp|src/services/GetRunningConfig_test.cpp|src/serial/SerialWorker_test.cpp|src/serial/Serial_test.cpp|src/serial_test.cpp|src/ProgramConfig_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/LogDumperTextFile_test.cpp|glibc-2.35|src/ConfigEncodeDecode_test.cpp|src/services/GetRunningConfig_test.cpp|src/serial/SerialWorker_test.cpp|src/serial/Serial_test.cpp|src/serial_test.cpp|src/ProgramConfig_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -130,7 +130,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="glibc-2.35|src/ConfigEncodeDecode_test.cpp|src/services/GetRunningConfig_test.cpp|src/serial/SerialWorker_test.cpp|src/serial/Serial_test.cpp|src/serial_test.cpp|src/ProgramConfig_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/LogDumperTextFile_test.cpp|glibc-2.35|src/ConfigEncodeDecode_test.cpp|src/services/GetRunningConfig_test.cpp|src/serial/SerialWorker_test.cpp|src/serial/Serial_test.cpp|src/serial_test.cpp|src/ProgramConfig_test.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -69,6 +69,12 @@ class SerialRxBackgroundWorker {
 	SerialRxBackgroundWorker * pointerThis;
 
 public:
+	/**
+	 * Optional pointer to a callback, which is used by background thread in
+	 * case a timeout
+	 */
+	void(*backgroundTimeoutCallback)(void) = NULL;
+
 	bool start(void);
 
 	void terminate(void);
