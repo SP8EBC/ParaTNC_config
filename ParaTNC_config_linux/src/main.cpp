@@ -48,16 +48,11 @@ const uint16_t did_list[] = {
 						0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
 						0x1500U, 0x1502U, 0x1503U, 0xF000U, 0xFF00U, 0xFF0FU};
 
-LogDumper logDumper(srvReadMemory, cond1);
-
 uint32_t logAreaStart = 0;
 uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
-void timeout_callback(void) {
-	pthread_cond_signal(&cond1);
-}
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -91,7 +86,9 @@ int main(int argc, char *argv[]) {
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 
 	SerialRxBackgroundWorker worker(&s, callbackMap);
-	worker.backgroundTimeoutCallback = timeout_callback;
+//	worker.backgroundTimeoutCallback = timeout_callback;
+
+	LogDumper logDumper(srvReadMemory, cond1, worker);
 
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);

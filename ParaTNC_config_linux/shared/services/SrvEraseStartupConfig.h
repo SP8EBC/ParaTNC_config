@@ -66,8 +66,6 @@ public:
 	virtual void callback(
 			const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
 
-	virtual void nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread);
-
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 
 #else

@@ -7,6 +7,9 @@
 
 #include <LogDumper.h>
 #include <iostream>
+#include <utility>
+
+#include "pthread.h"
 
 #include "../shared/crc//crc_.h"
 
@@ -19,9 +22,12 @@ const uint16_t LogDumper::daysInYearByMonth[2][13] =
 };
 
 
-LogDumper::LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1) : srvReadMemory(_srvReadMemory), cond1(_cond1) {
+LogDumper::LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, SerialRxBackgroundWorker& _serial_thread) :
+								srvReadMemory(_srvReadMemory),
+								cond1(_cond1),
+								serialRxBackgroundWorker(_serial_thread){
 	// TODO Auto-generated constructor stub
-
+	timeout = false;
 }
 
 LogDumper::~LogDumper() {
@@ -60,6 +66,11 @@ void LogDumper::getTimestampFromEvent(const event_log_exposed_t *const in,
 
 }
 
+void LogDumper::timeoutCallback(void) {
+	timeout = true;
+	pthread_cond_signal(&cond1);
+}
+
 void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 		std::string filename) {
 
@@ -78,8 +89,12 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 
 	logDumperTextFile.startTextExport(filename);
 
+	auto timeoutCallback = std::bind(&LogDumper::timeoutCallback, this);
+
 	for (int i = 0; i < eventsNum; i++)
 	{
+		serialRxBackgroundWorker.backgroundTimeoutCallback = timeoutCallback;
+
 		std::cout << std::dec <<
 				"I = LogDumper::dumpEventsToReport, processing event " << i <<
 				". Total progress: " << (int)(((float)i / (float)eventsNum) * 100.0f) << "%" << std::endl;
@@ -92,9 +107,10 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	    pthread_cond_wait(&cond1, &lock);
 	    pthread_mutex_unlock(&lock);
 
-	    if (srvReadMemory.isTimeoutDetected()) {
+	    if (timeout) {
 	    	// repeat the same event once again
 	    	i--;
+	    	timeout = false;
 	    }
 	    else {
 
@@ -118,14 +134,14 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 					exposed.event_rtc = event->event_rtc;
 					exposed.event_master_time = event->event_master_time;
 
-					exposed.event_id = event->event_id;
-					exposed.event_str_name = event_id_to_str(exposed.source, exposed.event_id);
-
 					exposed.source = (event_log_source_t)EVENT_LOG_GET_SOURCE(event->source);
 					exposed.source_str_name = event_log_source_to_str(exposed.source);
 
 					exposed.severity = (event_log_severity_t)EVENT_LOG_GET_SEVERITY(event->severity);
 					exposed.severity_str = event_log_severity_to_str(exposed.severity);
+
+					exposed.event_id = event->event_id;
+					exposed.event_str_name = event_id_to_str(exposed.source, exposed.event_id);
 
 					exposed.lparam = event->lparam;
 					exposed.lparam2 = event->lparam2;

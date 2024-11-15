@@ -66,9 +66,6 @@ public:
 	 * @param frame
 	 */
 	virtual void callback(const std::vector<unsigned char, std::allocator<unsigned char> > * frame);
-
-	virtual void nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread);
-
 	void setSerialContext(Serial * s) {
 		this->s = s;
 	}

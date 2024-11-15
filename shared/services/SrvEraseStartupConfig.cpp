@@ -82,6 +82,3 @@ void SrvEraseStartupConfig::callback(
 
 }
 
-void SrvEraseStartupConfig::nrcCallback(
-		const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
-}

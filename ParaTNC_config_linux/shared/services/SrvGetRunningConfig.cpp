@@ -32,8 +32,6 @@ SrvGetRunningConfig::SrvGetRunningConfig() : currentRegion(UNDEF), expectedKissF
 SrvGetRunningConfig::~SrvGetRunningConfig() {
 }
 
-void SrvGetRunningConfig::nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
-}
 
 SrvGetRunningConfig& SrvGetRunningConfig::operator=(const SrvGetRunningConfig &other) {
 	return * this;

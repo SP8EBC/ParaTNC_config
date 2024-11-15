@@ -11,6 +11,7 @@
 #include <string>
 
 #include "LogDumperTextFile.h"
+#include "serial/SerialRxBackgroundWorker.h"
 #include "../shared/services/SrvReadMemory.h"
 
 #ifdef __cplusplus
@@ -37,25 +38,25 @@ class LogDumper {
 	SrvReadMemory& srvReadMemory;
 	pthread_cond_t& cond1;
 
+	SerialRxBackgroundWorker &serialRxBackgroundWorker;
+
 	/**
 	 * Class writing report
 	 */
 	LogDumperTextFile logDumperTextFile;
 
+	bool timeout;
+
+	void timeoutCallback(void);
+
 	static void getTimestampFromEvent(const event_log_exposed_t * const in, struct tm * out);
 
 	static const uint16_t daysInYearByMonth[2][13];
-//											   =
-//	{
-//	    /* Normal years.  */
-//	    { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
-//	    /* Leap years.  */
-//	    { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
-//	};
+
 
 public:
 
-	LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1);
+	LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, SerialRxBackgroundWorker& _serial_thread);
 	virtual ~LogDumper();
 
 	void dumpEventsToReport(uint32_t startAddress, uint32_t endAddress, std::string filename);

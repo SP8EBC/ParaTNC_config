@@ -18,11 +18,9 @@ SrvReadMemory::SrvReadMemory() {
 	conditionVariable = 0;
 	s = 0;
 #endif
-	timeoutDetected = false;
 }
 
 void SrvReadMemory::sendRequest() {
-	timeoutDetected = false;
 
 	if (s != 0 && this->requestData.size() > 0) {
 		s->transmitKissFrame(this->requestData);
@@ -61,8 +59,6 @@ void SrvReadMemory::waitForTransmissionDone() {
 }
 
 void SrvReadMemory::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
-	timeoutDetected = false;
-
 	if (s) {
 		std::vector<uint8_t> response;
 
@@ -93,7 +89,9 @@ void SrvReadMemory::receiveSynchronously(IService_NegativeResponseCodeCbk cbk) {
 			}
 		}
 		catch (TimeoutE & ex) {
-			this->nrcCallback(NRC_NOT_DEFINED_BUT_TIMEOUT, false);
+			if (cbk != NULL) {
+				cbk(NRC_NOT_DEFINED_BUT_TIMEOUT);
+			}
 		}
 	}
 }
@@ -138,9 +136,3 @@ void SrvReadMemory::callback(
 #endif
 }
 
-void SrvReadMemory::nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
-
-	timeoutDetected = true;
-
-	pthread_cond_signal(conditionVariable);
-}

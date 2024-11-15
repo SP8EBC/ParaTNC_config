@@ -30,6 +30,7 @@ void LogDumperTextFile::startTextExport(std::string filename) {
 	set_default_alignments(table, 13, hAlign, vAlign);
 
 	add_empty_cell(table);
+	add_empty_cell(table);
 	//add_cell(table, "Counter");
 	add_cell(table, "RTC timestamp");
 	add_cell(table, "Uptime [s]");
@@ -53,8 +54,9 @@ void LogDumperTextFile::startTextExport(std::string filename) {
 void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp) {
 // add_cell_fmt
 	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
 	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
-	add_cell_fmt(table, "%d", eventLogEntry->event_rtc / 1000u);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
 	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
 	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
 	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->param);

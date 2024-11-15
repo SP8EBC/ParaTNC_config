@@ -344,6 +344,3 @@ void SrvReadDid::callback(
 	}
 #endif
 }
-
-void SrvReadDid::nrcCallback(const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
-}

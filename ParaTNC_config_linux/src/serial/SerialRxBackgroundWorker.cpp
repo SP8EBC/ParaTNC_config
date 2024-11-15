@@ -106,8 +106,10 @@ void SerialRxBackgroundWorker::worker(void) {
 			}
 		}
 		catch (TimeoutE & ex) {
-			if (this->backgroundTimeoutCallback != NULL) {
-				this->backgroundTimeoutCallback();
+			if (this->backgroundTimeoutCallback) {
+				std::function<void (void)> cbk = this->backgroundTimeoutCallback;
+				this->backgroundTimeoutCallback = NULL;
+				cbk();
 			}
 		}
 	}	while (workerLoop);

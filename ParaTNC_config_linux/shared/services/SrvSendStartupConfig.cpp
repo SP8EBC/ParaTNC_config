@@ -238,6 +238,3 @@ void SrvSendStartupConfig::callback(
 #endif
 }
 
-void SrvSendStartupConfig::nrcCallback(
-		const enum kiss_communication_nrc_t nrc, bool isFromBackgroundAsyncThread) {
-}

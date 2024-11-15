@@ -73,7 +73,9 @@ public:
 	 * Optional pointer to a callback, which is used by background thread in
 	 * case a timeout
 	 */
-	void(*backgroundTimeoutCallback)(void) = NULL;
+	//void(*backgroundTimeoutCallback)(void) = NULL;
+	std::function<void (void)> backgroundTimeoutCallback;
+
 
 	bool start(void);
 
