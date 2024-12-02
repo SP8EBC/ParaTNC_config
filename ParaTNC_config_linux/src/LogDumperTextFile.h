@@ -9,6 +9,7 @@
 #define SRC_LOGDUMPERTEXTFILE_H_
 
 #include <string>
+#include "time.h"
 
 #include "../shared/event_log_t.h"
 #include "table.h"
