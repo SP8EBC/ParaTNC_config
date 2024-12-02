@@ -58,6 +58,7 @@ uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
 bool restartOnly = false;
+std::string portName;
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -103,7 +104,7 @@ int main(int argc, char *argv[]) {
 
 	boost::program_options::options_description od("Parameters");
 	boost::program_options::options_description_easy_init odInit = od.add_options();
-	odInit("port", "Serial port used for communication");
+	odInit("port", boost::program_options::value<std::string>(&portName), "Serial port used for communication");
 	odInit("restart", "Restart ParaMETEO");
 
 	boost::program_options::variables_map odVariablesMap;
@@ -114,9 +115,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << od << std::endl;
 
-	if (odVariablesMap.count("port")) {
-		const std::string portName = odVariablesMap["port"].as<std::string>();
-
+	if (portName.length() > 1) {
     	std::cout << "I = main, opening user specified port " << portName << std::endl;
 		portOpenResult = s.init(portName, B9600);
 	}
