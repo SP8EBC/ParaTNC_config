@@ -93,11 +93,17 @@ int main(int argc, char *argv[]) {
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
 
+	bool portOpenResult = false;
+
 	if (argc > 1) {
-		s.init(argv[1], B9600);
+		portOpenResult = s.init(argv[1], B9600);
 	}
 	else {
-		s.init("/dev/ttyS0", B9600);
+		portOpenResult = s.init("/dev/ttyS0", B9600);
+	}
+
+	if (!portOpenResult) {
+		return -1;
 	}
 
 	worker.start();

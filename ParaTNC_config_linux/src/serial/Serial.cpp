@@ -238,6 +238,9 @@ bool Serial::init(string port, speed_t speed)
 
 	handle = open( port.c_str(), O_RDWR| O_NOCTTY );
 
+	if (handle <= 0) {
+		return false;
+	}
 
 	/* Error Handling */
 	if ( tcgetattr ( handle, &tty ) != 0 ) {
