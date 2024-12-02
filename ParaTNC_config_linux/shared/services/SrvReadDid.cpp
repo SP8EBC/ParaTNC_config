@@ -295,13 +295,15 @@ void SrvReadDid::callback(
 						<< ", data: ";
 
 			switch (this->didResponse.firstSize) {
-				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.first.i8 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.first.i16 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.first.i32 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT8:		std::cout << std::dec << (int)this->didResponse.first.i8 << std::hex << ", hexdata: " << (int)this->didResponse.first.i8 << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT16:	std::cout << std::dec << (int)this->didResponse.first.i16 << std::hex << ", hexdata: " << (int)this->didResponse.first.i16 << std::hex << std::endl; break;
+				case DIDRESPONSE_DATASIZE_INT32:	std::cout << std::dec << (int)this->didResponse.first.i32 << std::hex << ", hexdata: " << (int)this->didResponse.first.i32 << std::hex << std::endl; break;
 				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.first.f << std::endl; break;
 				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.first.str << std::endl; break;
 				default: break;
 			}
+
+			std::cout << std::dec;
 		}
 
 		if (this->didResponse.secondSize != DIDRESPONSE_DATASIZE_EMPTY) {
@@ -310,13 +312,15 @@ void SrvReadDid::callback(
 						<< ", data: ";
 
 			switch (this->didResponse.secondSize) {
-				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.second.i8 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.second.i16 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.second.i32 << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT8:		std::cout << std::dec << (int)this->didResponse.second.i8 << std::hex << ", hexdata: " << (int)this->didResponse.second.i8 << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT16:	std::cout << std::dec << (int)this->didResponse.second.i16 << std::hex << ", hexdata: " << (int)this->didResponse.second.i16 << std::hex << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT32:	std::cout << std::dec << (int)this->didResponse.second.i32 << std::hex << ", hexdata: " << (int)this->didResponse.second.i32 << std::hex << std::endl; break;
 				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.second.f << std::endl; break;
 				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.second.str << std::endl; break;
 				default: break;
 			}
+
+			std::cout << std::dec;
 		}
 
 		if (this->didResponse.thirdSize != DIDRESPONSE_DATASIZE_EMPTY) {
@@ -325,13 +329,15 @@ void SrvReadDid::callback(
 						<< ", data: ";
 
 			switch (this->didResponse.thirdSize) {
-				case DIDRESPONSE_DATASIZE_INT8:		std::cout << (int)this->didResponse.third.i8 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT16:	std::cout << (int)this->didResponse.third.i16 << std::endl; break;
-				case DIDRESPONSE_DATASIZE_INT32:	std::cout << (int)this->didResponse.third.i32 << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT8:		std::cout << std::dec << (int)this->didResponse.second.i8 << std::hex << ", hexdata: " << (int)this->didResponse.third.i8 << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT16:	std::cout << std::dec << (int)this->didResponse.second.i16 << std::hex << ", hexdata: " << (int)this->didResponse.third.i16 << std::hex << std::endl; break;
+			case DIDRESPONSE_DATASIZE_INT32:	std::cout << std::dec << (int)this->didResponse.second.i32 << std::hex << ", hexdata: " << (int)this->didResponse.third.i32 << std::hex << std::endl; break;
 				case DIDRESPONSE_DATASIZE_FLOAT:	std::cout << this->didResponse.third.f << std::endl; break;
 				case DIDRESPONSE_DATASIZE_STRING:	std::cout << this->didResponse.third.str << std::endl; break;
 				default: break;
 			}
+
+			std::cout << std::dec;
 		}
 	}
 

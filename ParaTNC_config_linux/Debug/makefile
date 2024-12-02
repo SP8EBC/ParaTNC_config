@@ -63,7 +63,7 @@ main-build: ParaTNC_config
 ParaTNC_config: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/lib/x86_64-linux-gnu -o "ParaTNC_config" $(OBJS) $(USER_OBJS) $(LIBS) -lboost_unit_test_framework -lboost_thread -lboost_date_time -lboost_system -lconfig++ -lconfig -lpthread
+	g++ -L/usr/lib/x86_64-linux-gnu -o "ParaTNC_config" $(OBJS) $(USER_OBJS) $(LIBS) -lboost_unit_test_framework -lboost_thread -lboost_date_time -lboost_system -lboost_program_options -lconfig++ -lconfig -lpthread
 	@echo 'Finished building target: $@'
 	@echo ' '
 

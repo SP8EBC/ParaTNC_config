@@ -57,6 +57,7 @@
 									<listOptionValue builtIn="false" value="boost_thread"/>
 									<listOptionValue builtIn="false" value="boost_date_time"/>
 									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="boost_program_options"/>
 									<listOptionValue builtIn="false" value="config++"/>
 									<listOptionValue builtIn="false" value="config"/>
 									<listOptionValue builtIn="false" value="pthread"/>

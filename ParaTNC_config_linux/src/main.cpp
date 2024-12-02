@@ -14,12 +14,15 @@
 #include "../shared/services/SrvSendStartupConfig.h"
 #include "../shared/services/SrvReadDid.h"
 #include "../shared/services/SrvReadMemory.h"
+#include "../shared/services/SrvReset.h"
 
 #include "../shared/config/decode/DecodeVer0.h"
 
 #include "../shared/kiss_communication_service_ids.h"
 
 #include "../shared/event_log.h"
+
+#include <boost/program_options.hpp>
 
 std::map<uint8_t, IService*> callbackMap;
 
@@ -31,6 +34,7 @@ SrvEraseStartupConfig srvEraseConfig;
 SrvSendStartupConfig srvSendStartupConfig(128);
 SrvReadDid srvReadDid;
 SrvReadMemory srvReadMemory;
+SrvReset srvReset;
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -53,6 +57,7 @@ uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
+bool restartOnly = false;
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -71,12 +76,14 @@ int main(int argc, char *argv[]) {
 	srvSendStartupConfig.setSerialContext(&s);
 	srvReadDid.setSerialContext(&s);
 	srvReadMemory.setSerialContext(&s);
+	srvReset.setSerialContext(&s);
 
 	srvGetVersion.setConditionVariable(&cond1);
 	srvRunningConfig.setConditionVariable(&cond1);
 	srvEraseConfig.setConditionVariable(&cond1);
 	srvReadDid.setConditionVariable(&cond1);
 	srvReadMemory.setConditionVariable(&cond1);
+	srvReset.setConditionVariable(&cond1);
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
@@ -84,6 +91,7 @@ int main(int argc, char *argv[]) {
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_PROGRAM_STARTUP_CFG_RESP, &srvSendStartupConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RESTART, &srvReset));
 
 	SerialRxBackgroundWorker worker(&s, callbackMap);
 //	worker.backgroundTimeoutCallback = timeout_callback;
@@ -93,17 +101,40 @@ int main(int argc, char *argv[]) {
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
 
+	boost::program_options::options_description od("Parameters");
+	boost::program_options::options_description_easy_init odInit = od.add_options();
+	odInit("port", "Serial port used for communication");
+	odInit("restart", "Restart ParaMETEO");
+
+	boost::program_options::variables_map odVariablesMap;
+	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
+	boost::program_options::notify(odVariablesMap);
+
 	bool portOpenResult = false;
 
-	if (argc > 1) {
-		portOpenResult = s.init(argv[1], B9600);
+	std::cout << od << std::endl;
+
+	if (odVariablesMap.count("port")) {
+		const std::string portName = odVariablesMap["port"].as<std::string>();
+
+    	std::cout << "I = main, opening user specified port " << portName << std::endl;
+		portOpenResult = s.init(portName, B9600);
 	}
 	else {
 		portOpenResult = s.init("/dev/ttyS0", B9600);
 	}
 
 	if (!portOpenResult) {
+    	std::cout << "E = main, cannot open and configure serial port. application cannot continue!" << std::endl;
 		return -1;
+	}
+
+	if (odVariablesMap.count("restart")) {
+    	std::cout << "I = main, restart will be performed instead of normal operation!" << std::endl;
+		restartOnly = true;
+	}
+	else {
+		restartOnly = false;
 	}
 
 	worker.start();
@@ -118,89 +149,96 @@ int main(int argc, char *argv[]) {
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 
-    for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
-    	std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;
+    if (restartOnly) {
+    	srvReset.restart();
+    }
+    else {
 
-        srvReadDid.sendRequestForDid(did_list[i]);
-        s.waitForTransmissionDone();
+		for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
+			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;
 
-        pthread_mutex_lock(&lock);
-        // wait for configuration to be received
-        pthread_cond_wait(&cond1, &lock);
-        pthread_mutex_unlock(&lock);
+			srvReadDid.sendRequestForDid(did_list[i]);
+			s.waitForTransmissionDone();
 
-        if (did_list[i] == 0xFF00U) {
-        	// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)
-        	const DidResponse& response = srvReadDid.getDidResponse();
-        	logAreaStart = (uint32_t)response.first.i32;
-        	logAreaEnd =  (uint32_t)response.second.i32;
-        }
-        else if (did_list[i] == 0xFF0FU) {
-        	//		ENTRY(0xFF0FU, nvm_event_oldestFlash, nvm_event_newestFlash, DID_EMPTY)
-        	const DidResponse& response = srvReadDid.getDidResponse();
-        	logOldestEntry = (uint32_t)response.first.i32;
-        	logNewestEntry = (uint32_t)response.second.i32;
-        }
-        else {
-        	;
-        }
+			pthread_mutex_lock(&lock);
+			// wait for configuration to be received
+			pthread_cond_wait(&cond1, &lock);
+			pthread_mutex_unlock(&lock);
+
+			if (did_list[i] == 0xFF00U) {
+				// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)
+				const DidResponse& response = srvReadDid.getDidResponse();
+				logAreaStart = (uint32_t)response.first.i32;
+				logAreaEnd =  (uint32_t)response.second.i32;
+			}
+			else if (did_list[i] == 0xFF0FU) {
+				//		ENTRY(0xFF0FU, nvm_event_oldestFlash, nvm_event_newestFlash, DID_EMPTY)
+				const DidResponse& response = srvReadDid.getDidResponse();
+				logOldestEntry = (uint32_t)response.first.i32;
+				logNewestEntry = (uint32_t)response.second.i32;
+			}
+			else {
+				;
+			}
+
+		}
+
+		std::cout << "I = main, logAreaStart at: 0x" << std::hex << logAreaStart << ", logAreaEnd at: 0x" << logAreaEnd << std::endl;
+		std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
+
+		logDumper.dumpEventsToReport(logAreaStart, logAreaEnd, "234");
+
+	////////////////////////
+
+		// srvRunningConfig.sendRequest();
+		// s.waitForTransmissionDone();
+
+		// pthread_mutex_lock(&lock);
+		// // wait for configuration to be received
+		// pthread_cond_wait(&cond1, &lock);
+		// pthread_mutex_unlock(&lock);
+
+		// srvRunningConfig.storeToBinaryFile("config.bin");
+
+		// std::string callsign;
+		// std::string description;
+		// float lat, lon;
+
+		// decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
+		// decode->getCallsign(callsign);
+		// decode->getDescritpion(description);
+		// lon = decode->getLongitude();
+		// lat = decode->getLatitude();
+
+		// std::cout << "I = main, callsign: " << callsign << std::endl;
+		// std::cout << "I = main, description: " << description << std::endl;
+		// std::cout << "I = main, lon: " << lon << std::endl;
+		// std::cout << "I = main, lat: " << lat << std::endl;
+
+	//////////////////////////
+
+	//	srvEraseConfig.sendRequest();
+	//	s.waitForTransmissionDone();
+	//
+	//    pthread_mutex_lock(&lock);
+	//    // wait for erase to be done
+	//    pthread_cond_wait(&cond1, &lock);
+	//    pthread_mutex_unlock(&lock);
+	//
+	//    std::cout << "erase done" << std::endl;
+	//
+	//    srvSendStartupConfig.setDataForDownload(test);
+	//    srvSendStartupConfig.sendRequest();
+
+	//    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
+	//
+	//    decode.getDescritpion(str);
+	//    std::cout << str << std::endl;
+
+	//	s->transmitKissFrame(pointerTxTest);
+	//	s->receiveKissFrame(pointerRxTest);
 
     }
-
-	std::cout << "I = main, logAreaStart at: 0x" << std::hex << logAreaStart << ", logAreaEnd at: 0x" << logAreaEnd << std::endl;
-	std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
-
-	logDumper.dumpEventsToReport(logAreaStart, logAreaEnd, "234");
-
-////////////////////////
-
-	// srvRunningConfig.sendRequest();
-	// s.waitForTransmissionDone();
-
-    // pthread_mutex_lock(&lock);
-    // // wait for configuration to be received
-    // pthread_cond_wait(&cond1, &lock);
-    // pthread_mutex_unlock(&lock);
-
-    // srvRunningConfig.storeToBinaryFile("config.bin");
-
-    // std::string callsign;
-    // std::string description;
-    // float lat, lon;
-
-	// decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
-	// decode->getCallsign(callsign);
-	// decode->getDescritpion(description);
-	// lon = decode->getLongitude();
-	// lat = decode->getLatitude();
-
-	// std::cout << "I = main, callsign: " << callsign << std::endl;
-	// std::cout << "I = main, description: " << description << std::endl;
-	// std::cout << "I = main, lon: " << lon << std::endl;
-	// std::cout << "I = main, lat: " << lat << std::endl;
-
-//////////////////////////
-
-//	srvEraseConfig.sendRequest();
-//	s.waitForTransmissionDone();
-//
-//    pthread_mutex_lock(&lock);
-//    // wait for erase to be done
-//    pthread_cond_wait(&cond1, &lock);
-//    pthread_mutex_unlock(&lock);
-//
-//    std::cout << "erase done" << std::endl;
-//
-//    srvSendStartupConfig.setDataForDownload(test);
-//    srvSendStartupConfig.sendRequest();
-
-//    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
-//
-//    decode.getDescritpion(str);
-//    std::cout << str << std::endl;
-
-//	s->transmitKissFrame(pointerTxTest);
-//	s->receiveKissFrame(pointerRxTest);
 	worker.terminate();
 
 	return 0;
