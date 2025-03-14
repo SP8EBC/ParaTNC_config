@@ -7,6 +7,9 @@
 
 #include <LogDumperTextFile.h>
 #include <string.h>
+#include <iostream>
+
+#include "../shared/event_log_strings.h"
 
 LogDumperTextFile::LogDumperTextFile() {
 	// TODO Auto-generated constructor stub
@@ -52,21 +55,86 @@ void LogDumperTextFile::startTextExport(std::string filename) {
 }
 
 void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp) {
-// add_cell_fmt
+
+	// special cases
+	auto src = eventLogEntry->source;
+	auto svrty = eventLogEntry->severity;
+	auto id = eventLogEntry->event_id;
+
+	if (src == EVENT_SRC_MAIN && svrty == EVENT_TIMESYNC && id == EVENTS_MAIN_TIMESYNC_NTP) {
+		storeTimesyncEntryInExport(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
+		storeHardfaultException(eventLogEntry,timestamp);
+	}
+	else {
+
+	// add_cell_fmt
+		add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+		add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+		add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+		add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+		add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+		add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->param);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->param2);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam2);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam3);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->lparam);
+		add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->lparam2);
+		next_row(table);
+
+	}
+
+}
+
+void LogDumperTextFile::storeHardfaultException(
+		const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+	char * first_register = "   ";
+	char * second_register = "   ";
+
+	switch (eventLogEntry->param)
+	{
+	case 1: first_register = (char *)event_log_str_hardfault_lr; second_register = (char *)event_log_str_hardfault_pc; break;
+	case 2: first_register = (char *)event_log_str_hardfault_r0; second_register = (char *)event_log_str_hardfault_r1; break;
+	case 3: first_register = (char *)event_log_str_hardfault_r2; second_register = (char *)event_log_str_hardfault_r3; break;
+	case 4: first_register = (char *)event_log_str_hardfault_r12; second_register = (char *)event_log_str_hardfault_cfsr; break;
+	case 5: first_register = (char *)event_log_str_hardfault_src; second_register = (char *)event_log_str_hardfault_xpsr; break;
+	default:
+		{
+			std::cout << "E = LogDumperTextFile::storeHardfaultException, unknown value of 'param': 0x" << std::hex << (int)eventLogEntry->param <<std::endl;
+			std::cout << "E = LogDumperTextFile::storeHardfaultException, lparam: 0x" << std::hex << eventLogEntry->lparam <<std::endl;
+			std::cout << "E = LogDumperTextFile::storeHardfaultException, lparam2: 0x" << std::hex << eventLogEntry->lparam2 <<std::endl;
+
+			break;
+		}
+	}
+
+    set_hline(table, BORDER_SINGLE);
 	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
 	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
 	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
 	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
 	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
 	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->param);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->param2);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam2);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->wparam3);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->lparam);
-	add_cell_fmt(table, "0x%X", (uint32_t)eventLogEntry->lparam2);
+	set_span(table, 3, 1);
+	//override_above_border(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%s: 0x%lX", first_register, eventLogEntry->lparam);
+	set_span(table, 4, 1);
+	add_cell_fmt(table, "%s: 0x%lX", second_register, eventLogEntry->lparam2);
 	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeSupervisorException(
+		const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+
 }
 
 void LogDumperTextFile::closeAndSaveTextExport(void) {
@@ -81,4 +149,29 @@ void LogDumperTextFile::closeAndSaveTextExport(void) {
 
     fclose(output);
 
+}
+
+void LogDumperTextFile::storeTimesyncEntryInExport(
+		const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "RTC synchronized from Network Time Srvr");
+	set_span(table, 7, 1);
+	//override_above_border(table, BORDER_SINGLE);
+	add_cell_fmt(table, "Real time clock set to %02d-%02d-%02d %02d:%02d",
+						eventLogEntry->param,
+						eventLogEntry->param2,
+						eventLogEntry->wparam,
+						eventLogEntry->wparam2,
+						eventLogEntry->lparam,
+						eventLogEntry->lparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
 }

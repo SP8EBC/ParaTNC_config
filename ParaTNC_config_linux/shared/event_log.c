@@ -156,6 +156,12 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			else if (event_id == EVENTS_MAIN_CYCLIC) {
 				out = event_log_str_main_info_cyclic;
 			}
+			else if (event_id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
+				out = event_log_str_main_info_hardault;
+			}
+			else if (event_id == EVENTS_MAIN_POSTMORTEM_SUPERVISOR) {
+				out = event_log_str_main_info_supervisor;
+			}
 			break;
 		}
 		case EVENT_SRC_WX_HANDLER:	{

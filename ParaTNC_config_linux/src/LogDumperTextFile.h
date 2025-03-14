@@ -24,6 +24,19 @@ class LogDumperTextFile {
 
 	std::string fn;
 
+	bool lineAbove = false;
+
+	/**
+	 * Stores all Timesync events with dedicatet format
+	 * @param eventLogEntry
+	 * @param timestamp
+	 */
+	void storeTimesyncEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
+	void storeHardfaultException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeSupervisorException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
+
 public:
 	LogDumperTextFile();
 	virtual ~LogDumperTextFile();
