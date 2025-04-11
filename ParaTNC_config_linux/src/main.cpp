@@ -7,6 +7,7 @@
 #include <serial/SerialRxBackgroundWorker.h>
 #include "ProgramConfig.h"
 #include "LogDumper.h"
+#include "TimeTools.h"
 #include "serial/Serial.h"
 #include "../shared/services/SrvGetRunningConfig.h"
 #include "../shared/services/SrvGetVersionAndId.h"
@@ -60,6 +61,9 @@ uint32_t logNewestEntry = 0;
 bool restartOnly = false;
 std::string portName;
 
+char fileNamePrefix[48] = {0u};
+size_t fileNamePrefixLenght = 0;
+
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
 	//ProgramConfig::readConfigFromFile("");
@@ -69,7 +73,10 @@ int main(int argc, char *argv[]) {
 	ProgramConfig::manualConfig();
 #endif
 
-	//s = std::make_shared<Serial>();
+	TimeTools::initBoostTimezones();
+
+	// make a room for station identification
+	fileNamePrefixLenght = TimeTools::getCurrentLocalTimeFnString(fileNamePrefix + 26, 48);
 
 	srvRunningConfig.setSerialContext(&s);
 	srvGetVersion.setSerialContext(&s);
@@ -137,9 +144,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	worker.start();
-	//worker.waitForStartup();
-//	srvRunningConfig.sendRequest();
-//	s->waitForTransmissionDone();
+
 	srvGetVersion.sendRequest();
 	s.waitForTransmissionDone();
 
@@ -152,6 +157,24 @@ int main(int argc, char *argv[]) {
     	srvReset.restart();
     }
     else {
+
+		srvRunningConfig.sendRequest();
+		s.waitForTransmissionDone();
+
+		 std::string callsign;
+		 std::string description;
+		 float lat, lon;
+
+		 decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
+		 decode->getCallsign(callsign);
+		 decode->getDescritpion(description);
+		 lon = decode->getLongitude();
+		 lat = decode->getLatitude();
+
+		 std::cout << "I = main, callsign: " << callsign << std::endl;
+		 std::cout << "I = main, description: " << description << std::endl;
+		 std::cout << "I = main, lon: " << lon << std::endl;
+		 std::cout << "I = main, lat: " << lat << std::endl;
 
 		for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;

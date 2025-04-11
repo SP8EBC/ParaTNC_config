@@ -1,3 +1,6 @@
 Running 1 test case...
 Entering test module "LOGDUMPER"
 ../src/LogDumperTextFile_test.cpp(37): Entering test case "basic"
+Test case basic did not check any assertions
+../src/LogDumperTextFile_test.cpp(37): Leaving test case "basic"; testing time: 282us
+Leaving test module "LOGDUMPER"; testing time: 300us

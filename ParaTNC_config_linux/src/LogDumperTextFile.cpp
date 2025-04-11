@@ -67,6 +67,9 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
 		storeHardfaultException(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
+		storeCyclic(eventLogEntry,timestamp);
+	}
 	else {
 
 	// add_cell_fmt
@@ -137,20 +140,6 @@ void LogDumperTextFile::storeSupervisorException(
 
 }
 
-void LogDumperTextFile::closeAndSaveTextExport(void) {
-    set_all_vlines(table, BORDER_SINGLE);
-	next_row(table);
-    make_boxed(table, BORDER_DOUBLE);
-
-    FILE* output;
-    output = fopen(fn.c_str(), "w");
-
-    fprint_table(table, output);
-
-    fclose(output);
-
-}
-
 void LogDumperTextFile::storeTimesyncEntryInExport(
 		const event_log_exposed_t *eventLogEntry,
 		const struct tm *const timestamp)
@@ -174,4 +163,56 @@ void LogDumperTextFile::storeTimesyncEntryInExport(
 	next_row(table);
     set_hline(table, BORDER_SINGLE);
 	lineAbove = true;
+}
+
+void LogDumperTextFile::storeCyclic(const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	//add_cell(table, "dupa");
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->severity_str);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d \n -", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->source_str_name);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "Cyclic status report\n -");
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "APRS-IS stats, connections: %u, conn fails: %u, packets tx: %u",
+						eventLogEntry->param,
+						eventLogEntry->param2,
+						eventLogEntry->wparam);
+	next_row(table);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Battery: %4.2f V, total RX: %d pkts, total TX: %d pkts",
+						((float)eventLogEntry->wparam2 / 100.0f),
+						eventLogEntry->lparam,
+						eventLogEntry->lparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+}
+
+void LogDumperTextFile::closeAndSaveTextExport(void) {
+    set_all_vlines(table, BORDER_SINGLE);
+	next_row(table);
+    make_boxed(table, BORDER_DOUBLE);
+
+    FILE* output;
+    output = fopen(fn.c_str(), "w");
+
+    fprint_table(table, output);
+
+    fclose(output);
+
 }

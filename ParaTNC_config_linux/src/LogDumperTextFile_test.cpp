@@ -37,5 +37,27 @@ BOOST_GLOBAL_FIXTURE (MyConfig);
 BOOST_AUTO_TEST_CASE(basic) {
 	LogDumperTextFile textFile;
 
+	event_log_exposed_t exposed = {0u};
+	// 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
+	exposed.severity = EVENT_INFO_CYCLIC;
+	exposed.source = EVENT_SRC_MAIN;
+	exposed.event_id = 0xAAu;
+
+	exposed.event_master_time = 123456u;
+
+	exposed.param = 1;
+	exposed.param2 = 2;
+	exposed.wparam = 3;
+	exposed.wparam2 = 1288;
+	exposed.wparam3 = 5;
+	exposed.lparam = 4888;
+	exposed.lparam2 = 4999;
+
+	  time_t rawtime;
+	  time (&rawtime);
+	struct tm * timestamp = localtime(&rawtime);
+
 	textFile.startTextExport("test");
+	textFile.storeEntryInExport(&exposed, timestamp);
+	textFile.closeAndSaveTextExport();
 }

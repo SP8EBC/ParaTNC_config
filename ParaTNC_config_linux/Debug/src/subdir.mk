@@ -10,6 +10,7 @@ CPP_SRCS += \
 ../src/LogDumperTextFile.cpp \
 ../src/LogDumper_test.cpp \
 ../src/ProgramConfig.cpp \
+../src/TimeTools.cpp \
 ../src/main.cpp 
 
 CPP_DEPS += \
@@ -19,6 +20,7 @@ CPP_DEPS += \
 ./src/LogDumperTextFile.d \
 ./src/LogDumper_test.d \
 ./src/ProgramConfig.d \
+./src/TimeTools.d \
 ./src/main.d 
 
 OBJS += \
@@ -28,6 +30,7 @@ OBJS += \
 ./src/LogDumperTextFile.o \
 ./src/LogDumper_test.o \
 ./src/ProgramConfig.o \
+./src/TimeTools.o \
 ./src/main.o 
 
 
@@ -35,7 +38,14 @@ OBJS += \
 src/%.o: ../src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++1y -D_XOPEN_SOURCE=600 -I../src/shared -I../src/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../src/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+src/TimeTools.o: ../src/TimeTools.cpp src/subdir.mk
+	@echo 'Building file: $<'
+	@echo 'Invoking: GCC C++ Compiler'
+	g++ -std=c++17 -U_XOPEN_SOURCE -I../src/shared -I../src/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -43,7 +53,7 @@ src/%.o: ../src/%.cpp src/subdir.mk
 clean: clean-src
 
 clean-src:
-	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/LogDumper.d ./src/LogDumper.o ./src/LogDumperTextFile.d ./src/LogDumperTextFile.o ./src/LogDumper_test.d ./src/LogDumper_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/main.d ./src/main.o
+	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/LogDumper.d ./src/LogDumper.o ./src/LogDumperTextFile.d ./src/LogDumperTextFile.o ./src/LogDumper_test.d ./src/LogDumper_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/TimeTools.d ./src/TimeTools.o ./src/main.d ./src/main.o
 
 .PHONY: clean-src
 
