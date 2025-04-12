@@ -12,6 +12,9 @@
 
 #include <vector>
 
+/**
+ * Encodes configuration data for versions EA16 to EA20
+ */
 class EncodeVer0: public IConfigEcode {
 
 	/**
@@ -84,6 +87,9 @@ public:
 	virtual void setDigiDelayInMsec(uint8_t _delayInMsec);
 	virtual bool decodeToFile(std::string _fn);
 	virtual void setUmbChannelQnh(uint16_t _channelQnhPressure);
+
+	virtual void setBatteryScalingA(uint16_t _a);		// from EA20
+	virtual void setBatteryScalingB(uint16_t _b);		// from EA20
 };
 
 #endif /* SRC_CONFIG_ENCODE_ENCODEVER0_H_ */

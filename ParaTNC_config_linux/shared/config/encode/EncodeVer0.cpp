@@ -11,6 +11,9 @@
 
 #include "../Ver0Map.h"
 
+/**
+ * Encodes configuration data for versions EA16 to EA20
+ */
 EncodeVer0::EncodeVer0() {
 
 	this->data.reserve(CONFIG__END__OFFSET - 1);
@@ -206,3 +209,12 @@ bool EncodeVer0::decodeToFile(std::string _fn) {
 
 void EncodeVer0::setUmbChannelQnh(uint16_t _channelQnhPressure) {
 }
+
+void EncodeVer0::setBatteryScalingA(uint16_t _a) {
+
+}
+
+void EncodeVer0::setBatteryScalingB(uint16_t _b) {
+
+}
+

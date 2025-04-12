@@ -17,7 +17,9 @@
 #include <time.h>
 
 
-
+/**
+ * Decode configuration data for versions EA16 to EA20
+ */
 DecodeVer0::DecodeVer0(const std::vector<uint8_t> &configData) : data(configData) {
 }
 
@@ -736,4 +738,26 @@ void DecodeVer0::getGsmApnPassword(std::string &password) {
 		startIt++;
 	} while(startIt != endIt);
 
+}
+
+uint8_t DecodeVer0::getWxDustSensor() {
+	return 0;
+}
+
+uint16_t DecodeVer0::getBatteryScalingA() {		// from EA20
+	return 0;
+}
+
+uint16_t DecodeVer0::getBatteryScalingB() {
+	return 0;
+}
+
+bool DecodeVer0::getPowersaveKeepGsmEnabled()		// from EA07
+{
+	return false;
+}
+
+uint32_t DecodeVer0::getUdsSecurityAccess()	// from EC00
+{
+	return 0;
 }

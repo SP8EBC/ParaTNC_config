@@ -48,9 +48,18 @@ public:
 	virtual bool getDigiAlwaysMessageAndStatus() = 0;	// reserved
 	virtual DigiFilter getDigiFilter() = 0;		// reserved
 	virtual std::string getDigiFilterPrefixList(uint8_t entry) = 0;		// reserved
-	virtual ButtonFunction getButtonOneFunction() = 0;
-	virtual ButtonFunction getButtonTwoFunction() = 0;
 
+	virtual uint8_t getWxDustSensor() = 0;	// from EA16
+
+	virtual uint16_t getBatteryScalingA() = 0;		// from EA20
+	virtual uint16_t getBatteryScalingB() = 0;		// from EA20
+
+	virtual ButtonFunction getButtonOneFunction() = 0;			// from EA22
+	virtual ButtonFunction getButtonTwoFunction() = 0;			// from EA22
+
+	virtual bool getPowersaveKeepGsmEnabled() = 0;		// from EA07
+
+	virtual uint32_t getUdsSecurityAccess() = 0;	// from EC00
 
 	virtual void getCallsign(std::string & call) = 0;
 	virtual uint8_t getSsid() = 0;

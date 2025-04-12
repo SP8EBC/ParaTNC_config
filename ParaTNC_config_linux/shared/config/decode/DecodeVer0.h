@@ -10,6 +10,9 @@
 
 #include "IConfigDecode.h"
 
+/**
+ * Decode configuration data for versions EA16 to EA20
+ */
 class DecodeVer0: public IConfigDecode {
 
 	const std::vector<uint8_t> data;
@@ -80,6 +83,15 @@ public:
 	virtual bool getWxDoubleTransmit()  ;
 	virtual WeatherSource getHumiditySrc()  ;
 	virtual void getGsmApnPassword(std::string &password)  ;
+
+	virtual uint8_t getWxDustSensor();	// from EA16
+
+	virtual uint16_t getBatteryScalingA();		// from EA20
+	virtual uint16_t getBatteryScalingB();		// from EA20
+
+	virtual bool getPowersaveKeepGsmEnabled();		// from EA07
+
+	virtual uint32_t getUdsSecurityAccess();	// from EC00
 };
 
 #endif /* SRC_CONFIG_DECODE_DECODEVER0_H_ */

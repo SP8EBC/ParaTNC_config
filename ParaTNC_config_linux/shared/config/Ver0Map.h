@@ -1,6 +1,10 @@
 /*
  * Ver0Map.h
  *
+ * 	Configuration data map for EA16 to EA20, although some parts are available
+ * 	since EA05 like APRS-IS configuration, or since EA04 which introduced
+ * 	API configuration
+ *
  *  Created on: Apr 24, 2023
  *      Author: mateusz
  */
@@ -40,7 +44,7 @@
 #define MODE_WX_DAVIS_OFFSET			0x4
 #define MODE_WX_MS5611_OR_BME_OFFSET	0x5
 #define MODE_WX_ANEMOMETER_CONST_OFFSET	0x6
-#define MODE_WX_DUST_SENSOR_OFFSET		0x7
+#define MODE_WX_DUST_SENSOR_OFFSET		0x7		// from EA16
 #define MODE_WX_PT_SENSOR_OFFSET		0x8
 #define MODE_VICTRON_OFFSET				0x9
 #define MODE_DIGI_VISCOUS_OFFSET		0xA
@@ -48,7 +52,7 @@
 #define MODE_DIGI_VISCOUS_DELAY_OFFSET	0xC
 #define MODE_DIGI_DELAY_100MSEC_OFFSET	0xD
 #define MODE_POWERSAVE_OFFSET			0xE
-#define MODE_POWERSAVE_KEEP_GSM_OFFSET	0xF
+#define MODE_POWERSAVE_KEEP_GSM_OFFSET	0xF		// from EA07
 #define MODE_GSM_OFFSET					0x10
 
 #define SOURCE_TEMPERATURE_OFFSET		0x0

@@ -50,9 +50,18 @@ public:
 	virtual void setDigiAlwaysMessageAndStatus(bool _alwaysMessageAndSts) = 0;	// reserved
 	virtual void setDigiFilter(DigiFilter _filter) = 0;		// reserved
 	virtual void setDigiFilterPrefixList(uint8_t entry, std::string & _value) = 0;		// reserved
-	virtual void setButtonOneFunction(ButtonFunction _buttonOne) = 0;
-	virtual void setButtonTwoFunction(ButtonFunction _buttonTwo) = 0;
 
+	virtual void setWxDustSensor(uint8_t _wx_dust_sensor) = 0;	// from EA16
+
+	virtual void setBatteryScalingA(uint16_t _a) = 0;		// from EA20
+	virtual void setBatteryScalingB(uint16_t _b) = 0;		// from EA20
+
+	virtual void setButtonOneFunction(ButtonFunction _buttonOne) = 0;	// from EA22
+	virtual void setButtonTwoFunction(ButtonFunction _buttonTwo) = 0;	// from EA22
+
+	virtual void setPowersaveKeepGsmEnabled(bool _enabled) = 0;		// from EA07
+
+	virtual void setUdsSecurityAccess(uint32_t _sec_access) = 0;	// from EC00
 
 	virtual void setCallsign(std::string & call) = 0;
 	virtual void setSsid(uint8_t _ssid) = 0;
