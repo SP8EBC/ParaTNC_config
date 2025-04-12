@@ -1,0 +1,758 @@
+// older on top
+
+==========================================
+Commit 4b40720 -- next tag EA00
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 4f76481..3e2b3d1 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -27,18 +27,14 @@ typedef enum config_data_powersave_mode_t {
+         *      readings will be collected all the time
+         */
+        PWSAVE_NONE = 0,
++       PWSAVE_NORMAL = 1,
++       PWSAVE_AGGRESV = 3
+ 
+        //PWSAVE_
+ 
+ 
+ }config_data_powersave_mode_t;
+ 
+-typedef struct config_data_powersave_t {
+-
+-       config_data_powersave_mode_t mode;
+-
+-}config_data_powersave_t;
+-
+ typedef struct config_data_mode_t {
+ 
+ #define WX_ENABLED                                     (1)
+@@ -67,6 +63,8 @@ typedef struct config_data_mode_t {
+ 
+        uint8_t digi_viscous_delay_sec;
+ 
++       config_data_powersave_mode_t powersave;
++
+ 
+ } config_data_mode_t;
+ 
+diff --git a/include/main.h b/include/main.h
+index 2329958..2d014c2 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -6,7 +6,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA00"
+-#define SW_DATE "30062021"
++#define SW_DATE "31082021"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+ #define SYSTICK_TICKS_PERIOD 10
+
+
+ 
+==========================================
+Commit 0c36746 -- next tag EA00
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 3e2b3d1..bec1660 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -63,8 +63,11 @@ typedef struct config_data_mode_t {
+ 
+        uint8_t digi_viscous_delay_sec;
+ 
++       // only for ParaMETEO
+        config_data_powersave_mode_t powersave;
+ 
++       // only for ParaMETEO
++       uint8_t gsm;
+ 
+ } config_data_mode_t;
+
+
+==========================================
+Commit 390d0e2 -- next tag EA00
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 8cba11d..56a3795 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -108,6 +108,8 @@ typedef struct config_data_basic_t {
+ 
+        uint8_t beacon_transmit_period;
+ 
++       uint8_t wx_double_transmit;
++
+ } config_data_basic_t;
+
+====================================
+Commit 499cd18 -- tag EA00
+====================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 56a3795..36c2348 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -55,6 +55,8 @@ typedef struct config_data_mode_t {
+ 
+        uint8_t wx_ms5611_or_bme;               // set to one to choose bme, zero to ms5611
+ 
++       uint8_t wx_anemometer_pulses_constant;          // #define _ANEMOMETER_PULSES_IN_10SEC_PER_ONE_MS_OF_WINDSPEED 10
++
+        uint8_t victron;
+ 
+        uint8_t digi_viscous;
+diff --git a/include/main.h b/include/main.h
+index 315585e..0e52ecb 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -6,7 +6,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA00"
+-#define SW_DATE "21092021"
++#define SW_DATE "24092021"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+ #define SYSTICK_TICKS_PERIOD 10
+
+==========================================
+Commit Commit 5d2311f -- next tag EA02
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 36c2348..0f4bbce 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -65,6 +65,8 @@ typedef struct config_data_mode_t {
+ 
+        uint8_t digi_viscous_delay_sec;
+ 
++       uint8_t digi_delay_100msec;             // in 100msec increments
++
+        // only for ParaMETEO
+        config_data_powersave_mode_t powersave;
+ 
+diff --git a/include/main.h b/include/main.h
+index 1efd927..d538265 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -5,8 +5,8 @@
+ #include "drivers/serial.h"
+ #include "config_data.h"
+ 
+-#define SW_VER "EA01"
+-#define SW_DATE "01102021"
++#define SW_VER "EA02"
++#define SW_DATE "27112021"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+ #define SYSTICK_TICKS_PERIOD 10
+
+==========================================
+Commit 01f9f33 -- next tag EA04
+==========================================
+
+diff --git a/include/config_data.h b/include/config_data.h
+index 0f4bbce..2bd1987 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -320,5 +320,17 @@ typedef struct config_data_rtu_t {
+ 
+ } config_data_rtu_t;
+ 
++typedef struct config_data_gsm_t {
++
++       char pin[5];
++
++       char apn[24];
++
++       char username[24];
++
++       char password[24];
++
++
++} config_data_gsm_t;
+ 
+ #endif /* CONFIG_DATA_H_ */
+diff --git a/include/config_data_externs.h b/include/config_data_externs.h
+index 33d8722..9e4677a 100644
+--- a/include/config_data_externs.h
++++ b/include/config_data_externs.h
+@@ -30,5 +30,9 @@ extern const config_data_umb_t config_data_umb_second;
+ extern const config_data_rtu_t config_data_rtu_second;
+ extern const config_data_wx_sources_t config_data_wx_sources_second;
+ 
++#ifdef PARAMETEO
++extern const config_data_gsm_t config_data_gsm_default;
++#endif
++
+ 
+ #endif /* CONFIG_DATA_EXTERNS_H_ */
+diff --git a/include/main.h b/include/main.h
+index c540240..ba8c13f 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -6,7 +6,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA04"
+-#define SW_DATE "12012022"
++#define SW_DATE "30012022"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+ #define SYSTICK_TICKS_PERIOD 10
+
+==========================================
+Commit ef312e6 -- next tag EA05
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 2bd1987..0d1bb00 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -326,10 +326,16 @@ typedef struct config_data_gsm_t {
+ 
+        char apn[24];
+ 
++       // username for APN connection
+        char username[24];
+ 
++       // password for APN connection
+        char password[24];
+ 
++       // http://pogoda.cc:8080/meteo_backend
++       char api_base_url[64];
++
++       char api_station_name[32];
+ 
+ } config_data_gsm_t;
+ 
+==========================================
+Commit 1bf375b -- next tag EA05
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 0d1bb00..8ee16ac 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -332,11 +332,21 @@ typedef struct config_data_gsm_t {
+        // password for APN connection
+        char password[24];
+ 
++       uint8_t api_enable;
++
+        // http://pogoda.cc:8080/meteo_backend
+        char api_base_url[64];
+ 
+        char api_station_name[32];
+ 
++       uint8_t aprsis_enable;
++
++       char aprsis_server_address[64];
++
++       uint16_t aprsis_server_port;
++
++       uint32_t aprsis_passcode;
++
+ } config_data_gsm_t;
+ 
+ #endif /* CONFIG_DATA_H_ */
+
+
+==========================================
+Commit 00e4adb -- tag EA07
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 8ee16ac..effdf1e 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -70,6 +70,9 @@ typedef struct config_data_mode_t {
+        // only for ParaMETEO
+        config_data_powersave_mode_t powersave;
+ 
++       // only for ParaMETEO - keeps GSM modem always on if GSM is configured to be used
++       uint8_t powersave_keep_gsm_always_enabled;
++
+        // only for ParaMETEO
+        uint8_t gsm;
+ 
+==========================================
+Commit bd8b738 -- next tag EA16
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 210ddec..88c6477 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -43,6 +43,9 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+ 
+ #define WX_MODBUS_DEBUG                                (1 << 1)
+ 
++#define WX_DUST_SDS011_PWM                     (1 << 1)
++#define WX_DUST_SDS011_SERIAL          (1 << 2)
++
+        uint8_t digi;
+ 
+        uint8_t wx;
+@@ -57,6 +60,8 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+ 
+        uint8_t wx_anemometer_pulses_constant;          // #define _ANEMOMETER_PULSES_IN_10SEC_PER_ONE_MS_OF_WINDSPEED 10
+ 
++       uint8_t wx_dust_sensor;
++
+        uint8_t victron;
+ 
+        uint8_t digi_viscous;
+diff --git a/include/configuration_handler.h b/include/configuration_handler.h
+index b699655..9483e49 100644
+--- a/include/configuration_handler.h
++++ b/include/configuration_handler.h
+@@ -19,7 +19,7 @@ typedef enum configuration_handler_region_t {
+ typedef enum configuration_erase_startup_t {
+        ERASE_STARTUP_IDLE              = 0xAA,
+        ERASE_STARTUP_PENDING   = 0xAB,
+-       ERASE_STARTUP_ERASED    = 0xAC,
++       ERASE_STARTUP_DONE              = 0xAC,
+        ERASE_STARTUP_ERROR             = 0xAD
+ }configuration_erase_startup_t;
+ 
+diff --git a/include/main.h b/include/main.h
+index be02d17..395e261 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -8,7 +8,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA16"
+-#define SW_DATE "20082022"
++#define SW_DATE "17092022"
+ #define SW_KISS_PROTO  "A"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+
+
+==========================================
+Commit fe74e93 -- next tag EA16
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 88c6477..480a4aa 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -85,6 +85,9 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+ 
+ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+ 
++       #define ENGINEERING1                                    (1)
++       #define ENGINEERING1_INH_WX_PWR_HNDL    (1 << 1)
++
+        char callsign[7];
+ 
+        uint8_t ssid;
+@@ -122,6 +125,18 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+ 
+        uint8_t wx_double_transmit;
+ 
++       /**
++        *      bit0 - must be set to zero to enable this engineering
++        *      bit1 - inhibit 'wx_pwr_switch_periodic_handle'
++        *      bit2 -
++        *      bit3 -
++        *      bit4 -
++        *      bit5 -
++        *      bit6 -
++        *      bit7 -
++        */
++       uint8_t engineering1;
++
+ } config_data_basic_t;
+ 
+ typedef enum config_data_wx_sources_enum_t {
+diff --git a/include/configuration_handler.h b/include/configuration_handler.h
+index 9483e49..e4a1d77 100644
+--- a/include/configuration_handler.h
++++ b/include/configuration_handler.h
+@@ -38,4 +38,6 @@ void configuration_clear_bits_register(uint32_t value);
+ configuration_handler_region_t configuration_get_current(uint32_t * size);
+ const uint32_t * configuration_get_address(configuration_handler_region_t region);
+ 
++int configuration_get_inhibit_wx_pwr_handle(void);
++
+ #endif /* CONFIGURATION_HANDLER_H_ */
+diff --git a/include/main.h b/include/main.h
+index 395e261..e912cde 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -8,7 +8,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA16"
+-#define SW_DATE "17092022"
++#define SW_DATE "19092022"
+ #define SW_KISS_PROTO  "A"
+ 
+
+==========================================
+Commit c09d51d -- tag EA16
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index 480a4aa..16768f3 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -87,6 +87,7 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+ 
+        #define ENGINEERING1                                    (1)
+        #define ENGINEERING1_INH_WX_PWR_HNDL    (1 << 1)
++       #define ENGINEERING1_EARLY_TX_ASSERT    (1 << 2)
+ 
+        char callsign[7];
+
+@@ -195,6 +196,8 @@ typedef struct __attribute__((aligned (4))) config_data_umb_t {
+        uint16_t channel_temperature;
+ 
+        uint16_t channel_qnh;
++
++       uint16_t serial_speed;
+
+
+==========================================
+Commit 13cabee -- next tag EA17
+==========================================
+
+diff --git a/include/config_data.h b/include/config_data.h
+index 16768f3..9f01868 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -62,6 +62,8 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+ 
+        uint8_t wx_dust_sensor;
+ 
++       uint8_t wx_pt_sensor;
++
+        uint8_t victron;
+ 
+        uint8_t digi_viscous;
+@@ -373,6 +375,12 @@ typedef struct __attribute__((aligned (4))) config_data_gsm_t {
+ 
+        uint32_t aprsis_passcode;
+ 
++       uint8_t sms_wx_info;
++
++       char sms_wx_inf_first[12];
++
++       char sms_wx_inf_second[12];
++
+ } config_data_gsm_t;
+ 
+ #endif /* CONFIG_DATA_H_ */
+diff --git a/include/main.h b/include/main.h
+index 39ef756..9fc220d 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -8,7 +8,7 @@
+ #include "config_data.h"
+ 
+ #define SW_VER "EA16"
+-#define SW_DATE "20092022"
++#define SW_DATE "24092022"
+ #define SW_KISS_PROTO  "A"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+
+ ==========================================
+ Commit be29dcb -- next tag EA17
+ ==========================================
+
+ diff --git a/include/config_data.h b/include/config_data.h
+index 3b5cbb7..e0baa52 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -156,6 +156,7 @@ typedef enum config_data_wx_sources_enum_t {
+         *      - analog/mechanical anemometer for wind
+         */
+        WX_SOURCE_INTERNAL = 1,
++       WX_SOURCE_INTERNAL_PT100 = 6,
+ 
+        /**
+         * Lufft UMB devices
+@@ -177,12 +178,7 @@ typedef enum config_data_wx_sources_enum_t {
+         * the controller queries for average and maximum wind speed.
+         */
+        WX_SOURCE_FULL_RTU = 4,
+-       WX_SOURCE_DAVIS_SERIAL = 5,
+-
+-       /**
+-        * This position is valid only for temperature
+-        */
+-       WX_SOURCE_INTERNAL_PT100 = 6,
++       WX_SOURCE_DAVIS_SERIAL = 5
+ } config_data_wx_sources_enum_t;
+ 
+ typedef struct __attribute__((aligned (4))) config_data_wx_sources_t {
+@@ -192,6 +188,9 @@ typedef struct __attribute__((aligned (4))) config_data_wx_sources_t {
+        config_data_wx_sources_enum_t humidity;
+        config_data_wx_sources_enum_t wind;
+ 
++       config_data_wx_sources_enum_t temperature_telemetry;
++
++
+ } config_data_wx_sources_t;
+ 
+ typedef struct __attribute__((aligned (4))) config_data_umb_t {
+diff --git a/include/main.h b/include/main.h
+index 9fc220d..2d182e3 100644
+--- a/include/main.h
++++ b/include/main.h
+@@ -7,8 +7,8 @@
+ #include "drivers/serial.h"
+ #include "config_data.h"
+ 
+-#define SW_VER "EA16"
+-#define SW_DATE "24092022"
++#define SW_VER "EA17"
++#define SW_DATE "21102022"
+ #define SW_KISS_PROTO  "A"
+ 
+ #define SYSTICK_TICKS_PER_SECONDS 100
+
+ ==========================================
+ Commit 67d08ff -- next tag EA19
+ ==========================================
+ diff --git a/include/config_data.h b/include/config_data.h
+ index 65f6ec2..5d2eb5d 100644
+ --- a/include/config_data.h
+ +++ b/include/config_data.h
+ @@ -89,6 +89,9 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+         // only for ParaMETEO
+         uint8_t gsm;
+  
+ +       // only for ParaMETEO
+ +       uint8_t nvm_logger;
+ +
+  } config_data_mode_t;
+  
+  typedef struct __attribute__((aligned (4))) config_data_basic_t {
+ @@ -97,6 +100,9 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+         #define ENGINEERING1_INH_WX_PWR_HNDL    (1 << 1)
+         #define ENGINEERING1_EARLY_TX_ASSERT    (1 << 2)
+  
+ +       #define ENGINEERING2                                    (1)
+ +       #define ENGINEERING2_POWER_CYCLE_R              (1 << 2)
+ +
+         char callsign[7];
+  
+         uint8_t ssid;
+ @@ -146,6 +152,16 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+          */
+         uint8_t engineering1;
+  
+ +       /**
+ +        * Ugly and nasty workarounds of (mostly hardware) problems. Use only
+ +        * where there is no hope left.
+ +        *
+ +        *      bit0 - must be set to zero to enable this engineering
+ +        *  bit1 - reboot after 99 telemetry frames
+ +        *  bit2 - power cycle vbat_r two minutes before weather frame
+ +        */
+ +       uint8_t engineering2;
+ +
+  } config_data_basic_t;
+  
+
+==========================================
+Commit 3c44e7e  -- next tag EA20
+==========================================
+diff --git a/include/config_data.h b/include/config_data.h
+index dd0fb37..c3f3c20 100644
+--- a/include/config_data.h
++++ b/include/config_data.h
+@@ -164,6 +164,10 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+         */
+        uint8_t engineering2;
+ 
++       uint16_t battery_scalling_a;
++
++       uint16_t battery_scalling_b;
++
+ } config_data_basic_t;
+
+ ==========================================
+ Commit 83526ea  -- next tag EA22
+ ==========================================
+ diff --git a/include/config_data.h b/include/config_data.h
+ index c3f3c20..8e0dd9b 100644
+ --- a/include/config_data.h
+ +++ b/include/config_data.h
+ @@ -35,6 +35,16 @@ typedef enum config_data_powersave_mode_t {
+  
+  }config_data_powersave_mode_t;
+  
+ +typedef enum config_data_button_function_t {
+ +
+ +       BUTTON_SEND_WX = 1,
+ +       BUTTON_SEND_WX_INTERNET = 2,
+ +       BUTTON_SEND_BEACON = 3,
+ +       BUTTON_FORCE_UART_KISS = 4,
+ +       BUTTON_FORCE_UART_LOG = 5,
+ +       BUTTON_RESET_GSM_GPRS = 6
+ +}config_data_button_function_t;
+ +
+  typedef struct __attribute__((aligned (4))) config_data_mode_t {
+  
+  #define WX_ENABLED                                     (1)
+ @@ -96,9 +106,10 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+  
+  typedef struct __attribute__((aligned (4))) config_data_basic_t {
+  
+ -       #define ENGINEERING1                                    (1)
+ -       #define ENGINEERING1_INH_WX_PWR_HNDL    (1 << 1)
+ -       #define ENGINEERING1_EARLY_TX_ASSERT    (1 << 2)
+ +       #define ENGINEERING1                                            (1)
+ +       #define ENGINEERING1_INH_WX_PWR_HNDL            (1 << 1)
+ +       #define ENGINEERING1_EARLY_TX_ASSERT            (1 << 2)
+ +       #define ENGINEERING1_PWRCYCLE_GSM_ON_NOCOMM     (1 << 2)
+  
+         #define ENGINEERING2                                    (1)
+         #define ENGINEERING2_REBOOT_AFTER_24    (1 << 1)
+ @@ -168,6 +179,10 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+  
+         uint16_t battery_scalling_b;
+  
+ +       config_data_button_function_t button_one;
+ +
+ +       config_data_button_function_t button_two;
+ +
+  } config_data_basic_t;
+ 
+===========================================================================================
+Commit 431d5a8 - comaptibility numbers structure defined -  Jul 4, 2023  -- next tag EA24
+===========================================================================================
+
+  diff --git a/include/stored_configuration_nvm/config_data.h b/include/stored_configuration_nvm/config_data.h
+index b928e4e..6654e5a 100644
+--- a/include/stored_configuration_nvm/config_data.h
++++ b/include/stored_configuration_nvm/config_data.h
+@@ -459,4 +459,45 @@ typedef struct __attribute__((aligned (4))) config_data_gsm_t {
+ 
+ } config_data_gsm_t;
+ 
++/**
++ * This structure holds compatibility numbers, which are used to check if
++ * configuration data stored in the NVM is compatible with running software.
++ * It is useful after firmware upgrade, which doesn't alter the configuration
++ * data. Each config block has a separate entry here (like basic, mode, RTU).
++ * During startup, if CRC verification is passed the software reads uint32_t
++ * word for each config block, and compare with internally hardcoded value
++ * If value in NVM is bigger than what application has, the app AND that
++ * with a bitmask (also hardcoded) to check if it can safely ignore that.
++ *
++ * If it cannot ignore, the configuration is too new and supposedly
++ * not compatible. The application should then either restore default values,
++ * or switch to different interpretation of that data - at least do something. 
++ *
++ * If the value from NVM is less than value from application (but not equal!!!)
++ * it is additionally ORed with another hardcoded bitmask. If a result of
++ * this OR is bigger than application
++ *
++ *
++ */
++typedef struct __attribute__((aligned (4))) config_data_compatibility_version_t {
++
++       uint64_t mode_block_compatiblity_number;                // 8 bytes
++
++       uint64_t basic_block_compatiblity_number;               // 8 bytes
++
++       uint64_t sources_block_compatiblity_number;             // 8 bytes
++
++       uint64_t umb_block_compatiblity_number;                 // 8 bytes
++
++       uint64_t rtu_block_compatiblity_number;                 // 8 bytes
++
++       uint64_t gsm_block_compatiblity_number;                 // 8 bytes
++
++       uint64_t seventh_block_compatibility_number;
++
++       uint64_t eight_block_compatibility_number;
++
++
++}config_data_compatibility_version_t;
++
+ #endif /* CONFIG_DATA_H_ */
+
+==========================================
+Commit 548c3fd  -- next tag EC00
+==========================================
+diff --git a/include/stored_configuration_nvm/config_data.h b/include/stored_configuration_nvm/config_data.h
+index 597f1f1..25a13fc 100644
+--- a/include/stored_configuration_nvm/config_data.h
++++ b/include/stored_configuration_nvm/config_data.h
+@@ -199,19 +199,30 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+        #define CONFIGURATION_SEC_MEDIUM_KISS   4U
+        /**
+         * Configuration of how UDS diagnostics are secured access different
+-        * mediums. GET_VERSION_AND_ID and SECURITY_ACCESS are never locked
++        * mediums. GET_VERSION_AND_ID and SECURITY_ACCESS are never locked.
++        * If the service shall not(!!) be locked respective bit should be set to 0.
++        * By default, when memory is fully erased everything is locked
+         *
+-        *      READ_DID and READ_MEMORY
+-        * bit 1 - APRSIS
+-        * bit 2 - RF network communication
+-        * bit 3 - KISS serial port communication
++        * Serial Port
++        *  0 - Read DID
++        *  1 - Read Memory (log and
++        *  2 -
+         *
+-        *  everything else
+-        * bit 4 - APRSIS
+-        * bit 5 - RF network communication
+-        * bit 6 - KISS serial port communication
++        *
++        *  13 -
++        *
++        * APRS Message (Radio network or APRS-IS server)
++        *
++        *  16 -
++        *  17 -
++        *
++        *      29 -
++        *
++        * Common
++        *      30 - Unlock all services by default when accessed via APRSMSG_TRANSPORT_ENCRYPTED_HEXSTRING
++        *      31 -
+         */
+-       uint8_t uds_diagnostics_security_access;
++       uint32_t uds_diagnostics_security_access;
+ 
+ } config_data_basic_t;
+ 
+==========================================
+Commit fd54f28 -- next tag ED03
+==========================================
+diff --git a/include/stored_configuration_nvm/config_data.h b/include/stored_configuration_nvm/config_data.h
+index b2caffe..114ea84 100644
+--- a/include/stored_configuration_nvm/config_data.h
++++ b/include/stored_configuration_nvm/config_data.h
+@@ -94,6 +94,12 @@ typedef struct __attribute__((aligned (4))) config_data_mode_t {
+        // only for ParaMETEO
+        uint8_t nvm_logger;
+ 
++       // only for ParaMETEO
++       uint8_t powersave_aggresive_schedule_start;
++
++       // only for ParaMETEO
++       uint8_t powersave_aggresive_schedule_stop;
++
+ } config_data_mode_t;
+ 
+ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+@@ -241,6 +247,11 @@ typedef struct __attribute__((aligned (4))) config_data_basic_t {
+         */
+        uint32_t uds_diagnostics_security_access;
+ 
++       /**
++        * only for ParaMETEO
++        */
++       uint8_t wx_transmit_period_forced_aggresive_pwrsave;
++
+ } config_data_basic_t;
+
