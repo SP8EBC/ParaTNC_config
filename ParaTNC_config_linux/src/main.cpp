@@ -61,8 +61,51 @@ uint32_t logNewestEntry = 0;
 bool restartOnly = false;
 std::string portName;
 
-char fileNamePrefix[48] = {0u};
+std::string fileNamePrefix;
 size_t fileNamePrefixLenght = 0;
+
+static size_t main_make_filename_prefix(std::string & callsign, std::string & api_name, char * out, size_t max_out_ln) {
+	size_t total_ln = 0;
+
+	 // copy station callsign and an api name to a buffer for log file prefix.
+	 // only after this place files might be created. prefix is 48 bytes long
+	 // indexes:
+	 // -> 0~10 	- API name				- 	11 characters
+	 // -> 12~17	- callsign				-	6 characters
+	 // -> 19 		- current time and date
+	 strncpy(out, api_name.c_str(), 11);
+	 total_ln = strlen(out);
+	 out[total_ln++] = '_';
+	 strncpy(out + total_ln, callsign.c_str(), 6);
+	 total_ln = strlen(out);
+	 out[total_ln++] = '_';
+	 TimeTools::getCurrentLocalTimeFnString(out + total_ln, max_out_ln - total_ln);
+	 total_ln = strlen(out);
+
+	 return total_ln;
+
+}
+
+static size_t main_make_filename_prefix(std::string & callsign, std::string & api_name, std::string & out) {
+	size_t total_ln = 0;
+
+	 // copy station callsign and an api name to a buffer for log file prefix.
+	 // only after this place files might be created. prefix is 48 bytes long
+	 // indexes:
+	 // -> 0~10 	- API name				- 	11 characters
+	 // -> 12~17	- callsign				-	6 characters
+	 // -> 19 		- current time and date
+	 out.clear();
+	 out.append(api_name);
+	 out.push_back('_');
+	 out.push_back('_');
+	 out.append(callsign);
+	 out.push_back('_');
+	 out.push_back('_');
+	 TimeTools::getCurrentLocalTimeFnString(out);
+
+	 return total_ln;
+}
 
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
@@ -74,9 +117,6 @@ int main(int argc, char *argv[]) {
 #endif
 
 	TimeTools::initBoostTimezones();
-
-	// make a room for station identification
-	fileNamePrefixLenght = TimeTools::getCurrentLocalTimeFnString(fileNamePrefix + 26, 48);
 
 	srvRunningConfig.setSerialContext(&s);
 	srvGetVersion.setSerialContext(&s);
@@ -161,20 +201,34 @@ int main(int argc, char *argv[]) {
 		srvRunningConfig.sendRequest();
 		s.waitForTransmissionDone();
 
+		pthread_mutex_lock(&lock);
+		// wait for configuration to be received
+		pthread_cond_wait(&cond1, &lock);
+		pthread_mutex_unlock(&lock);
+
 		 std::string callsign;
 		 std::string description;
+		 std::string apiName;
 		 float lat, lon;
 
 		 decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
 		 decode->getCallsign(callsign);
 		 decode->getDescritpion(description);
+		 decode->getGsmApiStationName(apiName);
+
 		 lon = decode->getLongitude();
 		 lat = decode->getLatitude();
 
 		 std::cout << "I = main, callsign: " << callsign << std::endl;
+		 std::cout << "I = main, API station name: " << apiName << std::endl;
 		 std::cout << "I = main, description: " << description << std::endl;
 		 std::cout << "I = main, lon: " << lon << std::endl;
 		 std::cout << "I = main, lat: " << lat << std::endl;
+
+		 main_make_filename_prefix(callsign, apiName, fileNamePrefix);
+
+		 std::cout << "I = main, fileNamePrefix: " << fileNamePrefix << std::endl;
+
 
 		for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;
@@ -208,7 +262,7 @@ int main(int argc, char *argv[]) {
 		std::cout << "I = main, logAreaStart at: 0x" << std::hex << logAreaStart << ", logAreaEnd at: 0x" << logAreaEnd << std::endl;
 		std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
 
-		logDumper.dumpEventsToReport(logAreaStart, logAreaEnd, "234");
+		logDumper.dumpEventsToReport(logAreaStart, logAreaEnd, fileNamePrefix + ".log");
 
 	////////////////////////
 

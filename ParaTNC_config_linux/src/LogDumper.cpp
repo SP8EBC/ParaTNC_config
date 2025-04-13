@@ -8,6 +8,8 @@
 #include <LogDumper.h>
 #include <iostream>
 #include <utility>
+#include <fstream>
+#include <iterator>
 
 #include "pthread.h"
 
@@ -81,6 +83,8 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	// declaring mutex
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
+	std::ofstream outBin(filename + ".bin", std::ios::out | std::ios::binary);
+
 	const size_t logEntrySize = sizeof(event_log_t);
 
 	const int eventsNum = (endAddress - startAddress) / logEntrySize;
@@ -115,6 +119,13 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	    else {
 
 			std::vector<uint8_t> memoryData = srvReadMemory.getResponseData();
+
+			if (outBin && outBin.good()) {
+			    std::ostream_iterator<char> oi(outBin);
+			    std::copy(memoryData.begin(), memoryData.end(), oi);
+
+				//outBin.write(memoryData.data(), memoryData.size());
+			}
 
 			const event_log_t * event = (event_log_t *)memoryData.data();
 
@@ -164,6 +175,10 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 			}
 	    }
 
+	}
+
+	if (outBin && outBin.good()) {
+		outBin.close();
 	}
 
 	logDumperTextFile.closeAndSaveTextExport();

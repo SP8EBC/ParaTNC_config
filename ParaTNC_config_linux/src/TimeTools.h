@@ -267,7 +267,7 @@ public:
 
 		boost::posix_time::ptime current_time = boost::posix_time::second_clock::local_time();
 
-		boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%Y-%b-%d__%H-%M-%S");
+		boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%Y-%b-%d_%H-%M-%S");
 
 		std::stringstream date_stream;
 
@@ -278,6 +278,34 @@ public:
 		ret = date_stream.str().length();
 
 		strncpy(out, date_stream.str().c_str(), ret);
+
+		return ret;
+	}
+
+	/**
+	 * Prints current date and time to a string in form without any white characters
+	 * and characters forbidden on ext4/NTFS/FAT32 file systems
+	 * @param out pointer to an output string where date-time will be printed
+	 * @param out_max_ln size of output string pointed by 'out'
+	 * @return final size of a string
+	 */
+	static size_t getCurrentLocalTimeFnString(std::string & out) {
+		size_t ret = 0;
+
+		boost::posix_time::ptime current_time = boost::posix_time::second_clock::local_time();
+
+		boost::posix_time::time_facet* facet = new boost::posix_time::time_facet("%Y-%b-%d_%H-%M-%S");
+
+		std::stringstream date_stream;
+
+		date_stream.imbue(std::locale(std::locale::classic(), facet));
+
+		date_stream << current_time;
+
+		ret = date_stream.str().length();
+
+		out.append(date_stream.str());
+		//strncpy(out, date_stream.str().c_str(), ret);
 
 		return ret;
 	}

@@ -33,6 +33,7 @@ public:
 	virtual uint8_t getRtuSlaveParity()  ;
 	virtual uint8_t getSsid()  ;
 	virtual void getGsmApiBaseUrl(std::string &password)  ;
+	virtual void getGsmApiStationName(std::string & _station_name);
 	virtual Digi getDigiEnabled()  ;
 	virtual Powersave getPowersave()  ;
 	virtual AprsPath getPath()  ;

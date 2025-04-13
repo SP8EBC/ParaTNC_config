@@ -105,6 +105,7 @@ public:
 	virtual void getGsmApnPassword(std::string & password) = 0;
 	virtual bool getGsmApiEnable() = 0;
 	virtual void getGsmApiBaseUrl(std::string & password) = 0;
+	virtual void getGsmApiStationName(std::string & _station_name) = 0;
 	virtual bool getGsmAprsisEnable() = 0;
 
 };

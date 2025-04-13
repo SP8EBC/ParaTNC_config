@@ -136,6 +136,10 @@ void DecodeVer0::getGsmApiBaseUrl(std::string &password) {
 	password.clear();
 
 	do {
+		if (*startIt == 0xFF || *startIt == 0x00 || *startIt == ' ') {
+			return;
+		}
+
 		password.append(1, (char) *startIt);
 
 		startIt++;
@@ -144,6 +148,25 @@ void DecodeVer0::getGsmApiBaseUrl(std::string &password) {
 	//std::for_each(startIt, endIt, [&password](uint8_t b) { password.append(1, (char) b);});
 
 
+}
+
+void DecodeVer0::getGsmApiStationName(std::string & _station_name) {
+	std::size_t offset = GSM_API_STATION_NAME_OFFSET + CONFIG_GSM_OFFSET;
+
+	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
+	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_API_STATION_NAME_LN;
+
+	_station_name.clear();
+
+	do {
+		if (*startIt == 0xFF || *startIt == 0x00 || *startIt == ' ') {
+			return;
+		}
+
+		_station_name.append(1, (char) *startIt);
+
+		startIt++;
+	} while(startIt != endIt);
 }
 
 Digi DecodeVer0::getDigiEnabled() {
@@ -298,6 +321,10 @@ void DecodeVer0::getGsmApnName(std::string &apn) {
 	apn.clear();
 
 	do {
+		if (*startIt == 0xFF || *startIt == 0x00 || *startIt == ' ') {
+			return;
+		}
+
 		apn.append(1, (char) *startIt);
 
 		startIt++;
@@ -315,6 +342,10 @@ void DecodeVer0::getCallsign(std::string &call) {
 	call.clear();
 
 	do {
+		if (*startIt == 0xFF || *startIt == 0x00 || *startIt == ' ') {
+			return;
+		}
+
 		call.append(1, (char) *startIt);
 
 		startIt++;
@@ -504,13 +535,13 @@ void DecodeVer0::getDescritpion(std::string &description) {
 	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
 	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + BASIC_COMMENT_LENGHT;
 
-	if (*startIt == 0xFF || *startIt == 0x00) {
-		return;
-	}
-
 	description.clear();
 
 	do {
+		if (*startIt == 0xFF || *startIt == 0x00) {
+			return;
+		}
+
 		description.append(1, (char) *startIt);
 
 		startIt++;
@@ -726,13 +757,13 @@ void DecodeVer0::getGsmApnPassword(std::string &password) {
 	std::vector<uint8_t>::const_iterator startIt = data.begin() + offset;
 	std::vector<uint8_t>::const_iterator endIt = data.begin() + offset + GSM_USERNAME_LEN;
 
-	if (*startIt == 0xFF || *startIt == 0x00) {
-		return;
-	}
-
 	password.clear();
 
 	do {
+		if (*startIt == 0xFF || *startIt == 0x00 || *startIt == ' ') {
+			return;
+		}
+
 		password.append(1, (char) *startIt);
 
 		startIt++;
