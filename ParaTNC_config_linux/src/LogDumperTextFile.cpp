@@ -203,6 +203,10 @@ void LogDumperTextFile::storeCyclic(const event_log_exposed_t *eventLogEntry,
     set_hline(table, BORDER_SINGLE);
 }
 
+void LogDumperTextFile::storeGsmRegisteredNetwork(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp) {
+
+}
+
 void LogDumperTextFile::closeAndSaveTextExport(void) {
     set_all_vlines(table, BORDER_SINGLE);
 	next_row(table);

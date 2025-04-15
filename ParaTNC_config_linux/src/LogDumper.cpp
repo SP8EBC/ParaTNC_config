@@ -72,8 +72,6 @@ bool LogDumper::convertEventToExposedEvent(const event_log_t * event, event_log_
 {
 	bool crcCorrect = false;
 
-	//struct tm decodedDateTime = {0u};
-
 	if ((event->event_counter_id != 0) && (event->event_counter_id != 0xFFFFFFFF)) {
 
 		// calculate crc checksum for this entry
@@ -82,7 +80,6 @@ bool LogDumper::convertEventToExposedEvent(const event_log_t * event, event_log_
 		const uint8_t crcLsb = (uint8_t)(crc & 0x000000FF);
 
 		if (event->crc_checksum == crcLsb) {
-			//decoded_events++;
 
 			exposed.event_counter_id = event->event_counter_id;
 			exposed.event_rtc = event->event_rtc;
@@ -109,13 +106,14 @@ bool LogDumper::convertEventToExposedEvent(const event_log_t * event, event_log_
 			}
 
 			crcCorrect = true;
-			//logDumperTextFile.storeEntryInExport(&exposed, &decodedDateTime);
 		}
 		else {
-			//std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
-			std::cout << "E = LogDumper::dumpEventsToReport, crc error, expected 0x" << std::hex << (int)event->crc_checksum << ", got: 0x" << (int)crcLsb << std::endl;
+			std::cout << "E = LogDumper::convertEventToExposedEvent, crc error, expected 0x" << std::hex << (int)event->crc_checksum << ", got: 0x" << (int)crcLsb << std::endl;
 		}
 
+	}
+	else {
+		std::cout << "W = LogDumper::convertEventToExposedEvent, probably erased memory has been read." << std::endl;
 	}
 
 	return crcCorrect;
@@ -130,6 +128,7 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 		std::string filename) {
 
 	uint32_t decoded_events = 0u;
+	uint32_t events_with_failed_crc	= 0u;
 
 	struct tm decodedDateTime = {0u};
 
@@ -189,6 +188,7 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 				logDumperTextFile.storeEntryInExport(&exposed, &decodedDateTime);
 			}
 			else {
+				events_with_failed_crc++;
 				std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
 			}
 
@@ -203,5 +203,7 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	logDumperTextFile.closeAndSaveTextExport();
 
 	std::cout << "I = LogDumper::dumpEventsToReport, decoded event log entries: " << std::dec << decoded_events << std::endl;
+	std::cout << "I = LogDumper::dumpEventsToReport, events with CRC checksum error: " << std::dec << events_with_failed_crc << std::endl;
+
 }
 

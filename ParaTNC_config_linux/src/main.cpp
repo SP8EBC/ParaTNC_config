@@ -229,6 +229,7 @@ int main(int argc, char *argv[]) {
 
 		 std::cout << "I = main, fileNamePrefix: " << fileNamePrefix << std::endl;
 
+			srvRunningConfig.storeToBinaryFile(fileNamePrefix + ".conf.bin");
 
 		for (int i = 0; i < ((int)sizeof(did_list) / (int)(sizeof(did_list[0]))); i++) {
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec << std::endl;

@@ -6,6 +6,7 @@
  */
 
 #include <LogDumperTextFile.h>
+#include <LogDumper.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE LOGDUMPER
@@ -15,6 +16,9 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <iterator>
+#include <algorithm>
+#include <string>
 
 struct MyConfig
 {
@@ -32,7 +36,60 @@ struct MyConfig
   std::ofstream test_log;
 };
 
+class _TestDumper : LogDumper {
+
+public:
+	static bool _convertEventToExposedEvent(const event_log_t * event, event_log_exposed_t & exposed, struct tm & decodedDateTime) {
+		return LogDumper::convertEventToExposedEvent(event, exposed, decodedDateTime);
+	}
+};
+
 BOOST_GLOBAL_FIXTURE (MyConfig);
+
+BOOST_AUTO_TEST_CASE(read_binary_1) {
+	LogDumperTextFile textFile;
+
+	uint8_t entry[sizeof(event_log_t)];
+	const event_log_t * event = (event_log_t *)entry;
+
+	int crcErrors = 0;
+
+    std::ifstream input( "./test_input/test__SR8WXD__2025-Apr-15_20-18-33.log.bin", std::ios::binary );
+
+    event_log_exposed_t exposed = {0u};
+    struct tm decodedDateTime = {0u};
+
+    BOOST_CHECK(input.is_open());
+    BOOST_CHECK(input.good());
+
+    std::vector<uint8_t> buffer(std::istreambuf_iterator<char>(input), {});
+
+    BOOST_TEST_MESSAGE("read: " + std::to_string(buffer.size()));
+
+    std::vector<uint8_t>::const_iterator from = buffer.begin();
+    std::vector<uint8_t>::const_iterator to = buffer.begin() + sizeof(event_log_t);
+
+    const std::vector<uint8_t>::const_iterator end = buffer.end();
+
+    for (size_t i = 0; i < buffer.size(); i += sizeof(event_log_t)) {
+    	std::copy(from, to, entry);
+
+    	from += sizeof(event_log_t);
+    	to += sizeof(event_log_t);
+
+    	if (to == end) {
+    		break;
+    	}
+
+    	const bool crcOk = _TestDumper::_convertEventToExposedEvent(event, exposed, decodedDateTime);
+
+    	if (!crcOk) {
+    		crcErrors++;
+    	}
+    }
+
+    BOOST_CHECK_EQUAL(crcErrors, 40);
+}
 
 BOOST_AUTO_TEST_CASE(basic) {
 	LogDumperTextFile textFile;
