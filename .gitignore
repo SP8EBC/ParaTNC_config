@@ -6,3 +6,5 @@ ParaTNC_config_linux/Debug/
 *.tar.gz
 *.d
 *.o
+remote-stdout.txt
+console-out.txt
