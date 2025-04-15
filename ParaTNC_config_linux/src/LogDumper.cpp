@@ -68,6 +68,59 @@ void LogDumper::getTimestampFromEvent(const event_log_exposed_t *const in,
 
 }
 
+bool LogDumper::convertEventToExposedEvent(const event_log_t * event, event_log_exposed_t & exposed, struct tm & decodedDateTime)
+{
+	bool crcCorrect = false;
+
+	//struct tm decodedDateTime = {0u};
+
+	if ((event->event_counter_id != 0) && (event->event_counter_id != 0xFFFFFFFF)) {
+
+		// calculate crc checksum for this entry
+		const uint32_t crc = calcCRC32std((void*)(event), sizeof(event_log_t) - 1, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
+
+		const uint8_t crcLsb = (uint8_t)(crc & 0x000000FF);
+
+		if (event->crc_checksum == crcLsb) {
+			//decoded_events++;
+
+			exposed.event_counter_id = event->event_counter_id;
+			exposed.event_rtc = event->event_rtc;
+			exposed.event_master_time = event->event_master_time;
+
+			exposed.source = (event_log_source_t)EVENT_LOG_GET_SOURCE(event->source);
+			exposed.source_str_name = event_log_source_to_str(exposed.source);
+
+			exposed.severity = (event_log_severity_t)EVENT_LOG_GET_SEVERITY(event->severity);
+			exposed.severity_str = event_log_severity_to_str(exposed.severity);
+
+			exposed.event_id = event->event_id;
+			exposed.event_str_name = event_id_to_str(exposed.source, exposed.event_id);
+
+			exposed.lparam = event->lparam;
+			exposed.lparam2 = event->lparam2;
+			exposed.wparam = event->wparam;
+			exposed.wparam2 = event->wparam2;
+			exposed.param = event->param;
+			exposed.param2 = event->param2;
+
+			if (event->event_rtc != 0x0) {
+				LogDumper::getTimestampFromEvent(&exposed, &decodedDateTime);
+			}
+
+			crcCorrect = true;
+			//logDumperTextFile.storeEntryInExport(&exposed, &decodedDateTime);
+		}
+		else {
+			//std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
+			std::cout << "E = LogDumper::dumpEventsToReport, crc error, expected 0x" << std::hex << (int)event->crc_checksum << ", got: 0x" << (int)crcLsb << std::endl;
+		}
+
+	}
+
+	return crcCorrect;
+}
+
 void LogDumper::timeoutCallback(void) {
 	timeout = true;
 	pthread_cond_signal(&cond1);
@@ -79,6 +132,8 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	uint32_t decoded_events = 0u;
 
 	struct tm decodedDateTime = {0u};
+
+	event_log_exposed_t exposed = {0u};
 
 	// declaring mutex
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -123,56 +178,20 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 			if (outBin && outBin.good()) {
 			    std::ostream_iterator<char> oi(outBin);
 			    std::copy(memoryData.begin(), memoryData.end(), oi);
-
-				//outBin.write(memoryData.data(), memoryData.size());
 			}
 
 			const event_log_t * event = (event_log_t *)memoryData.data();
 
-			if ((event->event_counter_id != 0) && (event->event_counter_id != 0xFFFFFFFF)) {
+			const bool crc = LogDumper::convertEventToExposedEvent(event, exposed, decodedDateTime);
 
-				// calculate crc checksum for this entry
-				const uint32_t crc = calcCRC32std((void*)(&memoryData[0]), logEntrySize - 1, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
-
-				const uint8_t crcLsb = (uint8_t)(crc & 0x000000FF);
-
-				if (event->crc_checksum == crcLsb) {
-					decoded_events++;
-
-					event_log_exposed_t exposed = {0u};
-
-					exposed.event_counter_id = event->event_counter_id;
-					exposed.event_rtc = event->event_rtc;
-					exposed.event_master_time = event->event_master_time;
-
-					exposed.source = (event_log_source_t)EVENT_LOG_GET_SOURCE(event->source);
-					exposed.source_str_name = event_log_source_to_str(exposed.source);
-
-					exposed.severity = (event_log_severity_t)EVENT_LOG_GET_SEVERITY(event->severity);
-					exposed.severity_str = event_log_severity_to_str(exposed.severity);
-
-					exposed.event_id = event->event_id;
-					exposed.event_str_name = event_id_to_str(exposed.source, exposed.event_id);
-
-					exposed.lparam = event->lparam;
-					exposed.lparam2 = event->lparam2;
-					exposed.wparam = event->wparam;
-					exposed.wparam2 = event->wparam2;
-					exposed.param = event->param;
-					exposed.param2 = event->param2;
-
-					if (event->event_rtc != 0x0) {
-						LogDumper::getTimestampFromEvent(&exposed, &decodedDateTime);
-					}
-
-					logDumperTextFile.storeEntryInExport(&exposed, &decodedDateTime);
-				}
-				else {
-					std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
-					std::cout << "E = LogDumper::dumpEventsToReport, expected 0x" << std::hex << (int)event->crc_checksum << ", got: 0x" << (int)crcLsb << std::endl;
-				}
-
+			if (crc) {
+				decoded_events++;
+				logDumperTextFile.storeEntryInExport(&exposed, &decodedDateTime);
 			}
+			else {
+				std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
+			}
+
 	    }
 
 	}

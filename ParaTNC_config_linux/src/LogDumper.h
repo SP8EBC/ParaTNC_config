@@ -49,9 +49,13 @@ class LogDumper {
 
 	void timeoutCallback(void);
 
+	static const uint16_t daysInYearByMonth[2][13];
+
 	static void getTimestampFromEvent(const event_log_exposed_t * const in, struct tm * out);
 
-	static const uint16_t daysInYearByMonth[2][13];
+protected:
+
+	static bool convertEventToExposedEvent(const event_log_t * event, event_log_exposed_t & exposed, struct tm & decodedDateTime);
 
 
 public:
