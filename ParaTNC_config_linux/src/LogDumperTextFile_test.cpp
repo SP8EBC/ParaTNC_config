@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <string>
 
+#include "../shared/event_log_strings.h"
+
 struct MyConfig
 {
   MyConfig() : test_log( "./test_reports/logdumpertex_test.log" )
@@ -46,8 +48,10 @@ public:
 
 BOOST_GLOBAL_FIXTURE (MyConfig);
 
-BOOST_AUTO_TEST_CASE(read_binary_1) {
+BOOST_AUTO_TEST_CASE(read_binary_for_gsm_logs) {
 	LogDumperTextFile textFile;
+
+	textFile.startTextExport("./test_reports/read_binary_for_gsm_logs.generated.log");
 
 	uint8_t entry[sizeof(event_log_t)];
 	const event_log_t * event = (event_log_t *)entry;
@@ -86,9 +90,22 @@ BOOST_AUTO_TEST_CASE(read_binary_1) {
     	if (!crcOk) {
     		crcErrors++;
     	}
+
+    	// special cases
+    	auto src = exposed.source;
+    	auto svrty = exposed.severity;
+    	auto id = exposed.event_id;
+
+    	if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
+    		textFile.storeEntryInExport(&exposed, &decodedDateTime);
+    	}
+    	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_IMSI) {
+    		textFile.storeEntryInExport(&exposed, &decodedDateTime);
+    	}
     }
 
     BOOST_CHECK_EQUAL(crcErrors, 40);
+	textFile.closeAndSaveTextExport();
 }
 
 BOOST_AUTO_TEST_CASE(basic) {
@@ -114,7 +131,7 @@ BOOST_AUTO_TEST_CASE(basic) {
 	  time (&rawtime);
 	struct tm * timestamp = localtime(&rawtime);
 
-	textFile.startTextExport("test");
+	textFile.startTextExport("./test_reports/basic.generated.log");
 	textFile.storeEntryInExport(&exposed, timestamp);
 	textFile.closeAndSaveTextExport();
 }

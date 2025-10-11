@@ -70,6 +70,18 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
 		storeCyclic(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
+		storeGsmRegisteredNetwork(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_IMSI) {
+		storeGsmImsi(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_IP_ADDRESS) {
+		storeGsmIpAddress(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_BOOTUP && id == EVENTS_MAIN_BOOTUP_COMPLETE) {
+		storeBootupComplete(eventLogEntry,timestamp);
+	}
 	else {
 
 	// add_cell_fmt
@@ -203,8 +215,117 @@ void LogDumperTextFile::storeCyclic(const event_log_exposed_t *eventLogEntry,
     set_hline(table, BORDER_SINGLE);
 }
 
-void LogDumperTextFile::storeGsmRegisteredNetwork(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp) {
+void LogDumperTextFile::storeBootupComplete(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	//add_cell(table, "dupa");
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->severity_str);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d \n -", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->source_str_name);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "Bootup complete\n -");
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "RTC ok: %u, Last powersave st: %u, : Battery: %4.2f V",
+						eventLogEntry->param,
+						eventLogEntry->param2,
+						((float)eventLogEntry->wparam / 100.0f));
+	next_row(table);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "monitor: 0x%X, go-to-sleep events cntr: %u",
+						eventLogEntry->lparam,
+						eventLogEntry->lparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+}
 
+void LogDumperTextFile::storeGsmRegisteredNetwork(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+	char carrierName[16] = {0u};
+
+	memcpy((void*)&carrierName[12], (void*)&eventLogEntry->wparam, sizeof(uint8_t));
+	memcpy((void*)&carrierName[13], (void*)&eventLogEntry->wparam2, sizeof(uint8_t));
+	memcpy((void*)&carrierName[8], (void*)&eventLogEntry->wparam, sizeof(uint16_t));
+	memcpy((void*)&carrierName[10], (void*)&eventLogEntry->wparam2, sizeof(uint16_t));
+	memcpy((void*)&carrierName[0], (void*)&eventLogEntry->lparam, sizeof(uint32_t));
+	memcpy((void*)&carrierName[4], (void*)&eventLogEntry->lparam2, sizeof(uint32_t));
+
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "GSM network name");
+	set_span(table, 7, 1);
+	//override_above_border(table, BORDER_SINGLE);
+	add_cell_fmt(table, " %s", carrierName);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeGsmImsi(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+	char imsi[16] = {0u};
+
+	memcpy((void*)&imsi[12], (void*)&eventLogEntry->wparam, sizeof(uint8_t));
+	memcpy((void*)&imsi[13], (void*)&eventLogEntry->wparam2, sizeof(uint8_t));
+	memcpy((void*)&imsi[8], (void*)&eventLogEntry->wparam, sizeof(uint16_t));
+	memcpy((void*)&imsi[10], (void*)&eventLogEntry->wparam2, sizeof(uint16_t));
+	memcpy((void*)&imsi[0], (void*)&eventLogEntry->lparam, sizeof(uint32_t));
+	memcpy((void*)&imsi[4], (void*)&eventLogEntry->lparam2, sizeof(uint32_t));
+
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "GSM IMSI");
+	set_span(table, 7, 1);
+	//override_above_border(table, BORDER_SINGLE);
+	add_cell_fmt(table, " %s", imsi);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeGsmIpAddress(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+	char ipAddr[16] = {0u};
+
+	memcpy((void*)&ipAddr[12], (void*)&eventLogEntry->wparam, sizeof(uint8_t));
+	memcpy((void*)&ipAddr[13], (void*)&eventLogEntry->wparam2, sizeof(uint8_t));
+	memcpy((void*)&ipAddr[8], (void*)&eventLogEntry->wparam, sizeof(uint16_t));
+	memcpy((void*)&ipAddr[10], (void*)&eventLogEntry->wparam2, sizeof(uint16_t));
+	memcpy((void*)&ipAddr[0], (void*)&eventLogEntry->lparam, sizeof(uint32_t));
+	memcpy((void*)&ipAddr[4], (void*)&eventLogEntry->lparam2, sizeof(uint32_t));
+
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "GPRS Ip Address");
+	set_span(table, 7, 1);
+	add_cell_fmt(table, " %s", ipAddr);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
 }
 
 void LogDumperTextFile::closeAndSaveTextExport(void) {

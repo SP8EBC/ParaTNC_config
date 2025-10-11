@@ -36,7 +36,11 @@ class LogDumperTextFile {
 	void storeHardfaultException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 	void storeSupervisorException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 	void storeCyclic(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeBootupComplete(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
 	void storeGsmRegisteredNetwork(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeGsmImsi(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeGsmIpAddress(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
 public:
 	LogDumperTextFile();

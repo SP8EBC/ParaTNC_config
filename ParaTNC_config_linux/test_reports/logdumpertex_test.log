@@ -1,6 +1,12 @@
-Running 1 test case...
+Running 2 test cases...
 Entering test module "LOGDUMPER"
-../src/LogDumperTextFile_test.cpp(37): Entering test case "basic"
+../src/LogDumperTextFile_test.cpp(51): Entering test case "read_binary_for_gsm_logs"
+../src/LogDumperTextFile_test.cpp(66): info: check input.is_open() has passed
+../src/LogDumperTextFile_test.cpp(67): info: check input.good() has passed
+read: 147424
+../src/LogDumperTextFile_test.cpp(107): info: check crcErrors == 40 has passed
+../src/LogDumperTextFile_test.cpp(51): Leaving test case "read_binary_for_gsm_logs"; testing time: 53886us
+../src/LogDumperTextFile_test.cpp(111): Entering test case "basic"
 Test case basic did not check any assertions
-../src/LogDumperTextFile_test.cpp(37): Leaving test case "basic"; testing time: 282us
-Leaving test module "LOGDUMPER"; testing time: 300us
+../src/LogDumperTextFile_test.cpp(111): Leaving test case "basic"; testing time: 203us
+Leaving test module "LOGDUMPER"; testing time: 54135us
