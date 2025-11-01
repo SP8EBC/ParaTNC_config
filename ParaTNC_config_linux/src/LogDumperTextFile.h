@@ -42,6 +42,9 @@ class LogDumperTextFile {
 	void storeGsmImsi(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 	void storeGsmIpAddress(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
+	void storeFanetFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
+
 public:
 	LogDumperTextFile();
 	virtual ~LogDumperTextFile();

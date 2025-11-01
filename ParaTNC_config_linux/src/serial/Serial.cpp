@@ -63,7 +63,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		return;
 	}
 
-	std::cout << "I = serial::transmitKissFrame, frame size: " << frame.size() << std::endl;
+	//std::cout << "I = serial::transmitKissFrame, frame size: " << frame.size() << std::endl;
 
 	if (this->serialState == SERIAL_IDLE) {
 		// send FEND at begining
@@ -103,7 +103,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		// send FEND at the end
 		write(handle, FEND, 1);
 
-		std::cout << "I = serial::transmitKissFrame, transmission done " << std::endl;
+		//std::cout << "I = serial::transmitKissFrame, transmission done " << std::endl;
 	}
 }
 
@@ -125,7 +125,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		return;
 	}
 
-	std::cout << "D = serial::receiveKissFrame, receiving started..." << std::endl;
+	//std::cout << "D = serial::receiveKissFrame, receiving started..." << std::endl;
 
 	// received byte
 	uint8_t rxData = 0;
@@ -201,7 +201,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			expectedRxLength = rxData - 3;		// exclude FEND at the start and this byte
 			receivingState = RX_ST_STARTED;
 
-			std::cout << "D = serial::receiveKissFrame, expectedRxLength: " << expectedRxLength << std::endl;
+			//std::cout << "D = serial::receiveKissFrame, expectedRxLength: " << expectedRxLength << std::endl;
 
 			frame.push_back(rxData);
 		}

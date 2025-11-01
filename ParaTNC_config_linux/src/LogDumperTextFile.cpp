@@ -82,6 +82,9 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_BOOTUP && id == EVENTS_MAIN_BOOTUP_COMPLETE) {
 		storeBootupComplete(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_FANET && svrty == EVENT_ERROR && id == EVENTS_FANET_FAIL_TO_SEND_METEO) {
+		storeFanetFail(eventLogEntry,timestamp);
+	}
 	else {
 
 	// add_cell_fmt
@@ -296,8 +299,27 @@ void LogDumperTextFile::storeGsmImsi(const event_log_exposed_t * eventLogEntry, 
 	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
 	add_cell_fmt(table, "GSM IMSI");
 	set_span(table, 7, 1);
-	//override_above_border(table, BORDER_SINGLE);
 	add_cell_fmt(table, " %s", imsi);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeFanetFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+
+	const int32_t errorCode = (int32_t)eventLogEntry->lparam2;
+
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Return code: %d",
+						errorCode);
 	next_row(table);
     set_hline(table, BORDER_SINGLE);
 	lineAbove = true;

@@ -124,6 +124,7 @@ const char * event_log_source_to_str(event_log_source_t src)
 		case EVENT_SRC_DRV_I2C:				return event_log_str_src_drv_i2c; break;
 		case EVENT_SRC_DRV_UART:			return event_log_str_src_drv_uart; break;
 		case EVENT_SRC_DRV_SPI:				return event_log_str_src_drv_spi; break;
+		case EVENT_SRC_FANET:				return event_log_str_src_drv_fanet; break;
 		default: return event_log_default;
 	}
 }
@@ -331,6 +332,11 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 		case EVENT_SRC_DRV_I2C:				 break;
 		case EVENT_SRC_DRV_UART:			 break;
 		case EVENT_SRC_DRV_SPI:				 break;
+		case EVENT_SRC_FANET:
+			if (event_id == EVENTS_FANET_FAIL_TO_SEND_METEO) {
+				out = event_log_str_fanet_fail_to_send_weather;
+			}
+			break;
 		default: out = event_log_default;
 	}
 
