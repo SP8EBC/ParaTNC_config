@@ -47,6 +47,8 @@ class LogDumper {
 
 	bool timeout;
 
+	int progress;
+
 	void timeoutCallback(void);
 
 	static const uint16_t daysInYearByMonth[2][13];

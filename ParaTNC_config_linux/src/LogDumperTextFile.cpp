@@ -67,6 +67,9 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
 		storeHardfaultException(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_POSTMORTEM_SUPERVISOR) {
+		storeSupervisorFault(eventLogEntry,timestamp);
+	}
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
 		storeCyclic(eventLogEntry,timestamp);
 	}
@@ -148,11 +151,85 @@ void LogDumperTextFile::storeHardfaultException(
 	lineAbove = true;
 }
 
-void LogDumperTextFile::storeSupervisorException(
+void LogDumperTextFile::storeSupervisorFault(
+		const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+	// task name stored in params is 10 char max, but make a room for null terminator
+	char taskName[11];
+	memset(taskName, 0x00, 11);
+
+	if (eventLogEntry->param == 0xFFu)
+	{
+		if (eventLogEntry->param2 == 0xFFu)
+		{
+			// this is timestamp
+			storeSupervisorFaultTimestamp(eventLogEntry, timestamp);
+			return;
+		}
+	}
+
+	taskName[0] = eventLogEntry->param;
+	taskName[1] = eventLogEntry->param2;
+	taskName[2] = (eventLogEntry->wparam) & 0xFFu;
+	taskName[3] = (eventLogEntry->wparam >> 8u) & 0xFFu;
+	taskName[4] = (eventLogEntry->wparam2) & 0xFFu;
+	taskName[5] = (eventLogEntry->wparam2 >> 8u) & 0xFFu;
+	taskName[6] = (eventLogEntry->lparam) & 0xFFu;
+	taskName[7] = (eventLogEntry->lparam >> 8u) & 0xFFu;
+	taskName[8] = (eventLogEntry->lparam >> 16u) & 0xFFu;
+	taskName[9] = (eventLogEntry->lparam >> 24u) & 0xFFu;
+
+	const uint16_t scaled_time = eventLogEntry->wparam3;
+	const uint32_t checkpoints = eventLogEntry->lparam2;
+
+	bool thisFailed = ((checkpoints & 0x80000000u) != 0);
+
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "Supervisor fail");
+	set_span(table, 7, 1);
+	//override_above_border(table, BORDER_SINGLE);
+	if (thisFailed)
+	{
+		add_cell_fmt(table, "%s: last supervisor %d msec ago, checkpoints: 0x%X, THIS FAILED",
+				taskName, scaled_time * 20, checkpoints & 0x7FFFFFFFu);
+	}
+	else
+	{
+		add_cell_fmt(table, "%s: last supervisor %d msec ago, checkpoints: 0x%X",
+				taskName, scaled_time * 20, checkpoints & 0x7FFFFFFFu);
+	}
+
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeSupervisorFaultTimestamp(
 		const event_log_exposed_t *eventLogEntry,
 		const struct tm *const timestamp)
 {
 
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "Supervisor fail");
+	set_span(table, 7, 1);
+	//override_above_border(table, BORDER_SINGLE);
+		add_cell_fmt(table, "maser timestamp at which supervisor failed: %d",
+				eventLogEntry->lparam);
+
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
 }
 
 void LogDumperTextFile::storeTimesyncEntryInExport(

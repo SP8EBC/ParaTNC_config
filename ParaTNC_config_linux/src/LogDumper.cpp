@@ -153,9 +153,11 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 	{
 		serialRxBackgroundWorker.backgroundTimeoutCallback = timeoutCallback;
 
+		const int currentProgress = (int)(((float)i / (float)eventsNum) * 100.0f);
+
 		std::cout << std::dec <<
 				"I = LogDumper::dumpEventsToReport, processing event " << i <<
-				". Total progress: " << (int)(((float)i / (float)eventsNum) * 100.0f) << "%" << std::endl;
+				". Total progress: " << currentProgress << "%" << std::endl;
 	    const uint32_t address = startAddress + (logEntrySize * i);
 	    srvReadMemory.sendRequestForMemoryRange(address, sizeof(event_log_t));
 	    srvReadMemory.waitForTransmissionDone();
@@ -194,6 +196,12 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 
 	    }
 
+		if (progress != currentProgress)
+		{
+			//logDumperTextFile.closeAndSaveTextExport();
+		}
+
+		progress = currentProgress;
 	}
 
 	if (outBin && outBin.good()) {

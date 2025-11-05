@@ -34,7 +34,9 @@ class LogDumperTextFile {
 	void storeTimesyncEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
 	void storeHardfaultException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeSupervisorException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeSupervisorFault(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeSupervisorFaultTimestamp(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
 	void storeCyclic(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 	void storeBootupComplete(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
