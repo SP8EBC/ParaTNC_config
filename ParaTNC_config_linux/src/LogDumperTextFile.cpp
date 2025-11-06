@@ -392,11 +392,14 @@ void LogDumperTextFile::storeFanetFail(const event_log_exposed_t * eventLogEntry
 	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
 	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
 
+	const uint8_t fanet_fail_counter = eventLogEntry->param;
+	const uint8_t fanet_success_counter = eventLogEntry->param2;
+
 	const int32_t errorCode = (int32_t)eventLogEntry->lparam2;
 
 	set_span(table, 7, 1);
-	add_cell_fmt(table, "Return code: %d",
-						errorCode);
+	add_cell_fmt(table, "Return code: %d, succeeded %d x, failed %d x",
+						errorCode, fanet_success_counter, fanet_fail_counter);
 	next_row(table);
     set_hline(table, BORDER_SINGLE);
 	lineAbove = true;

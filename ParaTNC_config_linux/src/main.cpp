@@ -58,7 +58,11 @@ uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
-bool restartOnly = false;
+// no diagnostic services has been selected, perform default batch
+bool defaultBatch = true;
+
+bool performRestart = false;
+
 std::string portName;
 
 std::string fileNamePrefix;
@@ -149,10 +153,19 @@ int main(int argc, char *argv[]) {
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
 
-	boost::program_options::options_description od("Parameters");
-	boost::program_options::options_description_easy_init odInit = od.add_options();
-	odInit("port", boost::program_options::value<std::string>(&portName), "Serial port used for communication");
-	odInit("restart", "Restart ParaMETEO");
+	boost::program_options::options_description od("");
+
+	boost::program_options::options_description generalOptions("General Options");
+	boost::program_options::options_description_easy_init goInit = generalOptions.add_options();
+	goInit("port,P", boost::program_options::value<std::string>(&portName), " : Serial port used for communication");
+
+	boost::program_options::options_description diagnosticServices("Diagnostic Services", 120, 90);
+	boost::program_options::options_description_easy_init dsInit = diagnosticServices.add_options();
+	dsInit("restart", " : Restart ParaMETEO");
+	dsInit("read-did,r", boost::program_options::value<std::string>(&portName), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
+
+	od.add(generalOptions);
+	od.add(diagnosticServices);
 
 	boost::program_options::variables_map odVariablesMap;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
@@ -177,10 +190,8 @@ int main(int argc, char *argv[]) {
 
 	if (odVariablesMap.count("restart")) {
     	std::cout << "I = main, restart will be performed instead of normal operation!" << std::endl;
-		restartOnly = true;
-	}
-	else {
-		restartOnly = false;
+    	defaultBatch = false;
+    	performRestart = true;
 	}
 
 	worker.start();
@@ -193,8 +204,11 @@ int main(int argc, char *argv[]) {
     pthread_cond_wait(&cond1, &lock);
     pthread_mutex_unlock(&lock);
 
-    if (restartOnly) {
-    	srvReset.restart();
+    // inverted logic to push default batch to the end
+    if (!defaultBatch) {
+    	if (performRestart) {
+        	srvReset.restart();
+    	}
     }
     else {
 
