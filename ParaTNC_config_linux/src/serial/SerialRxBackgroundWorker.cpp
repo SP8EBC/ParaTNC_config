@@ -14,9 +14,10 @@
 #include <iostream>
 
 
-SerialRxBackgroundWorker::SerialRxBackgroundWorker(Serial * serial, std::map<uint8_t, IService*> callbcks)
+SerialRxBackgroundWorker::SerialRxBackgroundWorker(Serial * serial, std::map<uint8_t, IService*> callbcks, std::function<void (uint16_t)> _nrcCallback)
 																	: ctx(serial),
-																	  callbackMap(callbcks)
+																	  callbackMap(callbcks),
+																	  nrcCallback(_nrcCallback)
 {
 	workerStartSync = PTHREAD_COND_INITIALIZER;
 
@@ -93,6 +94,7 @@ void SerialRxBackgroundWorker::worker(void) {
 
 				if (frameType == KISS_NEGATIVE_RESPONSE_SERVICE) {
 					std::cout << "E = SerialWorker::worker, NRC received: " << AuxStuff::nrcToString(receivedData.at(2)) << std::endl;
+					this->nrcCallback(receivedData.at(2));
 				}
 				else {
 					serviceCallback = this->callbackMap.at(frameType);
@@ -107,9 +109,7 @@ void SerialRxBackgroundWorker::worker(void) {
 		}
 		catch (TimeoutE & ex) {
 			if (this->backgroundTimeoutCallback) {
-				std::function<void (void)> cbk = this->backgroundTimeoutCallback;
-				this->backgroundTimeoutCallback = NULL;
-				cbk();
+				this->backgroundTimeoutCallback();
 			}
 		}
 	}	while (workerLoop);

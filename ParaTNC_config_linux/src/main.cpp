@@ -25,6 +25,18 @@
 
 #include <boost/program_options.hpp>
 
+typedef struct BatchConfig {
+	// no diagnostic services has been selected, perform default batch
+	bool defaultBatch;
+	bool monitorMode;
+
+	bool performRestart;
+
+	bool readDid;
+	bool monitorDid;
+	std::string didToRead;
+}BatchConfig;
+
 std::map<uint8_t, IService*> callbackMap;
 
 Serial s;
@@ -58,15 +70,12 @@ uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
-// no diagnostic services has been selected, perform default batch
-bool defaultBatch = true;
-
-bool performRestart = false;
-
 std::string portName;
 
 std::string fileNamePrefix;
 size_t fileNamePrefixLenght = 0;
+
+BatchConfig batchConfig;
 
 static size_t main_make_filename_prefix(std::string & callsign, std::string & api_name, char * out, size_t max_out_ln) {
 	size_t total_ln = 0;
@@ -111,6 +120,16 @@ static size_t main_make_filename_prefix(std::string & callsign, std::string & ap
 	 return total_ln;
 }
 
+static void nrc_callback(uint16_t nrc)
+{
+	exit(nrc);
+}
+
+static void timeout_callback(void)
+{
+	pthread_cond_signal(&cond1);
+}
+
 int main(int argc, char *argv[]) {
 #ifndef _ONLY_MANUAL_CFG
 	//ProgramConfig::readConfigFromFile("");
@@ -145,10 +164,13 @@ int main(int argc, char *argv[]) {
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RESTART, &srvReset));
 
-	SerialRxBackgroundWorker worker(&s, callbackMap);
-//	worker.backgroundTimeoutCallback = timeout_callback;
+	SerialRxBackgroundWorker worker(&s, callbackMap, nrc_callback);
+	worker.backgroundTimeoutCallback = timeout_callback;
 
 	LogDumper logDumper(srvReadMemory, cond1, worker);
+
+	memset(&batchConfig, 0x00, sizeof(BatchConfig));
+	batchConfig.defaultBatch = true;
 
 	std::vector<uint8_t> test;
 	test.insert(test.begin(), 0x800, 0xAB);
@@ -162,7 +184,8 @@ int main(int argc, char *argv[]) {
 	boost::program_options::options_description diagnosticServices("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit = diagnosticServices.add_options();
 	dsInit("restart", " : Restart ParaMETEO");
-	dsInit("read-did,r", boost::program_options::value<std::string>(&portName), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
+	dsInit("read-did,r", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
+	dsInit("monitor-did,m", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read specified DID each 2 second until this program is closed");
 
 	od.add(generalOptions);
 	od.add(diagnosticServices);
@@ -174,6 +197,10 @@ int main(int argc, char *argv[]) {
 	bool portOpenResult = false;
 
 	std::cout << od << std::endl;
+
+	for (auto & it : odVariablesMap)	{
+    	std::cout << "D = main, odVariablesMap [" << it.first << "]" << std::endl;
+	}
 
 	if (portName.length() > 1) {
     	std::cout << "I = main, opening user specified port " << portName << std::endl;
@@ -190,27 +217,75 @@ int main(int argc, char *argv[]) {
 
 	if (odVariablesMap.count("restart")) {
     	std::cout << "I = main, restart will be performed instead of normal operation!" << std::endl;
-    	defaultBatch = false;
-    	performRestart = true;
+    	batchConfig.defaultBatch = false;
+    	batchConfig.monitorMode = false;
+    	batchConfig.performRestart = true;
+	}
+
+	if (odVariablesMap.count("read-did")) {
+    	batchConfig.defaultBatch = false;
+    	batchConfig.monitorMode = false;
+    	batchConfig.readDid = true;
+	}
+
+	if (odVariablesMap.count("monitor-did")) {
+    	batchConfig.defaultBatch = false;
+    	batchConfig.monitorMode = true;
+    	batchConfig.monitorDid = true;
+	}
+
+	if (batchConfig.monitorMode && !batchConfig.defaultBatch)
+	{
+    	std::cout << "W = main, conflicting settings! DID or memory monitoring has a precendense over the rest" << std::endl;
 	}
 
 	worker.start();
 
-	srvGetVersion.sendRequest();
-	s.waitForTransmissionDone();
-
-	// wait for software version
-    pthread_mutex_lock(&lock);
-    pthread_cond_wait(&cond1, &lock);
-    pthread_mutex_unlock(&lock);
-
     // inverted logic to push default batch to the end
-    if (!defaultBatch) {
-    	if (performRestart) {
+	if (batchConfig.monitorMode) {
+		const int did = strtol(batchConfig.didToRead.c_str(), NULL, 16);
+
+		while(true) {
+			srvReadDid.sendRequestForDid(did);
+			s.waitForTransmissionDone();
+
+			pthread_mutex_lock(&lock);
+			// wait for configuration to be received
+			pthread_cond_wait(&cond1, &lock);
+			pthread_mutex_unlock(&lock);
+
+			sleep(1);
+		}
+	}
+	else if (!batchConfig.defaultBatch && !batchConfig.monitorMode) {
+    	if (batchConfig.readDid) {
+    		const int did = strtol(batchConfig.didToRead.c_str(), NULL, 16);
+        	std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
+
+			srvReadDid.sendRequestForDid(did);
+			s.waitForTransmissionDone();
+
+			pthread_mutex_lock(&lock);
+			// wait for configuration to be received
+			pthread_cond_wait(&cond1, &lock);
+			pthread_mutex_unlock(&lock);
+
+			const DidResponse& response = srvReadDid.getDidResponse();
+        	std::cout << "D = main, did has been read" << std::endl;
+
+    	}
+    	if (batchConfig.performRestart) {
         	srvReset.restart();
     	}
     }
     else {
+    	srvGetVersion.sendRequest();
+    	s.waitForTransmissionDone();
+
+    	// wait for software version
+        pthread_mutex_lock(&lock);
+        pthread_cond_wait(&cond1, &lock);
+        pthread_mutex_unlock(&lock);
 
 		srvRunningConfig.sendRequest();
 		s.waitForTransmissionDone();

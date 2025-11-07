@@ -68,12 +68,13 @@ class SerialRxBackgroundWorker {
 
 	SerialRxBackgroundWorker * pointerThis;
 
+	std::function<void (uint16_t)> nrcCallback;
+
 public:
 	/**
 	 * Optional pointer to a callback, which is used by background thread in
 	 * case a timeout
 	 */
-	//void(*backgroundTimeoutCallback)(void) = NULL;
 	std::function<void (void)> backgroundTimeoutCallback;
 
 
@@ -83,7 +84,7 @@ public:
 
 	void waitForStartup(void);
 
-	SerialRxBackgroundWorker(Serial * serial, std::map<uint8_t, IService*> callbcks);
+	SerialRxBackgroundWorker(Serial * serial, std::map<uint8_t, IService*> callbcks, std::function<void (uint16_t)> _nrcCallback);
 	virtual ~SerialRxBackgroundWorker();
 
 	SerialRxBackgroundWorker& operator=(const SerialRxBackgroundWorker &other);
