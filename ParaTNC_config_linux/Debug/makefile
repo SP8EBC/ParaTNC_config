@@ -14,8 +14,7 @@ RM := rm -rf
 -include shared/services/subdir.mk
 -include shared/exceptions/subdir.mk
 -include shared/crc/subdir.mk
--include shared/config/encode/subdir.mk
--include shared/config/decode/subdir.mk
+-include shared/config/subdir.mk
 -include shared/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)

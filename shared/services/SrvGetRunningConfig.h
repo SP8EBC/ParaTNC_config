@@ -11,8 +11,8 @@
 #include "serial/Serial.h"
 #include "../types/CurrentConfigRegion.h"
 
-#include "../config/decode/IConfigDecode.h"
-#include "../config/decode/IConfigValidate.h"
+#include "../config/IConfig.h"
+#include "../config/IConfigValidate.h"
 
 #include "IService.h"
 

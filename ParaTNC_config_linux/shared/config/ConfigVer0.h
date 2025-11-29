@@ -20,7 +20,7 @@
 // ============================================================================
 // BASIC Configuration Decoder/Encoder
 // ============================================================================
-class BasicConfig : IBasicConfig {
+class BasicConfig : public IBasicConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -84,7 +84,7 @@ public:
 // ============================================================================
 // MODE Configuration Decoder/Encoder
 // ============================================================================
-class ModeConfig : IModeConfig {
+class ModeConfig : public IModeConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -150,7 +150,7 @@ public:
 // ============================================================================
 // SOURCE Configuration Decoder/Encoder
 // ============================================================================
-class SourceConfig : ISourceConfig {
+class SourceConfig : public ISourceConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -190,7 +190,7 @@ public:
 // ============================================================================
 // UMB Configuration Decoder/Encoder
 // ============================================================================
-class UmbConfig :IUmbConfig {
+class UmbConfig : public IUmbConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -236,7 +236,7 @@ public:
 // ============================================================================
 // RTU Configuration Decoder/Encoder
 // ============================================================================
-class RtuConfig : IRtuConfig {
+class RtuConfig : public IRtuConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -288,7 +288,7 @@ public:
 // ============================================================================
 // GSM Configuration Decoder/Encoder
 // ============================================================================
-class GsmConfig : IGsmConfig {
+class GsmConfig : public IGsmConfig {
 protected:
     const std::vector<uint8_t>& configData;
 
@@ -345,7 +345,7 @@ public:
 // ============================================================================
 // Main Configuration Manager
 // ============================================================================
-class ConfigurationManager : IConfigurationManager {
+class ConfigurationManager : public IConfigurationManager {
 private:
     std::vector<uint8_t> configData;
     BasicConfig basicConfig;

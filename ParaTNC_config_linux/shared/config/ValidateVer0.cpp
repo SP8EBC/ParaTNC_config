@@ -8,7 +8,7 @@
 #include "stdafx.h"
 
 #include "ValidateVer0.h"
-#include "../../crc/crc_.h"
+#include "../crc/crc_.h"
 
 #include <iostream>
 #include <vector>

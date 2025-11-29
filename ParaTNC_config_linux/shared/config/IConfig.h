@@ -210,14 +210,16 @@ class IConfigurationManager {
 
 public:
 
-    IBasicConfig& getBasicConfig() = 0;
-    IModeConfig& getModeConfig() = 0;
-    ISourceConfig& getSourceConfig() = 0;
-    IUmbConfig& getUmbConfig() = 0;
-    IRtuConfig& getRtuConfig() = 0;
-    IGsmConfig& getGsmConfig() = 0;
+	virtual ~IConfigurationManager() = default;
 
-    const std::vector<uint8_t>& getConfigData() const = 0;
+    virtual IBasicConfig& getBasicConfig() = 0;
+    virtual IModeConfig& getModeConfig() = 0;
+    virtual ISourceConfig& getSourceConfig() = 0;
+    virtual IUmbConfig& getUmbConfig() = 0;
+    virtual IRtuConfig& getRtuConfig() = 0;
+    virtual IGsmConfig& getGsmConfig() = 0;
+
+    virtual const std::vector<uint8_t>& getConfigData() const = 0;
 };
 
 #endif /* SRC_CONFIG_DECODE_ICONFIGDECODE_H_ */

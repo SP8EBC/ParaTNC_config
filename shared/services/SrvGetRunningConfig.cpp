@@ -9,7 +9,7 @@
 #include "SrvGetRunningConfig.h"
 
 #include "../types/CurrentConfigRegion.h"
-#include "../config/decode/ValidateVer0.h"
+#include "../config/ValidateVer0.h"
 
 #include "../shared/kiss_communication_service_ids.h"
 
