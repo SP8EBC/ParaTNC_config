@@ -47,7 +47,7 @@ protected:
     }
 
 public:
-    BasicConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    BasicConfig(const std::vector<uint8_t>& data);
     virtual ~BasicConfig() = default;
 
     // Decoder methods
@@ -107,7 +107,7 @@ protected:
     }
 
 public:
-    ModeConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    ModeConfig(const std::vector<uint8_t>& data);
     virtual ~ModeConfig() = default;
 
     virtual uint8_t getDigi() const;
@@ -173,7 +173,7 @@ protected:
     }
 
 public:
-    SourceConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    SourceConfig(const std::vector<uint8_t>& data);
     virtual ~SourceConfig() = default;
 
     virtual uint8_t getTemperature() const;
@@ -213,7 +213,7 @@ protected:
     }
 
 public:
-    UmbConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    UmbConfig(const std::vector<uint8_t>& data);
     virtual ~UmbConfig() = default;
 
     virtual uint16_t getSlaveClass() const;
@@ -259,7 +259,7 @@ protected:
     }
 
 public:
-    RtuConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    RtuConfig(const std::vector<uint8_t>& data);
     virtual ~RtuConfig() = default;
 
     virtual uint16_t getSlaveSpeed() const;
@@ -314,7 +314,7 @@ protected:
     }
 
 public:
-    GsmConfig(const std::vector<uint8_t>& data) : configData(data) {}
+    GsmConfig(const std::vector<uint8_t>& data);
     virtual ~GsmConfig() = default;
 
     virtual void getPin(std::string& pin) const;

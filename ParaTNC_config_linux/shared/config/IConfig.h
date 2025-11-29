@@ -176,7 +176,7 @@ public:
 class IGsmConfig {
 
 public:
-    virtual ~IGsmConfig() = default;
+    virtual ~IGsmConfig();
 
     virtual void getPin(std::string& pin) const = 0;
     virtual void getApn(std::string& apn) const = 0;
@@ -210,7 +210,7 @@ class IConfigurationManager {
 
 public:
 
-	virtual ~IConfigurationManager() = default;
+	virtual ~IConfigurationManager();
 
     virtual IBasicConfig& getBasicConfig() = 0;
     virtual IModeConfig& getModeConfig() = 0;

@@ -8,6 +8,30 @@
 #include "ConfigVer0.h"
 #include "Ver0Map.h"
 
+BasicConfig::BasicConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
+ModeConfig::ModeConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
+SourceConfig::SourceConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
+UmbConfig::UmbConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
+RtuConfig::RtuConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
+GsmConfig::GsmConfig (const std::vector<uint8_t> &data) : configData (data)
+{
+}
+
 // ============================================================================
 // BASIC Configuration Implementation
 // ============================================================================
