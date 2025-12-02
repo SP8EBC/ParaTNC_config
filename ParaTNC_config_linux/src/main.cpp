@@ -9,6 +9,8 @@
 #include "LogDumper.h"
 #include "ProgramConfig.h"
 #include "TimeTools.h"
+#include "ConfigImporter.h"
+#include "ConfigExporter.h"
 #include "serial/Serial.h"
 #include <iomanip>
 #include <iostream>
@@ -63,7 +65,7 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 std::string str;
 
-IConfigurationManager *configManager;
+std::shared_ptr<IConfigurationManager> configManager;
 
 const uint16_t did_list[] = {0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
 							 0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
@@ -311,14 +313,23 @@ int main (int argc, char *argv[])
 		std::string apiName;
 		float lat, lon;
 
-		configManager = new ConfigurationManager(srvRunningConfig.getConfigurationData ());
+		//configManager = new ConfigurationManager(srvRunningConfig.getConfigurationData ());
+		configManager = std::make_shared<ConfigurationManager>(srvRunningConfig.getConfigurationData ());
+
+	    IBasicConfig& basic = configManager->getBasicConfig();
+//	    IModeConfig& mode = configManager->getModeConfig();
+//	    ISourceConfig& source = configManager->getSourceConfig();
+//	    IUmbConfig& umb = configManager->getUmbConfig();
+//	    IRtuConfig& rtu = configManager->getRtuConfig();
+	    IGsmConfig& gsm = configManager->getGsmConfig();
+
 //		decode = new ConfigVer0 (srvRunningConfig.getConfigurationData ());
-//		decode->getCallsign (callsign);
-//		decode->getDescritpion (description);
-//		decode->getGsmApiStationName (apiName);
-//
-//		lon = decode->getLongitude ();
-//		lat = decode->getLatitude ();
+	    basic.getCallsign (callsign);
+	    basic.getComment (description);
+	    gsm.getApiStationName (apiName);
+
+		lon = basic.getLongitude ();
+		lat = basic.getLatitude ();
 
 		std::cout << "I = main, callsign: " << callsign << std::endl;
 		std::cout << "I = main, API station name: " << apiName << std::endl;
@@ -331,6 +342,8 @@ int main (int argc, char *argv[])
 		std::cout << "I = main, fileNamePrefix: " << fileNamePrefix << std::endl;
 
 		srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
+		ConfigExporter exporter(configManager);
+		exporter.exportToFile(fileNamePrefix + ".conf");
 
 		for (int i = 0; i < ((int)sizeof (did_list) / (int)(sizeof (did_list[0]))); i++) {
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec

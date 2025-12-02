@@ -8,3 +8,5 @@ ParaTNC_config_linux/Debug/
 *.o
 remote-stdout.txt
 console-out.txt
+*.conf
+*.conf.bin
