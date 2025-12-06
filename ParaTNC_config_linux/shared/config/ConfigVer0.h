@@ -52,18 +52,20 @@ public:
 
     // Decoder methods
     virtual void getCallsign(std::string& call) const;
+    virtual std::string getCallsign() const;
     virtual uint8_t getSsid() const;
     virtual float getLatitude() const;
     virtual uint8_t getNs() const;
     virtual float getLongitude() const;
     virtual uint8_t getWe() const;
     virtual void getComment(std::string& comment) const;
+    virtual std::string getComment() const;
     virtual uint8_t getSymbol() const;
     virtual uint8_t getPathType() const;
-    virtual uint8_t getBeaconBootup() const;
+    virtual bool getBeaconBootup() const;
     virtual uint8_t getWxTransmitPeriod() const;
     virtual uint8_t getBeaconTransmitPeriod() const;
-    virtual uint8_t getWxDoubleTransmit() const;
+    virtual bool getWxDoubleTransmit() const;
 
     // Encoder methods
     virtual void setCallsign(const std::string& call);
@@ -75,10 +77,10 @@ public:
     virtual void setComment(const std::string& comment);
     virtual void setSymbol(uint8_t symbol);
     virtual void setPathType(uint8_t pathType);
-    virtual void setBeaconBootup(uint8_t bootup);
+    virtual void setBeaconBootup(bool bootup);
     virtual void setWxTransmitPeriod(uint8_t period);
     virtual void setBeaconTransmitPeriod(uint8_t period);
-    virtual void setWxDoubleTransmit(uint8_t doubleTransmit);
+    virtual void setWxDoubleTransmit(bool doubleTransmit);
 };
 
 // ============================================================================
@@ -112,39 +114,39 @@ public:
 
     virtual uint8_t getDigi() const;
     virtual uint8_t getWx() const;
-    virtual uint8_t getWxUmb() const;
-    virtual uint8_t getWxModbus() const;
-    virtual uint8_t getWxDavis() const;
-    virtual uint8_t getWxMs5611OrBme() const;
+    virtual bool getWxUmb() const;
+    virtual bool getWxModbus() const;
+    virtual bool getWxDavis() const;
+    virtual bool getWxMs5611OrBme() const;
     virtual uint8_t getWxAnemometerConst() const;
     virtual uint8_t getWxDustSensor() const;
     virtual uint8_t getWxPtSensor() const;
-    virtual uint8_t getVictron() const;
-    virtual uint8_t getDigiViscous() const;
-    virtual uint8_t getDigiOnlySsid() const;
+    virtual bool getVictron() const;
+    virtual bool getDigiViscous() const;
+    virtual bool getDigiOnlySsid() const;
     virtual uint8_t getDigiViscousDelay() const;
     virtual uint8_t getDigiDelay100msec() const;
     virtual uint8_t getPowersave() const;
-    virtual uint8_t getPowersaveKeepGsm() const;
-    virtual uint8_t getGsm() const;
+    virtual bool getPowersaveKeepGsm() const;
+    virtual bool getGsm() const;
 
     virtual void setDigi(uint8_t digi);
     virtual void setWx(uint8_t wx);
-    virtual void setWxUmb(uint8_t wxUmb);
-    virtual void setWxModbus(uint8_t wxModbus);
-    virtual void setWxDavis(uint8_t wxDavis);
-    virtual void setWxMs5611OrBme(uint8_t sensor);
+    virtual void setWxUmb(bool wxUmb);
+    virtual void setWxModbus(bool wxModbus);
+    virtual void setWxDavis(bool wxDavis);
+    virtual void setWxMs5611OrBme(bool sensor);
     virtual void setWxAnemometerConst(uint8_t anemometer);
     virtual void setWxDustSensor(uint8_t dust);
     virtual void setWxPtSensor(uint8_t ptSensor);
-    virtual void setVictron(uint8_t victron);
-    virtual void setDigiViscous(uint8_t viscous);
-    virtual void setDigiOnlySsid(uint8_t onlySsid);
+    virtual void setVictron(bool victron);
+    virtual void setDigiViscous(bool viscous);
+    virtual void setDigiOnlySsid(bool onlySsid);
     virtual void setDigiViscousDelay(uint8_t delay);
     virtual void setDigiDelay100msec(uint8_t delay);
     virtual void setPowersave(uint8_t powersave);
-    virtual void setPowersaveKeepGsm(uint8_t keepGsm);
-    virtual void setGsm(uint8_t gsm);
+    virtual void setPowersaveKeepGsm(bool keepGsm);
+    virtual void setGsm(bool gsm);
 };
 
 // ============================================================================
@@ -318,16 +320,24 @@ public:
     virtual ~GsmConfig() = default;
 
     virtual void getPin(std::string& pin) const;
+    virtual std::string getPin() const;
     virtual void getApn(std::string& apn) const;
+    virtual std::string getApn() const;
     virtual void getUsername(std::string& username) const;
+    virtual std::string getUsername() const;
     virtual void getPassword(std::string& password) const;
+    virtual std::string getPassword() const;
     virtual uint8_t getApiEnable() const;
     virtual void getApiBaseUrl(std::string& url) const;
+    virtual std::string getApiBaseUrl() const;
     virtual void getApiStationName(std::string& stationName) const;
+    virtual std::string getApiStationName() const;
     virtual uint8_t getAprsisEnable() const;
     virtual void getAprsisServer(std::string& server) const;
+    virtual std::string getAprsisServer() const;
     virtual uint16_t getAprsisPort() const;
     virtual void getAprsisPpasscode(std::string& passcode) const;
+    virtual std::string getAprsisPpasscode() const;
 
     virtual void setPin(const std::string& pin);
     virtual void setApn(const std::string& apn);
@@ -373,5 +383,7 @@ public:
     virtual IGsmConfig& getGsmConfig() { return gsmConfig; }
 
     const std::vector<uint8_t>& getConfigData() const { return configData; }
+
+    virtual void print(PrintVerbosity verbosity);
 };
 #endif /* SHARED_CONFIG_CONFIGVER0_H_ */

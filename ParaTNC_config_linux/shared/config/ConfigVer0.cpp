@@ -7,6 +7,9 @@
 
 #include "ConfigVer0.h"
 #include "Ver0Map.h"
+#include <iostream>
+
+// clang-format off
 
 BasicConfig::BasicConfig (const std::vector<uint8_t> &data) : configData (data)
 {
@@ -69,6 +72,10 @@ void BasicConfig::getCallsign(std::string& call) const {
     call = readString(CONFIG_BASIC_OFFSET + BASIC_CALLSIGN_OFFSET, 7);
 }
 
+std::string BasicConfig::getCallsign() const {
+    return readString(CONFIG_BASIC_OFFSET + BASIC_CALLSIGN_OFFSET, 7);
+}
+
 uint8_t BasicConfig::getSsid() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_SSID_OFFSET);
 }
@@ -93,6 +100,10 @@ void BasicConfig::getComment(std::string& comment) const {
     comment = readString(CONFIG_BASIC_OFFSET + BASIC_COMMENT_OFFSET, BASIC_COMMENT_LENGHT);
 }
 
+std::string BasicConfig::getComment() const {
+    return readString(CONFIG_BASIC_OFFSET + BASIC_COMMENT_OFFSET, BASIC_COMMENT_LENGHT);
+}
+
 uint8_t BasicConfig::getSymbol() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_SYMBOL_OFFSET);
 }
@@ -101,7 +112,7 @@ uint8_t BasicConfig::getPathType() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_PATHTYPE_OFFSET);
 }
 
-uint8_t BasicConfig::getBeaconBootup() const {
+bool BasicConfig::getBeaconBootup() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_BEACON_BOOTUP_OFFSET);
 }
 
@@ -113,7 +124,7 @@ uint8_t BasicConfig::getBeaconTransmitPeriod() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_BEACON_TRANSMIT_PERIOD);
 }
 
-uint8_t BasicConfig::getWxDoubleTransmit() const {
+bool BasicConfig::getWxDoubleTransmit() const {
     return readValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_WX_DOUBLE_TRANSMIT);
 }
 
@@ -153,8 +164,8 @@ void BasicConfig::setPathType(uint8_t pathType) {
     writeValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_PATHTYPE_OFFSET, pathType);
 }
 
-void BasicConfig::setBeaconBootup(uint8_t bootup) {
-    writeValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_BEACON_BOOTUP_OFFSET, bootup);
+void BasicConfig::setBeaconBootup(bool bootup) {
+    writeValue<bool>(CONFIG_BASIC_OFFSET + BASIC_BEACON_BOOTUP_OFFSET, bootup);
 }
 
 void BasicConfig::setWxTransmitPeriod(uint8_t period) {
@@ -165,8 +176,8 @@ void BasicConfig::setBeaconTransmitPeriod(uint8_t period) {
     writeValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_BEACON_TRANSMIT_PERIOD, period);
 }
 
-void BasicConfig::setWxDoubleTransmit(uint8_t doubleTransmit) {
-    writeValue<uint8_t>(CONFIG_BASIC_OFFSET + BASIC_WX_DOUBLE_TRANSMIT, doubleTransmit);
+void BasicConfig::setWxDoubleTransmit(bool doubleTransmit) {
+    writeValue<bool>(CONFIG_BASIC_OFFSET + BASIC_WX_DOUBLE_TRANSMIT, doubleTransmit);
 }
 
 // ============================================================================
@@ -175,39 +186,39 @@ void BasicConfig::setWxDoubleTransmit(uint8_t doubleTransmit) {
 
 uint8_t ModeConfig::getDigi() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_OFFSET); }
 uint8_t ModeConfig::getWx() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_OFFSET); }
-uint8_t ModeConfig::getWxUmb() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_UMB_OFFSET); }
-uint8_t ModeConfig::getWxModbus() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_MODBUS_OFFSET); }
-uint8_t ModeConfig::getWxDavis() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_DAVIS_OFFSET); }
-uint8_t ModeConfig::getWxMs5611OrBme() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_MS5611_OR_BME_OFFSET); }
+bool ModeConfig::getWxUmb() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_WX_UMB_OFFSET); }
+bool ModeConfig::getWxModbus() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_WX_MODBUS_OFFSET); }
+bool ModeConfig::getWxDavis() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_WX_DAVIS_OFFSET); }
+bool ModeConfig::getWxMs5611OrBme() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_WX_MS5611_OR_BME_OFFSET); }
 uint8_t ModeConfig::getWxAnemometerConst() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_ANEMOMETER_CONST_OFFSET); }
 uint8_t ModeConfig::getWxDustSensor() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_DUST_SENSOR_OFFSET); }
 uint8_t ModeConfig::getWxPtSensor() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_PT_SENSOR_OFFSET); }
-uint8_t ModeConfig::getVictron() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_VICTRON_OFFSET); }
-uint8_t ModeConfig::getDigiViscous() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_OFFSET); }
-uint8_t ModeConfig::getDigiOnlySsid() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_ONLY_SSID_OFFSET); }
+bool ModeConfig::getVictron() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_VICTRON_OFFSET); }
+bool ModeConfig::getDigiViscous() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_OFFSET); }
+bool ModeConfig::getDigiOnlySsid() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_DIGI_ONLY_SSID_OFFSET); }
 uint8_t ModeConfig::getDigiViscousDelay() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_DELAY_OFFSET); }
 uint8_t ModeConfig::getDigiDelay100msec() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET); }
 uint8_t ModeConfig::getPowersave() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_POWERSAVE_OFFSET); }
-uint8_t ModeConfig::getPowersaveKeepGsm() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_POWERSAVE_KEEP_GSM_OFFSET); }
-uint8_t ModeConfig::getGsm() const { return readValue<uint8_t>(CONFIG_MODE_OFSET + MODE_GSM_OFFSET); }
+bool ModeConfig::getPowersaveKeepGsm() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_POWERSAVE_KEEP_GSM_OFFSET); }
+bool ModeConfig::getGsm() const { return readValue<bool>(CONFIG_MODE_OFSET + MODE_GSM_OFFSET); }
 
 void ModeConfig::setDigi(uint8_t digi) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_OFFSET, digi); }
 void ModeConfig::setWx(uint8_t wx) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_OFFSET, wx); }
-void ModeConfig::setWxUmb(uint8_t wxUmb) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_UMB_OFFSET, wxUmb); }
-void ModeConfig::setWxModbus(uint8_t wxModbus) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_MODBUS_OFFSET, wxModbus); }
-void ModeConfig::setWxDavis(uint8_t wxDavis) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_DAVIS_OFFSET, wxDavis); }
-void ModeConfig::setWxMs5611OrBme(uint8_t sensor) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_MS5611_OR_BME_OFFSET, sensor); }
+void ModeConfig::setWxUmb(bool wxUmb) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_WX_UMB_OFFSET, wxUmb); }
+void ModeConfig::setWxModbus(bool wxModbus) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_WX_MODBUS_OFFSET, wxModbus); }
+void ModeConfig::setWxDavis(bool wxDavis) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_WX_DAVIS_OFFSET, wxDavis); }
+void ModeConfig::setWxMs5611OrBme(bool sensor) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_WX_MS5611_OR_BME_OFFSET, sensor); }
 void ModeConfig::setWxAnemometerConst(uint8_t anemometer) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_ANEMOMETER_CONST_OFFSET, anemometer); }
 void ModeConfig::setWxDustSensor(uint8_t dust) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_DUST_SENSOR_OFFSET, dust); }
 void ModeConfig::setWxPtSensor(uint8_t ptSensor) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_WX_PT_SENSOR_OFFSET, ptSensor); }
-void ModeConfig::setVictron(uint8_t victron) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_VICTRON_OFFSET, victron); }
-void ModeConfig::setDigiViscous(uint8_t viscous) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_OFFSET, viscous); }
-void ModeConfig::setDigiOnlySsid(uint8_t onlySsid) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_ONLY_SSID_OFFSET, onlySsid); }
+void ModeConfig::setVictron(bool victron) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_VICTRON_OFFSET, victron); }
+void ModeConfig::setDigiViscous(bool viscous) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_OFFSET, viscous); }
+void ModeConfig::setDigiOnlySsid(bool onlySsid) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_DIGI_ONLY_SSID_OFFSET, onlySsid); }
 void ModeConfig::setDigiViscousDelay(uint8_t delay) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_VISCOUS_DELAY_OFFSET, delay); }
 void ModeConfig::setDigiDelay100msec(uint8_t delay) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_DIGI_DELAY_100MSEC_OFFSET, delay); }
 void ModeConfig::setPowersave(uint8_t powersave) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_POWERSAVE_OFFSET, powersave); }
-void ModeConfig::setPowersaveKeepGsm(uint8_t keepGsm) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_POWERSAVE_KEEP_GSM_OFFSET, keepGsm); }
-void ModeConfig::setGsm(uint8_t gsm) { writeValue<uint8_t>(CONFIG_MODE_OFSET + MODE_GSM_OFFSET, gsm); }
+void ModeConfig::setPowersaveKeepGsm(bool keepGsm) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_POWERSAVE_KEEP_GSM_OFFSET, keepGsm); }
+void ModeConfig::setGsm(bool gsm) { writeValue<bool>(CONFIG_MODE_OFSET + MODE_GSM_OFFSET, gsm); }
 
 // ============================================================================
 // SOURCE Configuration Implementation
@@ -302,16 +313,24 @@ void GsmConfig::writeString(size_t offset, size_t maxLength, const std::string& 
 }
 
 void GsmConfig::getPin(std::string& pin) const { pin = readString(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET, GSM_PIN_LENGHT); }
+std::string GsmConfig::getPin() const { return readString(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET, GSM_PIN_LENGHT); }
 void GsmConfig::getApn(std::string& apn) const { apn = readString(CONFIG_GSM_OFFSET + GSM_APN_OFFSET, GSM_APN_LENGHT); }
+std::string GsmConfig::getApn() const { return readString(CONFIG_GSM_OFFSET + GSM_APN_OFFSET, GSM_APN_LENGHT); }
 void GsmConfig::getUsername(std::string& username) const { username = readString(CONFIG_GSM_OFFSET + GSM_USERNAME_OFFSET, GSM_USERNAME_LEN); }
+std::string GsmConfig::getUsername() const { return readString(CONFIG_GSM_OFFSET + GSM_USERNAME_OFFSET, GSM_USERNAME_LEN); }
 void GsmConfig::getPassword(std::string& password) const { password = readString(CONFIG_GSM_OFFSET + GSM_PASSWORD_OFFSET, GSM_PASSWORD_LEN); }
+std::string GsmConfig::getPassword() const { return readString(CONFIG_GSM_OFFSET + GSM_PASSWORD_OFFSET, GSM_PASSWORD_LEN); }
 uint8_t GsmConfig::getApiEnable() const { return readValue<uint8_t>(CONFIG_GSM_OFFSET + GSM_API_ENABLE_OFFSET); }
 void GsmConfig::getApiBaseUrl(std::string& url) const { url = readString(CONFIG_GSM_OFFSET + GSM_API_BASE_URL_OFFSET, GSM_API_BASE_URL_LEN); }
+std::string GsmConfig::getApiBaseUrl() const { return readString(CONFIG_GSM_OFFSET + GSM_API_BASE_URL_OFFSET, GSM_API_BASE_URL_LEN); }
 void GsmConfig::getApiStationName(std::string& stationName) const { stationName = readString(CONFIG_GSM_OFFSET + GSM_API_STATION_NAME_OFFSET, GSM_API_STATION_NAME_LN); }
+std::string GsmConfig::getApiStationName() const { return readString(CONFIG_GSM_OFFSET + GSM_API_STATION_NAME_OFFSET, GSM_API_STATION_NAME_LN); }
 uint8_t GsmConfig::getAprsisEnable() const { return readValue<uint8_t>(CONFIG_GSM_OFFSET + GSM_APRSIS_ENABLE); }
 void GsmConfig::getAprsisServer(std::string& server) const { server = readString(CONFIG_GSM_OFFSET + GSM_APRSIS_SERVER_OFFSET, GSM_APRSIS_SERVER_LN); }
+std::string GsmConfig::getAprsisServer() const { return readString(CONFIG_GSM_OFFSET + GSM_APRSIS_SERVER_OFFSET, GSM_APRSIS_SERVER_LN); }
 uint16_t GsmConfig::getAprsisPort() const { return readValue<uint16_t>(CONFIG_GSM_OFFSET + GSM_APRSIS_PORT_OFFSET); }
 void GsmConfig::getAprsisPpasscode(std::string& passcode) const { passcode = readString(CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET, 8); }
+std::string GsmConfig::getAprsisPpasscode() const { return readString(CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET, 8); }
 
 void GsmConfig::setPin(const std::string& pin) { writeString(CONFIG_GSM_OFFSET + GSM_PIN_OFFSET, GSM_PIN_LENGHT, pin); }
 void GsmConfig::setApn(const std::string& apn) { writeString(CONFIG_GSM_OFFSET + GSM_APN_OFFSET, GSM_APN_LENGHT, apn); }
@@ -324,3 +343,25 @@ void GsmConfig::setAprsisEnable(uint8_t aprsisEnable) { writeValue<uint8_t>(CONF
 void GsmConfig::setAprsisServer(const std::string& server) { writeString(CONFIG_GSM_OFFSET + GSM_APRSIS_SERVER_OFFSET, GSM_APRSIS_SERVER_LN, server); }
 void GsmConfig::setAprsisPort(uint16_t port) { writeValue<uint16_t>(CONFIG_GSM_OFFSET + GSM_APRSIS_PORT_OFFSET, port); }
 void GsmConfig::setAprsisPpasscode(const std::string& passcode) { writeString(CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET, 8, passcode); }
+// clang-format on
+
+void ConfigurationManager::print (PrintVerbosity verbosity)
+{
+	if (verbosity == PrintVerbosity::BRIEF_SUMMARY)
+	{
+		std::cout << "C = station APRS callsign: " << getBasicConfig().getCallsign();
+		if (getBasicConfig().getSsid() != 0)
+		{
+			std::cout << "-" << getBasicConfig().getSsid() << std::endl;
+		}
+		else
+		{
+			std::cout << std::endl;
+		}
+		std::cout << "C = API station name: " << getGsmConfig().getApiStationName() << std::endl;
+		std::cout << "C = APRS station description: " << getBasicConfig().getComment() << std::endl;
+		std::cout << "C = weather packets interval: " << getBasicConfig().getWxTransmitPeriod() << " mins" << std::endl;
+		std::cout << "C = beacon packets interval: " << getBasicConfig().getBeaconTransmitPeriod() << " mins" << std::endl;
+		std::cout << "C = digipeater delay: " << getModeConfig().getDigiDelay100msec() * 100 << " ms" << std::endl;
+	}
+}

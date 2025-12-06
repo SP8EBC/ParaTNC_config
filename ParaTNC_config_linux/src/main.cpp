@@ -6,11 +6,11 @@
 #include "../shared/services/SrvReadMemory.h"
 #include "../shared/services/SrvReset.h"
 #include "../shared/services/SrvSendStartupConfig.h"
+#include "ConfigExporter.h"
+#include "ConfigImporter.h"
 #include "LogDumper.h"
 #include "ProgramConfig.h"
 #include "TimeTools.h"
-#include "ConfigImporter.h"
-#include "ConfigExporter.h"
 #include "serial/Serial.h"
 #include <iomanip>
 #include <iostream>
@@ -30,7 +30,7 @@
 typedef struct BatchConfig {
 	BatchConfig ()
 		: defaultBatch (false), monitorMode (false), performRestart (false), readDid (false),
-		  monitorDid (false), didToRead ()
+		  monitorDid (false), didToRead (), readConfig (false), writeConfig(false), configFileToWrite()
 	{
 	}
 
@@ -43,6 +43,11 @@ typedef struct BatchConfig {
 	bool readDid;
 	bool monitorDid;
 	std::string didToRead;
+
+	bool readConfig;
+
+	bool writeConfig;
+	std::string configFileToWrite;
 } BatchConfig;
 
 std::map<uint8_t, IService *> callbackMap;
@@ -196,6 +201,8 @@ int main (int argc, char *argv[])
 	dsInit("restart", " : Restart ParaMETEO");
 	dsInit("read-did,r", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
 	dsInit("monitor-did,m", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read specified DID each 2 second until this program is closed");
+	dsInit("read-config,R", " : Read running config and store it in bin and text file");
+	dsInit("write-config,W", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Write startup config from text file");
 
 	od.add(generalOptions);
 	od.add(diagnosticServices);
@@ -247,6 +254,18 @@ int main (int argc, char *argv[])
 		batchConfig.monitorDid = true;
 	}
 
+	if (odVariablesMap.count ("read-config")) {
+		batchConfig.defaultBatch = false;
+		batchConfig.monitorMode = false;
+		batchConfig.readConfig = true;
+	}
+
+	if (odVariablesMap.count ("write-config")) {
+		batchConfig.defaultBatch = false;
+		batchConfig.monitorMode = false;
+		batchConfig.writeConfig = true;
+	}
+
 	if (batchConfig.monitorMode && !batchConfig.defaultBatch) {
 		std::cout << "W = main, conflicting settings! DID or memory monitoring has a precendense "
 					 "over the rest"
@@ -287,6 +306,45 @@ int main (int argc, char *argv[])
 			const DidResponse &response = srvReadDid.getDidResponse ();
 			std::cout << "D = main, did has been read" << std::endl;
 		}
+		if (batchConfig.readConfig) {
+			std::string callsign;
+			std::string apiName;
+
+			srvRunningConfig.sendRequest ();
+			s.waitForTransmissionDone ();
+
+			pthread_mutex_lock (&lock);
+			// wait for configuration to be received
+			pthread_cond_wait (&cond1, &lock);
+			pthread_mutex_unlock (&lock);
+
+			configManager =
+				std::make_shared<ConfigurationManager> (srvRunningConfig.getConfigurationData ());
+
+			IBasicConfig &basic = configManager->getBasicConfig ();
+			IGsmConfig &gsm = configManager->getGsmConfig ();
+
+			basic.getCallsign (callsign);
+			gsm.getApiStationName (apiName);
+
+			main_make_filename_prefix (callsign, apiName, fileNamePrefix);
+
+			srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
+			ConfigExporter exporter (configManager);
+			exporter.exportToFile (fileNamePrefix + ".conf");
+		}
+		if (batchConfig.writeConfig) {
+			if (!configManager) {
+				configManager =
+					std::make_shared<ConfigurationManager> (srvRunningConfig.getConfigurationData ());
+			}
+
+			ConfigImporter configImporter(configManager);
+
+			configImporter.importFromFile(batchConfig.configFileToWrite);
+
+			configManager->print(IConfigurationManager::PrintVerbosity::BRIEF_SUMMARY);
+		}
 		if (batchConfig.performRestart) {
 			srvReset.restart ();
 		}
@@ -309,41 +367,24 @@ int main (int argc, char *argv[])
 		pthread_mutex_unlock (&lock);
 
 		std::string callsign;
-		std::string description;
 		std::string apiName;
-		float lat, lon;
 
-		//configManager = new ConfigurationManager(srvRunningConfig.getConfigurationData ());
-		configManager = std::make_shared<ConfigurationManager>(srvRunningConfig.getConfigurationData ());
+		configManager =
+			std::make_shared<ConfigurationManager> (srvRunningConfig.getConfigurationData ());
 
-	    IBasicConfig& basic = configManager->getBasicConfig();
-//	    IModeConfig& mode = configManager->getModeConfig();
-//	    ISourceConfig& source = configManager->getSourceConfig();
-//	    IUmbConfig& umb = configManager->getUmbConfig();
-//	    IRtuConfig& rtu = configManager->getRtuConfig();
-	    IGsmConfig& gsm = configManager->getGsmConfig();
+		IBasicConfig &basic = configManager->getBasicConfig ();
+		IGsmConfig &gsm = configManager->getGsmConfig ();
 
-//		decode = new ConfigVer0 (srvRunningConfig.getConfigurationData ());
-	    basic.getCallsign (callsign);
-	    basic.getComment (description);
-	    gsm.getApiStationName (apiName);
-
-		lon = basic.getLongitude ();
-		lat = basic.getLatitude ();
-
-		std::cout << "I = main, callsign: " << callsign << std::endl;
-		std::cout << "I = main, API station name: " << apiName << std::endl;
-		std::cout << "I = main, description: " << description << std::endl;
-		std::cout << "I = main, lon: " << lon << std::endl;
-		std::cout << "I = main, lat: " << lat << std::endl;
+		basic.getCallsign (callsign);
+		gsm.getApiStationName (apiName);
 
 		main_make_filename_prefix (callsign, apiName, fileNamePrefix);
 
 		std::cout << "I = main, fileNamePrefix: " << fileNamePrefix << std::endl;
 
 		srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
-		ConfigExporter exporter(configManager);
-		exporter.exportToFile(fileNamePrefix + ".conf");
+		ConfigExporter exporter (configManager);
+		exporter.exportToFile (fileNamePrefix + ".conf");
 
 		for (int i = 0; i < ((int)sizeof (did_list) / (int)(sizeof (did_list[0]))); i++) {
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec

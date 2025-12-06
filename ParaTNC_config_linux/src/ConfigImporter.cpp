@@ -6,7 +6,7 @@
 
 #include "ConfigImporter.h"
 
-ConfigImporter::ConfigImporter(ConfigurationManager& configManager)
+ConfigImporter::ConfigImporter(std::shared_ptr<IConfigurationManager> configManager)
     : configManager(configManager), currentSection("") {}
 
 bool ConfigImporter::importFromFile(const std::string& filepath) {
@@ -136,7 +136,7 @@ bool ConfigImporter::parseSetting(const std::string& line) {
 }
 
 void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::string& value) {
-    IBasicConfig& basic = configManager.getBasicConfig();
+    IBasicConfig& basic = configManager->getBasicConfig();
     
     if (key == "callsign") {
         basic.setCallsign(parseString(value));
@@ -168,7 +168,7 @@ void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::
 }
 
 void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::string& value) {
-    IModeConfig& mode = configManager.getModeConfig();
+    IModeConfig& mode = configManager->getModeConfig();
     
     if (key == "digi") {
         mode.setDigi(parseUint8(value));
@@ -208,7 +208,7 @@ void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::s
 }
 
 void ConfigImporter::parseSourceConfigSetting(const std::string& key, const std::string& value) {
-    ISourceConfig& source = configManager.getSourceConfig();
+    ISourceConfig& source = configManager->getSourceConfig();
     
     if (key == "temperature") {
         source.setTemperature(parseUint8(value));
@@ -222,7 +222,7 @@ void ConfigImporter::parseSourceConfigSetting(const std::string& key, const std:
 }
 
 void ConfigImporter::parseUmbConfigSetting(const std::string& key, const std::string& value) {
-    IUmbConfig& umb = configManager.getUmbConfig();
+    IUmbConfig& umb = configManager->getUmbConfig();
     
     if (key == "slaveclass") {
         umb.setSlaveClass(parseUint16(value));
@@ -242,7 +242,7 @@ void ConfigImporter::parseUmbConfigSetting(const std::string& key, const std::st
 }
 
 void ConfigImporter::parseRtuConfigSetting(const std::string& key, const std::string& value) {
-    IRtuConfig& rtu = configManager.getRtuConfig();
+    IRtuConfig& rtu = configManager->getRtuConfig();
     
     if (key == "slavespeed") {
         rtu.setSlaveSpeed(parseUint16(value));
@@ -268,7 +268,7 @@ void ConfigImporter::parseRtuConfigSetting(const std::string& key, const std::st
 }
 
 void ConfigImporter::parseGsmConfigSetting(const std::string& key, const std::string& value) {
-    IGsmConfig& gsm = configManager.getGsmConfig();
+    IGsmConfig& gsm = configManager->getGsmConfig();
     
     if (key == "pin") {
         gsm.setPin(parseString(value));

@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <memory>
 #include "../shared/config/ConfigVer0.h"
 
 /**
@@ -32,7 +33,7 @@ public:
      * Constructor
      * @param configManager Reference to the ConfigurationManager instance to populate
      */
-    explicit ConfigImporter(ConfigurationManager& configManager);
+    explicit ConfigImporter(std::shared_ptr<IConfigurationManager> configManager);
     
     /**
      * Import configuration from INI file
@@ -49,7 +50,7 @@ public:
     bool importFromString(const std::string& content);
     
 private:
-    ConfigurationManager& configManager;
+    std::shared_ptr<IConfigurationManager> configManager;
     std::string currentSection;
     
     // Helper methods

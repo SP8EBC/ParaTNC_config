@@ -30,7 +30,9 @@ bool ConfigExporter::exportToFile(const std::string& filepath) {
             std::cerr << "Error: Cannot open file " << filepath << " for writing" << std::endl;
             return false;
         }
-        
+
+		std::cout << "I = ConfigExporter::exportToFile, " << filepath << std::endl;
+
         file << iniContent.str();
         file.close();
         

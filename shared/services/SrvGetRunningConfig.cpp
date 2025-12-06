@@ -39,9 +39,6 @@ SrvGetRunningConfig& SrvGetRunningConfig::operator=(const SrvGetRunningConfig &o
 
 void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 
-	// data payload size - this is a size of data read from flash memory
-	size_t dataSize = frame->size() - 4;
-
 	CurrentConfigRegion receivedCurrentRegion = (CurrentConfigRegion)frame->at(2);
 
 	// if currently no data transfer is in progress
@@ -198,6 +195,8 @@ bool SrvGetRunningConfig::storeToBinaryFile(std::string _in) {
 
 	// if file has been opened
 	if (f != NULL) {
+		std::cout << "I = SrvGetRunningConfig::storeToBinaryFile, " << _in << std::endl;
+
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 		fwrite(&this->configurationData[0], this->configurationData.size(), 1, f);
 #else
