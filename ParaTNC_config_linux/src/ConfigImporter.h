@@ -49,6 +49,8 @@ public:
      */
     bool importFromString(const std::string& content);
     
+    bool allSet();
+
 private:
     std::shared_ptr<IConfigurationManager> configManager;
     std::string currentSection;
@@ -74,6 +76,23 @@ private:
     float parseFloat(const std::string& value);
     bool parseBoolean(const std::string& value);
     std::string parseString(const std::string& value);
+
+	constexpr static auto checkFlags = [](uint64_t flag, uint8_t bits) -> bool {
+		uint64_t mask = 0;
+		for (int i = 0; i <= bits; i++) {
+			mask |= (1 << i);
+		}
+		if (flag == mask)	return true;
+		else return false;
+	};
+
+    // Flags which settings in sections have been set
+    uint64_t basicFlags;
+    uint64_t modeFlags;
+    uint64_t sourceFlags;
+    uint64_t umbFlags;
+    uint64_t rtuFlags;
+    uint64_t gsmFlags;
 };
 
 #endif /* CONFIG_IMPORTER_H_ */

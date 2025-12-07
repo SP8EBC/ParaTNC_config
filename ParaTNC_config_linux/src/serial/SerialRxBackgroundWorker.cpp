@@ -108,6 +108,7 @@ void SerialRxBackgroundWorker::worker(void) {
 			}
 		}
 		catch (TimeoutE & ex) {
+			std::cout << "E = SerialWorker::worker, TIMEOUT" << std::endl;
 			if (this->backgroundTimeoutCallback) {
 				this->backgroundTimeoutCallback();
 			}

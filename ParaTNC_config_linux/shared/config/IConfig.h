@@ -241,6 +241,11 @@ public:
     virtual IRtuConfig& getRtuConfig() = 0;
     virtual IGsmConfig& getGsmConfig() = 0;
 
+    virtual uint32_t getConfigCounter() = 0;
+    virtual void setConfigCounter(uint32_t value) = 0;
+
+    virtual uint32_t calculateAndSetChecksum() = 0;
+
     virtual const std::vector<uint8_t>& getConfigData() const = 0;
 
     virtual void print(PrintVerbosity verbosity) = 0;

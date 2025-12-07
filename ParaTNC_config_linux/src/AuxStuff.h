@@ -18,6 +18,7 @@ public:
 
 	static std::string nrcToString(uint16_t supposedValue) {
 		switch (supposedValue) {
+		case NRC_POSITIVE:					return "OK";
 		case NRC_GENERAL_REJECT: 			return "NRC_GENERAL_REJECT";
 		case NRC_SERVICE_NOT_SUPPORTED: 	return "NRC_SERVICE_NOT_SUPPORTED";
 		case NRC_SUBFUNCTION_NOT_SUPPORTED: return "NRC_SUBFUNCTION_NOT_SUPPORTED";

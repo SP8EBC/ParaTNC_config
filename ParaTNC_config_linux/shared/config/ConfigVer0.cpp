@@ -7,6 +7,7 @@
 
 #include "ConfigVer0.h"
 #include "Ver0Map.h"
+#include "ValidateVer0.h"
 #include <iostream>
 
 // clang-format off
@@ -345,23 +346,83 @@ void GsmConfig::setAprsisPort(uint16_t port) { writeValue<uint16_t>(CONFIG_GSM_O
 void GsmConfig::setAprsisPpasscode(const std::string& passcode) { writeString(CONFIG_GSM_OFFSET + GSM_APRSIS_PASSCODE_OFFSET, 8, passcode); }
 // clang-format on
 
+// ============================================================================
+//
+// ============================================================================
+
+ConfigurationManager::ConfigurationManager ()
+	: configData (CONFIG__END__OFFSET, 0), basicConfig (configData), modeConfig (configData),
+	  sourceConfig (configData), umbConfig (configData), rtuConfig (configData),
+	  gsmConfig (configData)
+{
+}
+
+uint32_t ConfigurationManager::getConfigCounter()
+{
+	if (configData.size() >= CONFIG__END__OFFSET)
+	{
+		uint32_t* ptr = (uint32_t*)(configData.data() + CONFIG_MODE_PGM_CNTR);
+		return *ptr;
+	}
+	else
+	{
+        throw std::out_of_range("Config data not allocated while trying to get CONFIG_MODE_PGM_CNTR");
+	}
+}
+
+void ConfigurationManager::setConfigCounter(uint32_t value)
+{
+	if (configData.size() >= CONFIG__END__OFFSET)
+	{
+		uint32_t* ptr = (uint32_t*)(configData.data() + CONFIG_MODE_PGM_CNTR);
+		*ptr = value;
+	}
+	else
+	{
+        throw std::out_of_range("Config data not allocated while trying to set CONFIG_MODE_PGM_CNTR");
+	}
+}
+
+uint32_t ConfigurationManager::calculateAndSetChecksum()
+{
+	ValidateVer0 validate;
+
+	validate.recalculateChecksum(configData);
+
+	uint32_t crcAreaLn = (uint32_t)(configData.size() - 12);
+
+	// data are stored in litte endian order
+	uint32_t crcFromFrame = 	(configData.at(crcAreaLn + 4)) |
+								(configData.at(crcAreaLn + 5) << 8) |
+								(configData.at(crcAreaLn + 6) << 16) |
+								(configData.at(crcAreaLn + 7) << 24);
+
+	return crcFromFrame;
+}
+
 void ConfigurationManager::print (PrintVerbosity verbosity)
 {
-	if (verbosity == PrintVerbosity::BRIEF_SUMMARY)
-	{
-		std::cout << "C = station APRS callsign: " << getBasicConfig().getCallsign();
-		if (getBasicConfig().getSsid() != 0)
-		{
-			std::cout << "-" << getBasicConfig().getSsid() << std::endl;
+	std::cout << "====================================" << std::endl;
+	if (verbosity == PrintVerbosity::BRIEF_SUMMARY) {
+		std::cout << "=====Configuration BRIEF SUMMARY====" << std::endl;
+
+		std::cout << "C = station APRS callsign: " << getBasicConfig ().getCallsign ();
+		if (getBasicConfig ().getSsid () != 0) {
+			std::cout << "-" << getBasicConfig ().getSsid () << std::endl;
 		}
-		else
-		{
+		else {
 			std::cout << std::endl;
 		}
-		std::cout << "C = API station name: " << getGsmConfig().getApiStationName() << std::endl;
-		std::cout << "C = APRS station description: " << getBasicConfig().getComment() << std::endl;
-		std::cout << "C = weather packets interval: " << getBasicConfig().getWxTransmitPeriod() << " mins" << std::endl;
-		std::cout << "C = beacon packets interval: " << getBasicConfig().getBeaconTransmitPeriod() << " mins" << std::endl;
-		std::cout << "C = digipeater delay: " << getModeConfig().getDigiDelay100msec() * 100 << " ms" << std::endl;
+		std::cout << "C = API station name: " << getGsmConfig ().getApiStationName () << std::endl;
+		std::cout << "C = APRS station description: " << getBasicConfig ().getComment ()
+				  << std::endl;
+		std::cout << "C = weather packets interval: " << (int)getBasicConfig ().getWxTransmitPeriod ()
+				  << " mins" << std::endl;
+		std::cout << "C = beacon packets interval: " << (int)getBasicConfig ().getBeaconTransmitPeriod ()
+				  << " mins" << std::endl;
+		std::cout << "C = digipeater delay: " << getModeConfig ().getDigiDelay100msec () * 100
+				  << " ms" << std::endl;
 	}
+	std::cout << "====================================" << std::endl;
+
 }

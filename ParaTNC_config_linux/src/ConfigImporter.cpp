@@ -6,8 +6,13 @@
 
 #include "ConfigImporter.h"
 
+#define CONFIG_IMPORTE_SET_FLAG(flag, bitpos)			\
+		flag |= (1 << bitpos)							\
+
 ConfigImporter::ConfigImporter(std::shared_ptr<IConfigurationManager> configManager)
-    : configManager(configManager), currentSection("") {}
+    : configManager(configManager), currentSection(""),
+	  basicFlags(0), modeFlags(0), sourceFlags(0), umbFlags(0),
+	  rtuFlags(0), gsmFlags(0){}
 
 bool ConfigImporter::importFromFile(const std::string& filepath) {
     try {
@@ -59,6 +64,23 @@ bool ConfigImporter::importFromString(const std::string& content) {
         std::cerr << "Exception during import: " << e.what() << std::endl;
         return false;
     }
+}
+
+bool ConfigImporter::allSet() {
+	bool result = false;
+
+	const bool basicResult = checkFlags(basicFlags, 12);
+	const bool modeResult = checkFlags(modeFlags, 16);
+	const bool sourceResult = checkFlags(sourceFlags, 3);
+	const bool umbResult = checkFlags(umbFlags, 6);
+	const bool rtuResult = checkFlags(rtuFlags, 9);
+	const bool gsmResult = checkFlags(gsmFlags, 10);
+
+	if (basicResult || modeResult || sourceResult || umbResult || rtuResult || gsmResult) {
+		result = true;
+	}
+
+	return result;
 }
 
 std::string ConfigImporter::toLowerCase(const std::string& str) {
@@ -139,30 +161,43 @@ void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::
     IBasicConfig& basic = configManager->getBasicConfig();
     
     if (key == "callsign") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 0);
         basic.setCallsign(parseString(value));
     } else if (key == "ssid") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 1);
         basic.setSsid(parseUint8(value));
     } else if (key == "latitude") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 2);
         basic.setLatitude(parseFloat(value));
     } else if (key == "ns") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 3);
         basic.setNs(parseUint8(value));
     } else if (key == "longitude") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 4);
         basic.setLongitude(parseFloat(value));
     } else if (key == "we") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 5);
         basic.setWe(parseUint8(value));
     } else if (key == "comment") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 6);
         basic.setComment(parseString(value));
     } else if (key == "symbol") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 7);
         basic.setSymbol(parseUint8(value));
     } else if (key == "pathtype") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 8);
         basic.setPathType(parseUint8(value));
     } else if (key == "beaconbootup") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 9);
         basic.setBeaconBootup(parseBoolean(value));
     } else if (key == "wxtransmitperiod") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 10);
         basic.setWxTransmitPeriod(parseUint8(value));
     } else if (key == "beacontransmitperiod") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 11);
         basic.setBeaconTransmitPeriod(parseUint8(value));
     } else if (key == "wxdoubletransmit") {
+    	CONFIG_IMPORTE_SET_FLAG(basicFlags, 12);
         basic.setWxDoubleTransmit(parseUint8(value));
     }
 }
@@ -171,38 +206,55 @@ void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::s
     IModeConfig& mode = configManager->getModeConfig();
     
     if (key == "digi") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 0);
         mode.setDigi(parseUint8(value));
     } else if (key == "wx") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 1);
         mode.setWx(parseUint8(value));
     } else if (key == "wxumb") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 2);
         mode.setWxUmb(parseUint8(value));
     } else if (key == "wxmodbus") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 3);
         mode.setWxModbus(parseUint8(value));
     } else if (key == "wxdavis") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 4);
         mode.setWxDavis(parseUint8(value));
     } else if (key == "wxms5611orbme") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 5);
         mode.setWxMs5611OrBme(parseUint8(value));
     } else if (key == "wxanemometerconst") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 6);
         mode.setWxAnemometerConst(parseUint8(value));
     } else if (key == "wxdustsensor") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 7);
         mode.setWxDustSensor(parseUint8(value));
     } else if (key == "wxptsensor") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 8);
         mode.setWxPtSensor(parseUint8(value));
     } else if (key == "victron") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 9);
         mode.setVictron(parseUint8(value));
     } else if (key == "digiviscous") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 10);
         mode.setDigiViscous(parseUint8(value));
     } else if (key == "digionlyssid") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 11);
         mode.setDigiOnlySsid(parseUint8(value));
     } else if (key == "digiviscousdelay") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 12);
         mode.setDigiViscousDelay(parseUint8(value));
     } else if (key == "digidelay100msec") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 13);
         mode.setDigiDelay100msec(parseUint8(value));
     } else if (key == "powersave") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 14);
         mode.setPowersave(parseUint8(value));
     } else if (key == "powersavekeepgsm") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 15);
         mode.setPowersaveKeepGsm(parseUint8(value));
     } else if (key == "gsm") {
+    	CONFIG_IMPORTE_SET_FLAG(modeFlags, 16);
         mode.setGsm(parseUint8(value));
     }
 }
@@ -211,12 +263,16 @@ void ConfigImporter::parseSourceConfigSetting(const std::string& key, const std:
     ISourceConfig& source = configManager->getSourceConfig();
     
     if (key == "temperature") {
+    	CONFIG_IMPORTE_SET_FLAG(sourceFlags, 0);
         source.setTemperature(parseUint8(value));
     } else if (key == "pressure") {
+    	CONFIG_IMPORTE_SET_FLAG(sourceFlags, 1);
         source.setPressure(parseUint8(value));
     } else if (key == "humidity") {
+    	CONFIG_IMPORTE_SET_FLAG(sourceFlags, 2);
         source.setHumidity(parseUint8(value));
     } else if (key == "wind") {
+    	CONFIG_IMPORTE_SET_FLAG(sourceFlags, 3);
         source.setWind(parseUint8(value));
     }
 }
@@ -225,18 +281,25 @@ void ConfigImporter::parseUmbConfigSetting(const std::string& key, const std::st
     IUmbConfig& umb = configManager->getUmbConfig();
     
     if (key == "slaveclass") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 0);
         umb.setSlaveClass(parseUint16(value));
     } else if (key == "slaveid") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 1);
         umb.setSlaveId(parseUint16(value));
     } else if (key == "channelwindspeed") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 2);
         umb.setChannelWindSpeed(parseUint16(value));
     } else if (key == "channelwindgust") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 3);
         umb.setChannelWindGust(parseUint16(value));
     } else if (key == "channelwinddirection") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 4);
         umb.setChannelWindDirection(parseUint16(value));
     } else if (key == "channeltemperature") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 5);
         umb.setChannelTemperature(parseUint16(value));
     } else if (key == "channelqnh") {
+    	CONFIG_IMPORTE_SET_FLAG(umbFlags, 6);
         umb.setChannelQnh(parseUint16(value));
     }
 }
@@ -245,24 +308,34 @@ void ConfigImporter::parseRtuConfigSetting(const std::string& key, const std::st
     IRtuConfig& rtu = configManager->getRtuConfig();
     
     if (key == "slavespeed") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 0);
         rtu.setSlaveSpeed(parseUint16(value));
     } else if (key == "slaveparity") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 1);
         rtu.setSlaveParity(parseUint8(value));
     } else if (key == "slaveStopbits") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 2);
         rtu.setSlaveStopBits(parseUint8(value));
     } else if (key == "usefullwinddata") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 3);
         rtu.setUseFullWindData(parseUint8(value));
     } else if (key == "temperaturesrc") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 4);
         rtu.setTemperatureSrc(parseUint8(value));
     } else if (key == "humiditysrc") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 5);
         rtu.setHumiditySrc(parseUint8(value));
     } else if (key == "pressuresrc") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 6);
         rtu.setPressureSrc(parseUint8(value));
     } else if (key == "winddir") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 7);
         rtu.setWindDir(parseUint8(value));
     } else if (key == "windspeed") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 8);
         rtu.setWindSpeed(parseUint8(value));
     } else if (key == "windgusts") {
+    	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 9);
         rtu.setWindGusts(parseUint8(value));
     }
 }
@@ -271,26 +344,37 @@ void ConfigImporter::parseGsmConfigSetting(const std::string& key, const std::st
     IGsmConfig& gsm = configManager->getGsmConfig();
     
     if (key == "pin") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 0);
         gsm.setPin(parseString(value));
     } else if (key == "apn") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 1);
         gsm.setApn(parseString(value));
     } else if (key == "username") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 2);
         gsm.setUsername(parseString(value));
     } else if (key == "password") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 3);
         gsm.setPassword(parseString(value));
     } else if (key == "apienable") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 4);
         gsm.setApiEnable(parseUint8(value));
     } else if (key == "apibaseurl") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 5);
         gsm.setApiBaseUrl(parseString(value));
     } else if (key == "apistationname") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 6);
         gsm.setApiStationName(parseString(value));
     } else if (key == "aprsisenabled") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 7);
         gsm.setAprsisEnable(parseUint8(value));
     } else if (key == "aprsisserver") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 8);
         gsm.setAprsisServer(parseString(value));
     } else if (key == "aprsisport") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 9);
         gsm.setAprsisPort(parseUint16(value));
     } else if (key == "aprsipasscode") {
+    	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 10);
         gsm.setAprsisPpasscode(parseString(value));
     }
 }
@@ -327,8 +411,13 @@ bool ConfigImporter::parseBoolean(const std::string& value) {
     if (lowercaseValue == "true" || lowercaseValue == "1" || lowercaseValue == "yes" || lowercaseValue == "on") {
         return true;
     }
+    else if (lowercaseValue == "false" || lowercaseValue == "0" || lowercaseValue == "no" || lowercaseValue == "off") {
+        return true;
+    }
+    else {
+    	throw std::runtime_error("Error parsing boolean value from line: " + value);
+    }
     
-    return false;
 }
 
 std::string ConfigImporter::parseString(const std::string& value) {

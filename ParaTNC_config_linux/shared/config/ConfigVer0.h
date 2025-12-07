@@ -375,12 +375,19 @@ public:
           rtuConfig(configData),
           gsmConfig(configData) {}
 
+    ConfigurationManager();
+
     virtual IBasicConfig& getBasicConfig() { return basicConfig; }
     virtual IModeConfig& getModeConfig() { return modeConfig; }
     virtual ISourceConfig& getSourceConfig() { return sourceConfig; }
     virtual IUmbConfig& getUmbConfig() { return umbConfig; }
     virtual IRtuConfig& getRtuConfig() { return rtuConfig; }
     virtual IGsmConfig& getGsmConfig() { return gsmConfig; }
+
+    virtual uint32_t getConfigCounter();
+    virtual void setConfigCounter(uint32_t value);
+
+    virtual uint32_t calculateAndSetChecksum();
 
     const std::vector<uint8_t>& getConfigData() const { return configData; }
 

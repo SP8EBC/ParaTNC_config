@@ -19,6 +19,7 @@ public:
 
 	virtual bool checkValidate(std::vector<uint8_t> & dataFromTnc) = 0;
 
+	virtual bool recalculateChecksum(std::vector<uint8_t> & dataFromTnc) = 0;
 };
 
 #endif /* SRC_CONFIG_DECODE_ICONFIGVALIDATE_H_ */

@@ -30,7 +30,8 @@
 typedef struct BatchConfig {
 	BatchConfig ()
 		: defaultBatch (false), monitorMode (false), performRestart (false), readDid (false),
-		  monitorDid (false), didToRead (), readConfig (false), writeConfig(false), configFileToWrite()
+		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false),
+		  configFileToWrite ()
 	{
 	}
 
@@ -187,9 +188,6 @@ int main (int argc, char *argv[])
 
 	batchConfig.defaultBatch = true;
 
-	std::vector<uint8_t> test;
-	test.insert(test.begin(), 0x800, 0xAB);
-
 	boost::program_options::options_description od("");
 
 	boost::program_options::options_description generalOptions("General Options");
@@ -291,6 +289,7 @@ int main (int argc, char *argv[])
 		}
 	}
 	else if (!batchConfig.defaultBatch && !batchConfig.monitorMode) {
+		// exec diagnostic services in order
 		if (batchConfig.readDid) {
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
@@ -299,7 +298,7 @@ int main (int argc, char *argv[])
 			s.waitForTransmissionDone ();
 
 			pthread_mutex_lock (&lock);
-			// wait for configuration to be received
+			// wait for DID value to be received
 			pthread_cond_wait (&cond1, &lock);
 			pthread_mutex_unlock (&lock);
 
@@ -307,8 +306,8 @@ int main (int argc, char *argv[])
 			std::cout << "D = main, did has been read" << std::endl;
 		}
 		if (batchConfig.readConfig) {
-			std::string callsign;
-			std::string apiName;
+			std::string callsign; // this is required to create export filename
+			std::string apiName;  // this is required to create export filename
 
 			srvRunningConfig.sendRequest ();
 			s.waitForTransmissionDone ();
@@ -318,32 +317,92 @@ int main (int argc, char *argv[])
 			pthread_cond_wait (&cond1, &lock);
 			pthread_mutex_unlock (&lock);
 
-			configManager =
-				std::make_shared<ConfigurationManager> (srvRunningConfig.getConfigurationData ());
+			if (srvRunningConfig.isValidatedOk ()) {
+				// create configuration manager from received data. CRC validation is done inside
+				// srvRunningConfig
+				configManager = std::make_shared<ConfigurationManager> (
+					srvRunningConfig.getConfigurationData ());
 
-			IBasicConfig &basic = configManager->getBasicConfig ();
-			IGsmConfig &gsm = configManager->getGsmConfig ();
+				IBasicConfig &basic = configManager->getBasicConfig ();
+				IGsmConfig &gsm = configManager->getGsmConfig ();
 
-			basic.getCallsign (callsign);
-			gsm.getApiStationName (apiName);
+				// get callsign and API station name
+				basic.getCallsign (callsign);
+				gsm.getApiStationName (apiName);
 
-			main_make_filename_prefix (callsign, apiName, fileNamePrefix);
+				// create filename prefix into fileNamePrefix
+				main_make_filename_prefix (callsign, apiName, fileNamePrefix);
 
-			srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
-			ConfigExporter exporter (configManager);
-			exporter.exportToFile (fileNamePrefix + ".conf");
+				srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
+				ConfigExporter exporter (configManager); // to text config file
+				exporter.exportToFile (fileNamePrefix + ".conf");
+			}
 		}
 		if (batchConfig.writeConfig) {
 			if (!configManager) {
-				configManager =
-					std::make_shared<ConfigurationManager> (srvRunningConfig.getConfigurationData ());
+				configManager = std::make_shared<ConfigurationManager> ();
 			}
 
-			ConfigImporter configImporter(configManager);
+			ConfigImporter configImporter (configManager);
 
-			configImporter.importFromFile(batchConfig.configFileToWrite);
+			configImporter.importFromFile (batchConfig.configFileToWrite);
 
-			configManager->print(IConfigurationManager::PrintVerbosity::BRIEF_SUMMARY);
+			configManager->print (IConfigurationManager::PrintVerbosity::BRIEF_SUMMARY);
+
+			const bool configFullSet = configImporter.allSet ();
+
+			if (configFullSet) {
+
+				// read DID 0xF000u -> config_running_pgm_counter
+				srvReadDid.sendRequestForDid (0xF000u);
+				s.waitForTransmissionDone ();
+
+				pthread_mutex_lock (&lock);
+				// wait for DID value to be received
+				pthread_cond_wait (&cond1, &lock);
+				pthread_mutex_unlock (&lock);
+
+				const DidResponse &response = srvReadDid.getDidResponse ();
+
+				// check if DID response for id 0xF000 has correct type
+				if (response.firstSize == DIDRESPONSE_DATASIZE_INT32) {
+					const uint32_t configCounter = (uint32_t)(response.first.i32);
+					std::cout << "I = main, old value of configCounter: " << configCounter
+							  << std::endl;
+
+					// increase config counter to use
+					configManager->setConfigCounter (configCounter + 1);
+					std::cout << "I = main, new value of configCounter: " << configCounter + 1
+							  << std::endl;
+
+					const uint32_t newCrc = configManager->calculateAndSetChecksum ();
+					std::cout << "I = main, new CRC32 checksum: 0x" << std::hex << newCrc
+							  << std::endl;
+
+					// send startup config erase request
+					srvEraseConfig.sendRequest ();
+					s.waitForTransmissionDone ();
+
+					pthread_mutex_lock (&lock);
+					// wait for erase to be done
+					pthread_cond_wait (&cond1, &lock);
+					pthread_mutex_unlock (&lock);
+
+					std::cout << "I = main, erase done" << std::endl;
+
+					auto dataToSend = configManager->getConfigData ();
+					srvSendStartupConfig.setDataForDownload (dataToSend);
+					srvSendStartupConfig.sendRequest ();
+				}
+				else {
+					throw std::runtime_error ("DID number 0xF000 must be a type of int32_t");
+				}
+			}
+			else {
+				throw std::runtime_error (
+					"If write-config service is set, all configuration options must be specified "
+					"in input file. Use amend-config instead.");
+			}
 		}
 		if (batchConfig.performRestart) {
 			srvReset.restart ();

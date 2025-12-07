@@ -148,6 +148,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 
 		// no data has been received
 		if (rxLn == 0) {
+			//std::cout << "W = serial::receiveKissFrame" << std::endl;
 			// continue the loop
 			continue;
 		}

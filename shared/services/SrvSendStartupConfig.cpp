@@ -113,7 +113,9 @@ void SrvSendStartupConfig::sendRequest() {
 			segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
 		}
 
-		std::cout << "I = SrvSendStartupConfig::sendRequest, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
+		std::cout << "I = SrvSendStartupConfig::sendRequest, " << i << " from " << howManyFrames
+				  << ", currentOffset: 0x" << std::hex << (int)currentOffset << std::dec
+				  << std::endl;
 
 		// increase currrent offset
 		currentOffset += singleFrameLn;
@@ -195,8 +197,9 @@ void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk
 
 				operationResult = (kiss_communication_nrc_t)result;
 
-				std::cout << "I = SrvSendStartupConfig::receiveSynchronously, result: 0x" <<  std::hex << (int)result  << std::dec << " - " << AuxStuff::nrcToString(operationResult) << std::endl;
-
+				std::cout << "I = SrvSendStartupConfig::receiveSynchronously, result: 0x"
+						  << std::hex << (int)result << std::dec << " - "
+						  << AuxStuff::nrcToString (operationResult) << std::endl;
 			}
 
 //	#if defined (_MSC_VER) && (_MSC_VER <= 1400)

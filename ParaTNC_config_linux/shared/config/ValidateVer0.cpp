@@ -8,6 +8,7 @@
 #include "stdafx.h"
 
 #include "ValidateVer0.h"
+#include "Ver0Map.h"
 #include "../crc/crc_.h"
 
 #include <iostream>
@@ -18,6 +19,11 @@ ValidateVer0::~ValidateVer0() {
 }
 
 bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
+
+	if (dataFromTnc.size() < CONFIG__END__OFFSET)
+	{
+		return false;
+	}
 
 	uint32_t calculatedCrc = 0;
 
@@ -46,4 +52,27 @@ bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 	}
 
 	return false;
+}
+
+bool ValidateVer0::recalculateChecksum(std::vector<uint8_t> & dataFromTnc) {
+
+	if (dataFromTnc.size() < CONFIG__END__OFFSET)
+	{
+		return false;
+	}
+
+	uint32_t crcAreaLn = (uint32_t)(dataFromTnc.size() - 12) & 0x7FFFFFFFU;
+
+#if defined (_MSC_VER) && (_MSC_VER <= 1400)
+	const uint32_t calculatedCrc = calcCRC32std(&dataFromTnc[0], crcAreaLn, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
+#else
+	const uint32_t calculatedCrc = calcCRC32std(dataFromTnc.data(), crcAreaLn, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);
+#endif
+
+	dataFromTnc[crcAreaLn + 4] = (calculatedCrc & 0x000000FFu);
+	dataFromTnc[crcAreaLn + 5] = (calculatedCrc & 0x0000FF00u) >> 8;
+	dataFromTnc[crcAreaLn + 6] = (calculatedCrc & 0x00FF0000u) >> 16;
+	dataFromTnc[crcAreaLn + 7] = (calculatedCrc & 0xFF000000u) >> 24;
+
+	return true;
 }

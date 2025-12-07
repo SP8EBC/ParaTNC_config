@@ -14,6 +14,8 @@ class ValidateVer0: public IConfigValidate {
 public:
 	virtual bool checkValidate(std::vector<uint8_t> & dataFromTnc);
 
+	virtual bool recalculateChecksum(std::vector<uint8_t> & dataFromTnc);
+
 	virtual ~ValidateVer0();
 };
 
