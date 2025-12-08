@@ -103,7 +103,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		// send FEND at the end
 		write(handle, FEND, 1);
 
-		//std::cout << "I = serial::transmitKissFrame, transmission done " << std::endl;
+		std::cout << "D = serial::transmitKissFrame, transmission done " << std::endl;
 	}
 }
 

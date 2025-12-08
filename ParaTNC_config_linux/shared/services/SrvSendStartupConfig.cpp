@@ -181,7 +181,11 @@ void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk
 				segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
 			}
 
-			std::cout << "I = SrvSendStartupConfig::receiveSynchronously, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
+			//std::cout << "I = SrvSendStartupConfig::receiveSynchronously, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
+			std::cout << "I = SrvSendStartupConfig::receiveSynchronously, " << i << " from " << howManyFrames
+					  << ", currentOffset: 0x" << std::hex << (int)currentOffset << std::dec
+					  << std::endl;
+
 
 			// increase currrent offset
 			currentOffset += singleFrameLn;

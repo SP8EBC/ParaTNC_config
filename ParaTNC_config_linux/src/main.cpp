@@ -393,6 +393,7 @@ int main (int argc, char *argv[])
 					auto dataToSend = configManager->getConfigData ();
 					srvSendStartupConfig.setDataForDownload (dataToSend);
 					srvSendStartupConfig.sendRequest ();
+					//srvSendStartupConfig.receiveSynchronously(nrc_callback);
 				}
 				else {
 					throw std::runtime_error ("DID number 0xF000 must be a type of int32_t");
