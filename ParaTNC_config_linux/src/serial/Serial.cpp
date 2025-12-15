@@ -103,7 +103,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		// send FEND at the end
 		write(handle, FEND, 1);
 
-		std::cout << "D = serial::transmitKissFrame, transmission done " << std::endl;
+		//std::cout << "D = serial::transmitKissFrame, transmission done " << std::endl;
 	}
 }
 
@@ -163,7 +163,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		// TODO: must be fixed, the method shall returns
 		// with an error in case of timeout instead of looping here
 		// for no sense.
-		if (currentTime.tv_sec - receivingStart.tv_sec > 1) {
+		if (currentTime.tv_sec - receivingStart.tv_sec > 10) {
 			timeouts++;
 			std::cout << "E = serial::receiveKissFrame, timeout has occured for " << timeouts << " time" << std::endl;
 

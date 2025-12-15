@@ -21,6 +21,11 @@
 #define CONFIG_RTU_OFFSET		0x160			//	Current size: 0x54, free: 0x4C
 #define CONFIG_GSM_OFFSET		0x200			//	Current size: 0xF8,
 #define CONFIG__END__OFFSET		0x300
+#define CONFIG_BLOCK_SIZE		0x800
+
+#define CRC_OFFSET				0x7F8
+#define CRC_16B_WORD_OFFSET		CRC_OFFSET / 2
+#define CRC_32B_WORD_OFFSET		CRC_OFFSET / 4
 
 #define BASIC_CALLSIGN_OFFSET			0x0			// string - max ln 7
 #define BASIC_SSID_OFFSET				0x7			// uint8_t

@@ -20,7 +20,7 @@ ValidateVer0::~ValidateVer0() {
 
 bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 
-	if (dataFromTnc.size() < CONFIG__END__OFFSET)
+	if (dataFromTnc.size() < CRC_OFFSET)
 	{
 		return false;
 	}
@@ -32,7 +32,7 @@ bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 	// which is not included into CRC calculation.
 	// four bytes AFTER a crc is not used at all and is kept due to
 	// STM32L4xx target limitations which require 64 bit aligned write block size
-	uint32_t crcAreaLn = (uint32_t)(dataFromTnc.size() - 12) & 0x7FFFFFFFU;
+	uint32_t crcAreaLn = (uint32_t)(CONFIG_BLOCK_SIZE - 12) & 0x7FFFFFFFU;
 
 	// data are stored in litte endian order
 	uint32_t crcFromFrame = 	(dataFromTnc.at(crcAreaLn + 4)) |
@@ -56,12 +56,12 @@ bool ValidateVer0::checkValidate(std::vector<uint8_t> & dataFromTnc) {
 
 bool ValidateVer0::recalculateChecksum(std::vector<uint8_t> & dataFromTnc) {
 
-	if (dataFromTnc.size() < CONFIG__END__OFFSET)
+	if (dataFromTnc.size() < CRC_OFFSET)
 	{
 		return false;
 	}
 
-	uint32_t crcAreaLn = (uint32_t)(dataFromTnc.size() - 12) & 0x7FFFFFFFU;
+	uint32_t crcAreaLn = (uint32_t)(CONFIG_BLOCK_SIZE - 12) & 0x7FFFFFFFU;
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 	const uint32_t calculatedCrc = calcCRC32std(&dataFromTnc[0], crcAreaLn, 0x04C11DB7, 0xFFFFFFFF, 0, 0, 0);

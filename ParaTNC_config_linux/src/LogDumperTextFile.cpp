@@ -73,6 +73,18 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
 		storeCyclic(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_CONFIG_FIRST_CRC_FAIL) {
+		storeConfigFirstCrcFail(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR && id == EVENTS_MAIN_CONFIG_SECOND_CRC_FAIL) {
+		storeConfigSecondCrcFail(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_FIRST_RESTORE) {
+		storeConfigFirstRestore(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_SECOND_RESTORE) {
+		storeConfigSecondRestore(eventLogEntry,timestamp);
+	}
 	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
 		storeGsmRegisteredNetwork(eventLogEntry,timestamp);
 	}
@@ -87,6 +99,12 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	}
 	else if (src == EVENT_SRC_FANET && svrty == EVENT_ERROR && id == EVENTS_FANET_FAIL_TO_SEND_METEO) {
 		storeFanetFail(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_ERASING_STARTUP) {
+		storeErasingStartup(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_FLASHING_STARTUP) {
+		storeFlashingStartup(eventLogEntry,timestamp);
 	}
 	else {
 
@@ -441,5 +459,106 @@ void LogDumperTextFile::closeAndSaveTextExport(void) {
     fprint_table(table, output);
 
     fclose(output);
+}
 
+void LogDumperTextFile::storeErasingStartup (const event_log_exposed_t *eventLogEntry,
+											 const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "result: %d", eventLogEntry->param);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeFlashingStartup (const event_log_exposed_t *eventLogEntry,
+											  const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "result: %d", eventLogEntry->param);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeConfigFirstCrcFail (const event_log_exposed_t *eventLogEntry,
+												 const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "expected: 0x%X, calculated: 0x%X", eventLogEntry->lparam, eventLogEntry->lparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeConfigSecondCrcFail (const event_log_exposed_t *eventLogEntry,
+												  const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "expected: 0x%X, calculated: 0x%X", eventLogEntry->lparam, eventLogEntry->lparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeConfigFirstRestore (const event_log_exposed_t *eventLogEntry,
+												 const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "param: d, target CRC: 0x%X", eventLogEntry->param, eventLogEntry->lparam);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
+}
+
+void LogDumperTextFile::storeConfigSecondRestore (const event_log_exposed_t *eventLogEntry,
+												  const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	add_cell_fmt(table, "%d", eventLogEntry->event_counter_id);
+	add_cell_fmt(table, "%s", eventLogEntry->severity_str);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	add_cell_fmt(table, "%d", eventLogEntry->event_master_time / 1000u);
+	add_cell_fmt(table, "%s", eventLogEntry->source_str_name);
+	add_cell_fmt(table, "%s", eventLogEntry->event_str_name);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "param: d, target CRC: 0x%X", eventLogEntry->param, eventLogEntry->lparam);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+	lineAbove = true;
 }

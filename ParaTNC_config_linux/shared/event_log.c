@@ -163,6 +163,18 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			else if (event_id == EVENTS_MAIN_POSTMORTEM_SUPERVISOR) {
 				out = event_log_str_main_info_supervisor;
 			}
+			else if (event_id == EVENTS_MAIN_CONFIG_FIRST_CRC_FAIL) {
+				out = event_log_str_main_error_first_crc_fail;
+			}
+			else if (event_id == EVENTS_MAIN_CONFIG_SECOND_CRC_FAIL) {
+				out = event_log_str_main_error_second_crc_fail;
+			}
+			else if (event_id == EVENTS_MAIN_CONFIG_FIRST_RESTORE) {
+				out = event_log_str_main_warn_first_restore;
+			}
+			else if (event_id == EVENTS_MAIN_CONFIG_SECOND_RESTORE) {
+				out = event_log_str_main_warn_second_restore;
+			}
 			break;
 		}
 		case EVENT_SRC_WX_HANDLER:	{
@@ -244,7 +256,15 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			}
 			break;
 		}
-		case EVENT_SRC_KISS:				 break;
+		case EVENT_SRC_KISS:
+			if (event_id == EVENTS_DEFINITIONS_KISS_WARN_ERASING_STARTUP) {
+				out = event_log_str_kiss_warn_erasing_startup;
+			}
+			else if (event_id == EVENTS_DEFINITIONS_KISS_WARN_FLASHING_STARTUP) {
+				out = event_log_str_kiss_warn_programming_startup;
+			}
+
+			break;
 		case EVENT_SRC_APRS_RF:				 break;
 		case EVENT_SRC_GSM_GPRS:
 			if (event_id == EVENTS_GSM_GPRS_ERR_APN_CONFIGURATION_MISSING) {

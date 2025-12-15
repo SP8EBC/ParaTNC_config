@@ -46,6 +46,13 @@ class LogDumperTextFile {
 
 	void storeFanetFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
+	void storeErasingStartup(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeFlashingStartup(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeConfigFirstCrcFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeConfigSecondCrcFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeConfigFirstRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeConfigSecondRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
 
 public:
 	LogDumperTextFile();

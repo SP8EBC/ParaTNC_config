@@ -213,23 +213,23 @@ void ConfigExporter::addSection(const std::string& sectionName) {
 }
 
 void ConfigExporter::addSetting(const std::string& key, uint8_t value, const std::string& typeComment) {
-    iniContent << key << " = " << static_cast<int>(value) << " ; " << typeComment << "\n";
+    iniContent << key << " = " << static_cast<int>(value) << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, uint16_t value, const std::string& typeComment) {
-    iniContent << key << " = " << value << " ; " << typeComment << "\n";
+    iniContent << key << " = " << value << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, float value, const std::string& typeComment) {
-    iniContent << key << " = " << formatFloat(value) << " ; " << typeComment << "\n";
+    iniContent << key << " = " << formatFloat(value) << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, bool value, const std::string& typeComment) {
-    iniContent << key << " = " << (value ? "true" : "false") << " ; " << typeComment << "\n";
+    iniContent << key << " = " << (value ? "true" : "false") << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, const std::string& value, const std::string& typeComment) {
-    iniContent << key << " = " << escapeValue(value) << " ; " << typeComment << "\n";
+    iniContent << key << " = " << escapeValue(value) << "\t\t# " << typeComment << "\n";
 }
 
 std::string ConfigExporter::escapeValue(const std::string& value) {

@@ -6,8 +6,8 @@
  */
 
 #include "ConfigVer0.h"
-#include "Ver0Map.h"
 #include "ValidateVer0.h"
+#include "Ver0Map.h"
 #include <iostream>
 
 // clang-format off
@@ -351,51 +351,65 @@ void GsmConfig::setAprsisPpasscode(const std::string& passcode) { writeString(CO
 // ============================================================================
 
 ConfigurationManager::ConfigurationManager ()
-	: configData (CONFIG__END__OFFSET, 0), basicConfig (configData), modeConfig (configData),
+	: configData (CONFIG_BLOCK_SIZE, 0), basicConfig (configData), modeConfig (configData),
 	  sourceConfig (configData), umbConfig (configData), rtuConfig (configData),
 	  gsmConfig (configData)
 {
 }
 
-uint32_t ConfigurationManager::getConfigCounter()
+uint32_t ConfigurationManager::getConfigCounter ()
 {
-	if (configData.size() >= CONFIG__END__OFFSET)
-	{
-		uint32_t* ptr = (uint32_t*)(configData.data() + CONFIG_MODE_PGM_CNTR);
+	if (configData.size () >= CONFIG_BLOCK_SIZE) {
+		uint32_t *ptr = (uint32_t *)(configData.data () + CONFIG_MODE_PGM_CNTR);
 		return *ptr;
 	}
-	else
-	{
-        throw std::out_of_range("Config data not allocated while trying to get CONFIG_MODE_PGM_CNTR");
+	else {
+		throw std::out_of_range (
+			"Config data not allocated while trying to get CONFIG_MODE_PGM_CNTR");
 	}
 }
 
-void ConfigurationManager::setConfigCounter(uint32_t value)
+void ConfigurationManager::setConfigCounter (uint32_t value)
 {
-	if (configData.size() >= CONFIG__END__OFFSET)
-	{
-		uint32_t* ptr = (uint32_t*)(configData.data() + CONFIG_MODE_PGM_CNTR);
+	if (configData.size () >= CONFIG_BLOCK_SIZE) {
+		uint32_t *ptr = (uint32_t *)(configData.data () + CONFIG_MODE_PGM_CNTR);
 		*ptr = value;
 	}
-	else
-	{
-        throw std::out_of_range("Config data not allocated while trying to set CONFIG_MODE_PGM_CNTR");
+	else {
+		throw std::out_of_range (
+			"Config data not allocated while trying to set CONFIG_MODE_PGM_CNTR");
 	}
 }
 
-uint32_t ConfigurationManager::calculateAndSetChecksum()
+uint32_t ConfigurationManager::calculateAndSetChecksum ()
 {
 	ValidateVer0 validate;
 
-	validate.recalculateChecksum(configData);
+	if (configData.size () < CONFIG_BLOCK_SIZE) {
+		throw std::runtime_error (
+			"Configuration data block size is too small to be valid and calculate CRC for");
+	}
 
-	uint32_t crcAreaLn = (uint32_t)(configData.size() - 12);
+	// recalculate CRC checksum for current configuration block
+	const bool crcCalcRes = validate.recalculateChecksum (configData);
+
+	if (!crcCalcRes) {
+		throw std::runtime_error ("Failure during CRC32 calculation in ConfigurationManager!");
+	}
+
+	uint32_t crcAreaLn = (uint32_t)(CONFIG_BLOCK_SIZE - 12);
 
 	// data are stored in litte endian order
-	uint32_t crcFromFrame = 	(configData.at(crcAreaLn + 4)) |
-								(configData.at(crcAreaLn + 5) << 8) |
-								(configData.at(crcAreaLn + 6) << 16) |
-								(configData.at(crcAreaLn + 7) << 24);
+	uint32_t crcFromFrame = (configData.at (crcAreaLn + 4)) | (configData.at (crcAreaLn + 5) << 8) |
+							(configData.at (crcAreaLn + 6) << 16) |
+							(configData.at (crcAreaLn + 7) << 24);
+
+	// use the same validation, that is used during uploading configuration controller -> PC
+	const bool crcRevalidate = validate.checkValidate (configData);
+
+	if (!crcRevalidate) {
+		throw std::runtime_error ("!crcCalcRes");
+	}
 
 	return crcFromFrame;
 }
@@ -416,13 +430,12 @@ void ConfigurationManager::print (PrintVerbosity verbosity)
 		std::cout << "C = API station name: " << getGsmConfig ().getApiStationName () << std::endl;
 		std::cout << "C = APRS station description: " << getBasicConfig ().getComment ()
 				  << std::endl;
-		std::cout << "C = weather packets interval: " << (int)getBasicConfig ().getWxTransmitPeriod ()
-				  << " mins" << std::endl;
-		std::cout << "C = beacon packets interval: " << (int)getBasicConfig ().getBeaconTransmitPeriod ()
-				  << " mins" << std::endl;
+		std::cout << "C = weather packets interval: "
+				  << (int)getBasicConfig ().getWxTransmitPeriod () << " mins" << std::endl;
+		std::cout << "C = beacon packets interval: "
+				  << (int)getBasicConfig ().getBeaconTransmitPeriod () << " mins" << std::endl;
 		std::cout << "C = digipeater delay: " << getModeConfig ().getDigiDelay100msec () * 100
 				  << " ms" << std::endl;
 	}
 	std::cout << "====================================" << std::endl;
-
 }

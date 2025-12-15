@@ -120,6 +120,9 @@ void SrvSendStartupConfig::sendRequest() {
 		// increase currrent offset
 		currentOffset += singleFrameLn;
 
+		//usleep(40000);
+		//sleep(5);
+
 		// transmit fame to TNC
 		if (s != 0) {
 			s->transmitKissFrame(segmentedData);

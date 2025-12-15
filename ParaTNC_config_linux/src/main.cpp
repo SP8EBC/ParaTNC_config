@@ -337,6 +337,9 @@ int main (int argc, char *argv[])
 				ConfigExporter exporter (configManager); // to text config file
 				exporter.exportToFile (fileNamePrefix + ".conf");
 			}
+			else {
+				throw std::runtime_error("CRC validation failed for running configuration block!!");
+			}
 		}
 		if (batchConfig.writeConfig) {
 			if (!configManager) {
@@ -371,8 +374,8 @@ int main (int argc, char *argv[])
 							  << std::endl;
 
 					// increase config counter to use
-					configManager->setConfigCounter (configCounter + 1);
-					std::cout << "I = main, new value of configCounter: " << configCounter + 1
+					configManager->setConfigCounter (configCounter + 2);
+					std::cout << "I = main, new value of configCounter: " << configManager->getConfigCounter()
 							  << std::endl;
 
 					const uint32_t newCrc = configManager->calculateAndSetChecksum ();
@@ -401,8 +404,8 @@ int main (int argc, char *argv[])
 			}
 			else {
 				throw std::runtime_error (
-					"If write-config service is set, all configuration options must be specified "
-					"in input file. Use amend-config instead.");
+					"If write-config service is used, all configuration options must be specified "
+					"in the input file. Use amend-config instead.");
 			}
 		}
 		if (batchConfig.performRestart) {
