@@ -59,18 +59,48 @@ std::string ConfigExporter::exportToString() {
 
 void ConfigExporter::exportBasicConfig() {
     try {
-        IBasicConfig& basic = configManager->getBasicConfig();
-        addSection("BasicConfig");
-        
-        std::string callsign;
-        basic.getCallsign(callsign);
-        addSetting("callsign", callsign, "std::string");
-        
-        addSetting("ssid", basic.getSsid(), "uint8_t");
-        addSetting("latitude", basic.getLatitude(), "float");
-        addSetting("ns", basic.getNs(), "uint8_t");
-        addSetting("longitude", basic.getLongitude(), "float");
-        addSetting("we", basic.getWe(), "uint8_t");
+		IBasicConfig &basic = configManager->getBasicConfig ();
+		addSection ("BasicConfig");
+
+		std::string callsign;
+		basic.getCallsign (callsign);
+		addSetting ("callsign", callsign, "std::string");
+
+		addSetting ("ssid", basic.getSsid (), "uint8_t");
+		addSetting ("latitude", basic.getLatitude (), "float");
+
+		{
+			const uint8_t ns = basic.getNs ();
+			if (ns == 'n' || ns == 'N') {
+				addSetting ("ns", "n", "uint8_t");
+			}
+			else if (ns == 's' || ns == 'S') {
+				addSetting ("ns", "s", "uint8_t");
+			}
+			else {
+				std::cout << "E = ConfigExporter::exportBasicConfig, unknown data for 'ns'!! value: "
+						  << (int)ns << std::endl;
+				addSetting ("ns", ns, "this value is wrong!");
+			}
+		}
+
+		addSetting("longitude", basic.getLongitude(), "float");
+
+		{
+	        const uint8_t we = basic.getWe();
+
+			if (we == 'w' || we == 'W') {
+				addSetting ("we", "w", "uint8_t");
+			}
+			else if (we == 'e' || we == 'E') {
+				addSetting ("we", "e", "uint8_t");
+			}
+			else {
+				std::cout << "E = ConfigExporter::exportBasicConfig, unknown data for 'we'!! value: "
+						  << (int)we << std::endl;
+				addSetting ("we", we, "this value is wrong!");
+			}
+		}
         
         std::string comment;
         basic.getComment(comment);
@@ -170,10 +200,39 @@ void ConfigExporter::exportRtuConfig() {
         addSetting("windGusts", rtu.getWindGusts(), "uint8_t");
         
         iniContent << "\n";
+
+        exportRtuSlavesConfig();
     } catch (const std::exception& e) {
         std::cerr << "Error exporting RtuConfig: " << e.what() << std::endl;
     }
 }
+
+void ConfigExporter::exportRtuSlavesConfig ()
+{
+    IRtuConfig& rtu = configManager->getRtuConfig();
+
+	const size_t howManySlaves = rtu.howManySlaves();
+
+	for (size_t i = 0; i < howManySlaves; i++)
+	{
+		const RtuSlave slave = rtu.getSlave(i);
+		const std::string sectionName = "RtuSlave" + std::to_string(i);
+		addSection(sectionName);
+
+		addSetting("busAddress", slave.busAddress, " ");
+		addSetting("function", slave.function, " ");
+		addSetting("readLen", slave.readLen, " ");
+		addSetting("registerAddress", slave.registerAddress, " ");
+		addSetting("scalingA", slave.scalingA, " ");
+		addSetting("scalingB", slave.scalingB, " ");
+		addSetting("scalingC", slave.scalingC, " ");
+		addSetting("scalingD", slave.scalingD, " ");
+		addSetting("signedValue", slave.signedValue, " ");
+        iniContent << "\n";
+
+	}
+}
+
 
 void ConfigExporter::exportGsmConfig() {
     try {
@@ -261,8 +320,9 @@ std::string ConfigExporter::escapeValue(const std::string& value) {
     return value;
 }
 
-std::string ConfigExporter::formatFloat(float value) {
-    std::ostringstream oss;
+std::string ConfigExporter::formatFloat (float value)
+{
+	std::ostringstream oss;
     oss << std::fixed << std::setprecision(6) << value;
     std::string result = oss.str();
     

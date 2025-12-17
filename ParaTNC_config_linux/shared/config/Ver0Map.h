@@ -84,8 +84,9 @@
 #define RTU_WIND_SPEED_OFFSET			0x9			// uint8_t
 #define RTU_WIND_GUSTS_OFFSET			0xA			// uint8_t
 
-#define RTU_SLAVE_CONFIG_BLOCK_OFFSET	0xE
+#define RTU_SLAVE_CONFIG_BLOCK_OFFSET	0xB
 #define RTU_SLAVE_CONFIG_BLOCK_SIZE		0xC
+#define RTU_SLAVE_HOW_MANY				0x6
 
 #define RTU_X_BUS_ADDRESS			0x0
 #define RTU_X_FUNCTION				0x1

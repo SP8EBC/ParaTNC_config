@@ -281,6 +281,78 @@ void RtuConfig::setWindDir(uint8_t windDir) { writeValue<uint8_t>(CONFIG_RTU_OFF
 void RtuConfig::setWindSpeed(uint8_t windSpeed) { writeValue<uint8_t>(CONFIG_RTU_OFFSET + RTU_WIND_SPEED_OFFSET, windSpeed); }
 void RtuConfig::setWindGusts(uint8_t windGusts) { writeValue<uint8_t>(CONFIG_RTU_OFFSET + RTU_WIND_GUSTS_OFFSET, windGusts); }
 
+size_t RtuConfig::howManySlaves () const
+{
+	return RTU_SLAVE_HOW_MANY;
+}
+
+void RtuConfig::setSlave (uint8_t id, RtuSlave &data)
+{
+	// indexing starts at zero
+	if (id >= RTU_SLAVE_HOW_MANY)
+	{
+		throw std::out_of_range("Try to set RTU slave with ID bigger than maximum!");
+	}
+
+	size_t offset = CONFIG_RTU_OFFSET + RTU_SLAVE_CONFIG_BLOCK_OFFSET + (RTU_SLAVE_CONFIG_BLOCK_SIZE * id);
+
+	writeValue<uint8_t>(offset + RTU_X_BUS_ADDRESS, data.busAddress);
+	writeValue<uint8_t>(offset + RTU_X_FUNCTION, data.function);
+	writeValue<uint16_t>(offset + RTU_X_REGUSTER_ADDR, data.registerAddress);
+	writeValue<uint16_t>(offset + RTU_X_LENGHT, data.readLen);
+	writeValue<uint8_t>(offset + RTU_X_SCALLING_A, data.scalingA);
+	writeValue<uint8_t>(offset + RTU_X_SCALLING_B, data.scalingB);
+	writeValue<uint8_t>(offset + RTU_X_SCALLING_C, data.scalingC);
+	writeValue<uint8_t>(offset + RTU_X_SCALLING_D, data.scalingD);
+	writeValue<uint8_t>(offset + RTU_X_UNSIGNED_SIGNED, (data.signedValue == true) ? 1 : 0);
+
+}
+
+RtuSlave RtuConfig::getSlave (uint8_t id) const
+{
+	// indexing starts at zero
+	if (id >= RTU_SLAVE_HOW_MANY)
+	{
+		throw std::out_of_range("Try to request RTU slave with ID bigger than maximum!");
+	}
+
+	size_t offset = CONFIG_RTU_OFFSET + RTU_SLAVE_CONFIG_BLOCK_OFFSET + (RTU_SLAVE_CONFIG_BLOCK_SIZE * id);
+
+	RtuSlave out = {0u};
+
+	out.busAddress = readValue<uint8_t>(offset + RTU_X_BUS_ADDRESS);
+	out.function = readValue<uint8_t>(offset + RTU_X_FUNCTION);
+	out.readLen = readValue<uint16_t>(offset + RTU_X_REGUSTER_ADDR);
+	out.registerAddress = readValue<uint16_t>(offset + RTU_X_LENGHT);
+	out.scalingA = readValue<uint8_t>(offset + RTU_X_SCALLING_A);
+	out.scalingB = readValue<uint8_t>(offset + RTU_X_SCALLING_B);
+	out.scalingC = readValue<uint8_t>(offset + RTU_X_SCALLING_C);
+	out.scalingD = readValue<uint8_t>(offset + RTU_X_SCALLING_D);
+
+	const uint8_t unsignedraw = readValue<uint8_t>(offset + RTU_X_UNSIGNED_SIGNED);
+
+	if (unsignedraw == 0)
+	{
+		out.signedValue = false;
+	}
+	else
+	{
+		out.signedValue = true;
+	}
+
+	if ((out.function != 0x03) && (out.function != 0x04))
+	{
+		std::cout << "E = RtuConfig::getSlave, id: " << (int)id << ", potentially unsupported Modbus function!! " << std::endl;
+	}
+
+	if (out.scalingD == 0)
+	{
+		std::cout << "E = RtuConfig::getSlave, id: " << (int)id << ", scalingD cannot be zero!!" << std::endl;
+	}
+
+	return out;
+}
+
 // ============================================================================
 // GSM Configuration Implementation
 // ============================================================================

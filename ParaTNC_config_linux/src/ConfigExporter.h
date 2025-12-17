@@ -46,6 +46,8 @@ public:
      */
     std::string exportToString();
     
+    void exportRtuSlavesConfig();
+
 private:
     std::shared_ptr<IConfigurationManager> configManager;
     std::ostringstream iniContent;

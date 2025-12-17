@@ -143,6 +143,22 @@ public:
 };
 
 // ============================================================================
+// Structure to decode / encode single read from RTU slave
+// ============================================================================
+struct RtuSlave {
+	uint8_t busAddress;
+	uint8_t function;
+	uint16_t registerAddress;
+	uint16_t readLen;
+	uint8_t scalingA;
+	uint8_t scalingB;
+	uint8_t scalingC;
+	uint8_t scalingD;
+	bool signedValue;
+};
+
+
+// ============================================================================
 // RTU Configuration Decoder/Encoder
 // ============================================================================
 class IRtuConfig {
@@ -159,8 +175,10 @@ public:
     virtual uint8_t getWindDir() const = 0;
     virtual uint8_t getWindSpeed() const = 0;
     virtual uint8_t getWindGusts() const = 0;
+    virtual RtuSlave getSlave(uint8_t id) const = 0;
+	virtual size_t howManySlaves() const = 0; //!< returns how many slaves can be configured
 
-    virtual void setSlaveSpeed(uint16_t speed) = 0;
+	virtual void setSlaveSpeed(uint16_t speed) = 0;
     virtual void setSlaveParity(uint8_t parity) = 0;
     virtual void setSlaveStopBits(uint8_t stopBits) = 0;
     virtual void setUseFullWindData(uint8_t useFullWind) = 0;
@@ -170,6 +188,7 @@ public:
     virtual void setWindDir(uint8_t windDir) = 0;
     virtual void setWindSpeed(uint8_t windSpeed) = 0;
     virtual void setWindGusts(uint8_t windGusts) = 0;
+    virtual void setSlave(uint8_t id, RtuSlave & data) = 0;
 };
 
 // ============================================================================

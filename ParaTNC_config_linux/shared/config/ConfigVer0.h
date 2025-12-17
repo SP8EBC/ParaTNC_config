@@ -274,6 +274,7 @@ public:
     virtual uint8_t getWindDir() const;
     virtual uint8_t getWindSpeed() const;
     virtual uint8_t getWindGusts() const;
+	virtual RtuSlave getSlave (uint8_t id) const override;
 
     virtual void setSlaveSpeed(uint16_t speed);
     virtual void setSlaveParity(uint8_t parity);
@@ -285,6 +286,8 @@ public:
     virtual void setWindDir(uint8_t windDir);
     virtual void setWindSpeed(uint8_t windSpeed);
     virtual void setWindGusts(uint8_t windGusts);
+	virtual void setSlave (uint8_t id, RtuSlave &data) override;
+	virtual size_t howManySlaves () const;
 };
 
 // ============================================================================
