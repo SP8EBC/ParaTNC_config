@@ -322,8 +322,8 @@ RtuSlave RtuConfig::getSlave (uint8_t id) const
 
 	out.busAddress = readValue<uint8_t>(offset + RTU_X_BUS_ADDRESS);
 	out.function = readValue<uint8_t>(offset + RTU_X_FUNCTION);
-	out.readLen = readValue<uint16_t>(offset + RTU_X_REGUSTER_ADDR);
-	out.registerAddress = readValue<uint16_t>(offset + RTU_X_LENGHT);
+	out.readLen = readValue<uint16_t>(offset + RTU_X_LENGHT);
+	out.registerAddress = readValue<uint16_t>(offset +  RTU_X_REGUSTER_ADDR);
 	out.scalingA = readValue<uint8_t>(offset + RTU_X_SCALLING_A);
 	out.scalingB = readValue<uint8_t>(offset + RTU_X_SCALLING_B);
 	out.scalingC = readValue<uint8_t>(offset + RTU_X_SCALLING_C);
@@ -338,16 +338,6 @@ RtuSlave RtuConfig::getSlave (uint8_t id) const
 	else
 	{
 		out.signedValue = true;
-	}
-
-	if ((out.function != 0x03) && (out.function != 0x04))
-	{
-		std::cout << "E = RtuConfig::getSlave, id: " << (int)id << ", potentially unsupported Modbus function!! " << std::endl;
-	}
-
-	if (out.scalingD == 0)
-	{
-		std::cout << "E = RtuConfig::getSlave, id: " << (int)id << ", scalingD cannot be zero!!" << std::endl;
 	}
 
 	return out;

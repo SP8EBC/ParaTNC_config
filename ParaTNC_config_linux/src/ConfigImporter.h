@@ -68,6 +68,7 @@ private:
     void parseSourceConfigSetting(const std::string& key, const std::string& value);
     void parseUmbConfigSetting(const std::string& key, const std::string& value);
     void parseRtuConfigSetting(const std::string& key, const std::string& value);
+    void parseRtuSlaveConfigSetting(uint8_t id, const std::string& key, const std::string& value);
     void parseGsmConfigSetting(const std::string& key, const std::string& value);
     
     // Type conversion helpers

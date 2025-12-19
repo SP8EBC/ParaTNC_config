@@ -348,7 +348,11 @@ int main (int argc, char *argv[])
 
 			ConfigImporter configImporter (configManager);
 
-			configImporter.importFromFile (batchConfig.configFileToWrite);
+			const bool importResult = configImporter.importFromFile (batchConfig.configFileToWrite);
+
+			if (!importResult) {
+				throw std::runtime_error("Configuration file malformed");
+			}
 
 			configManager->print (IConfigurationManager::PrintVerbosity::BRIEF_SUMMARY);
 
@@ -484,56 +488,6 @@ int main (int argc, char *argv[])
 				  << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
 
 		logDumper.dumpEventsToReport (logAreaStart, logAreaEnd, fileNamePrefix + ".log");
-
-		////////////////////////
-
-		// srvRunningConfig.sendRequest();
-		// s.waitForTransmissionDone();
-
-		// pthread_mutex_lock(&lock);
-		// // wait for configuration to be received
-		// pthread_cond_wait(&cond1, &lock);
-		// pthread_mutex_unlock(&lock);
-
-		// srvRunningConfig.storeToBinaryFile("config.bin");
-
-		// std::string callsign;
-		// std::string description;
-		// float lat, lon;
-
-		// decode = new DecodeVer0(srvRunningConfig.getConfigurationData());
-		// decode->getCallsign(callsign);
-		// decode->getDescritpion(description);
-		// lon = decode->getLongitude();
-		// lat = decode->getLatitude();
-
-		// std::cout << "I = main, callsign: " << callsign << std::endl;
-		// std::cout << "I = main, description: " << description << std::endl;
-		// std::cout << "I = main, lon: " << lon << std::endl;
-		// std::cout << "I = main, lat: " << lat << std::endl;
-
-		//////////////////////////
-
-		//	srvEraseConfig.sendRequest();
-		//	s.waitForTransmissionDone();
-		//
-		//    pthread_mutex_lock(&lock);
-		//    // wait for erase to be done
-		//    pthread_cond_wait(&cond1, &lock);
-		//    pthread_mutex_unlock(&lock);
-		//
-		//    std::cout << "erase done" << std::endl;
-		//
-		//    srvSendStartupConfig.setDataForDownload(test);
-		//    srvSendStartupConfig.sendRequest();
-
-		//    DecodeVer0 decode(srvRunningConfig.getConfigurationData());
-		//
-		//    decode.getDescritpion(str);
-		//    std::cout << str << std::endl;
-
-		//	s->transmitKissFrame(pointerTxTest);
-		//	s->receiveKissFrame(pointerRxTest);
 	}
 	worker.terminate ();
 

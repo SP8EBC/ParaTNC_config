@@ -152,6 +152,21 @@ bool ConfigImporter::parseSetting(const std::string& line) {
         parseRtuConfigSetting(key, value);
     } else if (currentSection == "gsmconfig") {
         parseGsmConfigSetting(key, value);
+    } else {
+    	// rtu slave sections
+
+    	// checks if section name contains digits - currently only 6 slaves
+    	// are supported by ParaMETEO
+    	std::size_t found = currentSection.find_first_of("012345");
+
+    	// digits have been found
+    	if (found != std::string::npos) {
+    		const std::string prefix = currentSection.substr(0, found);
+    		const int slaveId = atoi(currentSection.substr(found, 1).c_str());
+    		if (prefix == "rtuslave") {
+    			parseRtuSlaveConfigSetting(slaveId, key, value);
+    		}
+    	}
     }
     
     return true;
@@ -171,13 +186,31 @@ void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::
         basic.setLatitude(parseFloat(value));
     } else if (key == "ns") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 3);
-        basic.setNs(parseUint8(value));
+    	const uint8_t ns = parseString(value)[0];
+    	if (ns == 'n' || ns == 'N' || ns == 's' || ns == 'S')
+    	{
+        	basic.setNs(ns);
+    	}
+    	else
+    	{
+			std::cout << "E = ConfigImporter::parseBasicConfigSetting, value: " << value << ", ns: " << (int)ns << std::endl;
+    		throw std::out_of_range("Wrong value for 'ns' setting in [Basic] section");
+    	}
     } else if (key == "longitude") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 4);
         basic.setLongitude(parseFloat(value));
     } else if (key == "we") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 5);
-        basic.setWe(parseUint8(value));
+    	const uint8_t we = parseString(value)[0];
+    	if (we == 'w' || we == 'W' || we == 'e' || we == 'E')
+    	{
+    		basic.setWe(we);
+    	}
+    	else
+    	{
+			std::cout << "E = ConfigImporter::parseBasicConfigSetting, value: " << value << ", we: " << (int)we << std::endl;
+    		throw std::out_of_range("Wrong value for 'we' setting in [Basic] section");
+    	}
     } else if (key == "comment") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 6);
         basic.setComment(parseString(value));
@@ -338,6 +371,68 @@ void ConfigImporter::parseRtuConfigSetting(const std::string& key, const std::st
     	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 9);
         rtu.setWindGusts(parseUint8(value));
     }
+}
+
+void ConfigImporter::parseRtuSlaveConfigSetting(uint8_t id, const std::string& key, const std::string& value)
+{
+	IRtuConfig &rtu = configManager->getRtuConfig ();
+
+	auto slave = rtu.getSlave (id);
+
+	if (key == "busaddress") {
+		slave.busAddress = (parseUint8 (value));
+	}
+	else if (key == "function") {
+		slave.function = (parseUint8 (value));
+
+		if ((slave.function != 0x03) && (slave.function != 0x04)) {
+			std::cout << "E = ConfigImporter::parseRtuSlaveConfigSetting, id: " << (int)id
+					  << ", potentially unsupported Modbus function!! " << std::endl;
+		}
+	}
+	else if (key == "readlen") {
+		slave.readLen = (parseUint16 (value));
+	}
+	else if (key == "registeraddress") {
+		slave.registerAddress = (parseUint16 (value));
+	}
+	else if (key == "scalinga") {
+		slave.scalingA = (parseUint8 (value));
+	}
+	else if (key == "scalingb") {
+		slave.scalingB = (parseUint8 (value));
+	}
+	else if (key == "scalingc") {
+		slave.scalingC = (parseUint8 (value));
+	}
+	else if (key == "scalingd") {
+		slave.scalingD = (parseUint8 (value));
+		if (slave.scalingD == 0) {
+			throw std::out_of_range (
+				"scalingD in RTU slave config cannot equals zero, as this will cause div/0 error");
+		}
+	}
+	else if (key == "signedvalue") {
+		slave.signedValue = (parseUint8 (value));
+	}
+	else {
+		throw std::runtime_error("unknown option in RTU slave config.");
+	}
+
+	rtu.setSlave(id, slave);
+
+/**
+ * 		addSetting("busAddress", slave.busAddress, " ");
+		addSetting("function", slave.function, " ");
+		addSetting("readLen", slave.readLen, " ");
+		addSetting("registerAddress", slave.registerAddress, " ");
+		addSetting("scalingA", slave.scalingA, " ");
+		addSetting("scalingB", slave.scalingB, " ");
+		addSetting("scalingC", slave.scalingC, " ");
+		addSetting("scalingD", slave.scalingD, " ");
+		addSetting("signedValue", slave.signedValue, " ");
+ *
+ */
 }
 
 void ConfigImporter::parseGsmConfigSetting(const std::string& key, const std::string& value) {
