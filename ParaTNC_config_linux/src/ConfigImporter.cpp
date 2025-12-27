@@ -12,7 +12,7 @@
 ConfigImporter::ConfigImporter(std::shared_ptr<IConfigurationManager> configManager)
     : configManager(configManager), currentSection(""),
 	  basicFlags(0), modeFlags(0), sourceFlags(0), umbFlags(0),
-	  rtuFlags(0), gsmFlags(0){}
+	  rtuFlags(0), gsmFlags(0), rtuSlavesCounter(0), rtuSlaveFlags(0){}
 
 bool ConfigImporter::importFromFile(const std::string& filepath) {
     try {
@@ -187,9 +187,15 @@ void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::
     } else if (key == "ns") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 3);
     	const uint8_t ns = parseString(value)[0];
-    	if (ns == 'n' || ns == 'N' || ns == 's' || ns == 'S')
+    	if (ns == 'n' || ns == 'N')
     	{
-        	basic.setNs(ns);
+    		const char n = 'N';
+        	basic.setNs((uint8_t)n);
+    	}
+    	else if (ns == 's' || ns == 'S')
+    	{
+    		const char s = 'S';
+        	basic.setNs((uint8_t)s);
     	}
     	else
     	{
@@ -381,6 +387,7 @@ void ConfigImporter::parseRtuSlaveConfigSetting(uint8_t id, const std::string& k
 
 	if (key == "busaddress") {
 		slave.busAddress = (parseUint8 (value));
+		rtuSlavesCounter++;
 	}
 	else if (key == "function") {
 		slave.function = (parseUint8 (value));
@@ -409,7 +416,7 @@ void ConfigImporter::parseRtuSlaveConfigSetting(uint8_t id, const std::string& k
 		slave.scalingD = (parseUint8 (value));
 		if (slave.scalingD == 0) {
 			throw std::out_of_range (
-				"scalingD in RTU slave config cannot equals zero, as this will cause div/0 error");
+				"scalingD in Modbus-RTU slave config cannot equals zero, as this will cause div/0 error");
 		}
 	}
 	else if (key == "signedvalue") {

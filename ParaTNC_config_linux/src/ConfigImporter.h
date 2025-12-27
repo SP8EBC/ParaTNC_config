@@ -94,6 +94,9 @@ private:
     uint64_t umbFlags;
     uint64_t rtuFlags;
     uint64_t gsmFlags;
+
+    uint8_t rtuSlavesCounter;
+    uint64_t rtuSlaveFlags;
 };
 
 #endif /* CONFIG_IMPORTER_H_ */

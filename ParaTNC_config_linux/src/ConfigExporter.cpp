@@ -72,10 +72,12 @@ void ConfigExporter::exportBasicConfig() {
 		{
 			const uint8_t ns = basic.getNs ();
 			if (ns == 'n' || ns == 'N') {
-				addSetting ("ns", "n", "uint8_t");
+				const std::string n = "N";
+				addSetting ("ns", n, "uint8_t");
 			}
 			else if (ns == 's' || ns == 'S') {
-				addSetting ("ns", "s", "uint8_t");
+				const std::string s = "S";
+				addSetting ("ns", s, "uint8_t");
 			}
 			else {
 				std::cout << "E = ConfigExporter::exportBasicConfig, unknown data for 'ns'!! value: "
@@ -90,10 +92,12 @@ void ConfigExporter::exportBasicConfig() {
 	        const uint8_t we = basic.getWe();
 
 			if (we == 'w' || we == 'W') {
-				addSetting ("we", "w", "uint8_t");
+				const std::string w = "E";
+				addSetting ("we", w, "uint8_t");
 			}
 			else if (we == 'e' || we == 'E') {
-				addSetting ("we", "e", "uint8_t");
+				const std::string e = "E";
+				addSetting ("we", e, "uint8_t");
 			}
 			else {
 				std::cout << "E = ConfigExporter::exportBasicConfig, unknown data for 'we'!! value: "

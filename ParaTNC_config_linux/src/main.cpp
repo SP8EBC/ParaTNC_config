@@ -1,3 +1,4 @@
+#include "mainAuxFunctions.h"
 
 #include "../shared/services/SrvEraseStartupConfig.h"
 #include "../shared/services/SrvGetRunningConfig.h"
@@ -12,6 +13,7 @@
 #include "ProgramConfig.h"
 #include "TimeTools.h"
 #include "serial/Serial.h"
+#include "BatchConfig_t.h"
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -26,30 +28,6 @@
 #include "../shared/event_log.h"
 
 #include <boost/program_options.hpp>
-
-typedef struct BatchConfig {
-	BatchConfig ()
-		: defaultBatch (false), monitorMode (false), performRestart (false), readDid (false),
-		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false),
-		  configFileToWrite ()
-	{
-	}
-
-	// no diagnostic services has been selected, perform default batch
-	bool defaultBatch;
-	bool monitorMode;
-
-	bool performRestart;
-
-	bool readDid;
-	bool monitorDid;
-	std::string didToRead;
-
-	bool readConfig;
-
-	bool writeConfig;
-	std::string configFileToWrite;
-} BatchConfig;
 
 std::map<uint8_t, IService *> callbackMap;
 
@@ -90,51 +68,6 @@ size_t fileNamePrefixLenght = 0;
 
 BatchConfig batchConfig;
 
-static size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, char *out,
-										 size_t max_out_ln)
-{
-	size_t total_ln = 0;
-
-	// copy station callsign and an api name to a buffer for log file prefix.
-	// only after this place files might be created. prefix is 48 bytes long
-	// indexes:
-	// -> 0~10 	- API name				- 	11 characters
-	// -> 12~17	- callsign				-	6 characters
-	// -> 19 		- current time and date
-	strncpy (out, api_name.c_str (), 11);
-	total_ln = strlen (out);
-	out[total_ln++] = '_';
-	strncpy (out + total_ln, callsign.c_str (), 6);
-	total_ln = strlen (out);
-	out[total_ln++] = '_';
-	TimeTools::getCurrentLocalTimeFnString (out + total_ln, max_out_ln - total_ln);
-	total_ln = strlen (out);
-
-	return total_ln;
-}
-
-static size_t main_make_filename_prefix (std::string &callsign, std::string &api_name,
-										 std::string &out)
-{
-	size_t total_ln = 0;
-
-	// copy station callsign and an api name to a buffer for log file prefix.
-	// only after this place files might be created. prefix is 48 bytes long
-	// indexes:
-	// -> 0~10 	- API name				- 	11 characters
-	// -> 12~17	- callsign				-	6 characters
-	// -> 19 		- current time and date
-	out.clear ();
-	out.append (api_name);
-	out.push_back ('_');
-	out.push_back ('_');
-	out.append (callsign);
-	out.push_back ('_');
-	out.push_back ('_');
-	TimeTools::getCurrentLocalTimeFnString (out);
-
-	return total_ln;
-}
 
 static void nrc_callback (uint16_t nrc)
 {
@@ -294,123 +227,21 @@ int main (int argc, char *argv[])
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
 
-			srvReadDid.sendRequestForDid (did);
-			s.waitForTransmissionDone ();
-
-			pthread_mutex_lock (&lock);
-			// wait for DID value to be received
-			pthread_cond_wait (&cond1, &lock);
-			pthread_mutex_unlock (&lock);
-
-			const DidResponse &response = srvReadDid.getDidResponse ();
+			main_readDid (did, srvReadDid, s, lock, cond1);
 			std::cout << "D = main, did has been read" << std::endl;
 		}
 		if (batchConfig.readConfig) {
-			std::string callsign; // this is required to create export filename
-			std::string apiName;  // this is required to create export filename
-
-			srvRunningConfig.sendRequest ();
-			s.waitForTransmissionDone ();
-
-			pthread_mutex_lock (&lock);
-			// wait for configuration to be received
-			pthread_cond_wait (&cond1, &lock);
-			pthread_mutex_unlock (&lock);
-
-			if (srvRunningConfig.isValidatedOk ()) {
-				// create configuration manager from received data. CRC validation is done inside
-				// srvRunningConfig
-				configManager = std::make_shared<ConfigurationManager> (
-					srvRunningConfig.getConfigurationData ());
-
-				IBasicConfig &basic = configManager->getBasicConfig ();
-				IGsmConfig &gsm = configManager->getGsmConfig ();
-
-				// get callsign and API station name
-				basic.getCallsign (callsign);
-				gsm.getApiStationName (apiName);
-
-				// create filename prefix into fileNamePrefix
-				main_make_filename_prefix (callsign, apiName, fileNamePrefix);
-
-				srvRunningConfig.storeToBinaryFile (fileNamePrefix + ".conf.bin");
-				ConfigExporter exporter (configManager); // to text config file
-				exporter.exportToFile (fileNamePrefix + ".conf");
-			}
-			else {
-				throw std::runtime_error("CRC validation failed for running configuration block!!");
-			}
+			configManager = main_readConfig (srvRunningConfig, s, lock, cond1, fileNamePrefix);
 		}
 		if (batchConfig.writeConfig) {
-			if (!configManager) {
-				configManager = std::make_shared<ConfigurationManager> ();
-			}
-
-			ConfigImporter configImporter (configManager);
-
-			const bool importResult = configImporter.importFromFile (batchConfig.configFileToWrite);
-
-			if (!importResult) {
-				throw std::runtime_error("Configuration file malformed");
-			}
-
-			configManager->print (IConfigurationManager::PrintVerbosity::BRIEF_SUMMARY);
-
-			const bool configFullSet = configImporter.allSet ();
-
-			if (configFullSet) {
-
-				// read DID 0xF000u -> config_running_pgm_counter
-				srvReadDid.sendRequestForDid (0xF000u);
-				s.waitForTransmissionDone ();
-
-				pthread_mutex_lock (&lock);
-				// wait for DID value to be received
-				pthread_cond_wait (&cond1, &lock);
-				pthread_mutex_unlock (&lock);
-
-				const DidResponse &response = srvReadDid.getDidResponse ();
-
-				// check if DID response for id 0xF000 has correct type
-				if (response.firstSize == DIDRESPONSE_DATASIZE_INT32) {
-					const uint32_t configCounter = (uint32_t)(response.first.i32);
-					std::cout << "I = main, old value of configCounter: " << configCounter
-							  << std::endl;
-
-					// increase config counter to use
-					configManager->setConfigCounter (configCounter + 2);
-					std::cout << "I = main, new value of configCounter: " << configManager->getConfigCounter()
-							  << std::endl;
-
-					const uint32_t newCrc = configManager->calculateAndSetChecksum ();
-					std::cout << "I = main, new CRC32 checksum: 0x" << std::hex << newCrc
-							  << std::endl;
-
-					// send startup config erase request
-					srvEraseConfig.sendRequest ();
-					s.waitForTransmissionDone ();
-
-					pthread_mutex_lock (&lock);
-					// wait for erase to be done
-					pthread_cond_wait (&cond1, &lock);
-					pthread_mutex_unlock (&lock);
-
-					std::cout << "I = main, erase done" << std::endl;
-
-					auto dataToSend = configManager->getConfigData ();
-					srvSendStartupConfig.setDataForDownload (dataToSend);
-					srvSendStartupConfig.sendRequest ();
-					//srvSendStartupConfig.receiveSynchronously(nrc_callback);
-				}
-				else {
-					throw std::runtime_error ("DID number 0xF000 must be a type of int32_t");
-				}
-			}
-			else {
-				throw std::runtime_error (
-					"If write-config service is used, all configuration options must be specified "
-					"in the input file. Use amend-config instead.");
-			}
+			configManager = main_writeConfig (configManager,
+											  srvReadDid,
+											  srvEraseConfig,
+											  srvSendStartupConfig,
+											  batchConfig,
+											  s,
+											  lock,
+											  cond1);
 		}
 		if (batchConfig.performRestart) {
 			srvReset.restart ();
