@@ -12,7 +12,7 @@
 typedef struct BatchConfig {
 	BatchConfig ()
 		: defaultBatch (false), monitorMode (false), performRestart (false), readDid (false),
-		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false),
+		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false), amendConfig(false),
 		  configFileToWrite ()
 	{
 	}
@@ -30,6 +30,7 @@ typedef struct BatchConfig {
 	bool readConfig;
 
 	bool writeConfig;
+	bool amendConfig;
 	std::string configFileToWrite;
 } BatchConfig;
 

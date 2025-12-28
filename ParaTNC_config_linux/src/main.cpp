@@ -133,7 +133,8 @@ int main (int argc, char *argv[])
 	dsInit("read-did,r", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
 	dsInit("monitor-did,m", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read specified DID each 2 second until this program is closed");
 	dsInit("read-config,R", " : Read running config and store it in bin and text file");
-	dsInit("write-config,W", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Write startup config from text file");
+	dsInit("write-config,W", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Write complete startup config from text file");
+	dsInit("amend-config,A", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Partially Amend config from (incomplete) text file");
 
 	od.add(generalOptions);
 	od.add(diagnosticServices);
@@ -195,6 +196,18 @@ int main (int argc, char *argv[])
 		batchConfig.defaultBatch = false;
 		batchConfig.monitorMode = false;
 		batchConfig.writeConfig = true;
+		batchConfig.amendConfig = false;
+	}
+
+	if (odVariablesMap.count ("amend-config")) {
+		batchConfig.defaultBatch = false;
+		batchConfig.monitorMode = false;
+		batchConfig.writeConfig = false;
+		batchConfig.amendConfig = true;
+	}
+
+	if (batchConfig.writeConfig && batchConfig.amendConfig) {
+		throw std::runtime_error("Cannot ammend and write at once!!");
 	}
 
 	if (batchConfig.monitorMode && !batchConfig.defaultBatch) {
@@ -242,6 +255,8 @@ int main (int argc, char *argv[])
 											  s,
 											  lock,
 											  cond1);
+		}
+		if (batchConfig.amendConfig) {
 		}
 		if (batchConfig.performRestart) {
 			srvReset.restart ();
