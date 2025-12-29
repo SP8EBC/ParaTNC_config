@@ -7,13 +7,13 @@
 #include "../shared/services/SrvReadMemory.h"
 #include "../shared/services/SrvReset.h"
 #include "../shared/services/SrvSendStartupConfig.h"
+#include "BatchConfig_t.h"
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
 #include "LogDumper.h"
 #include "ProgramConfig.h"
 #include "TimeTools.h"
 #include "serial/Serial.h"
-#include "BatchConfig_t.h"
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -67,7 +67,6 @@ std::string fileNamePrefix;
 size_t fileNamePrefixLenght = 0;
 
 BatchConfig batchConfig;
-
 
 static void nrc_callback (uint16_t nrc)
 {
@@ -207,7 +206,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (batchConfig.writeConfig && batchConfig.amendConfig) {
-		throw std::runtime_error("Cannot ammend and write at once!!");
+		throw std::runtime_error ("Cannot ammend and write at once!!");
 	}
 
 	if (batchConfig.monitorMode && !batchConfig.defaultBatch) {
@@ -257,6 +256,22 @@ int main (int argc, char *argv[])
 											  cond1);
 		}
 		if (batchConfig.amendConfig) {
+			configManager = main_readConfig (srvRunningConfig, s, lock, cond1);
+
+			ConfigImporter configImporter (configManager);
+
+			const bool importResult = configImporter.importFromFile (batchConfig.configFileToWrite);
+			if (!importResult) {
+				throw std::runtime_error ("Configuration file malformed");
+			}
+
+			main_amendConfig (configManager,
+							  srvReadDid,
+							  srvEraseConfig,
+							  srvSendStartupConfig,
+							  s,
+							  lock,
+							  cond1);
 		}
 		if (batchConfig.performRestart) {
 			srvReset.restart ();

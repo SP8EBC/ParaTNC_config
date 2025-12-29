@@ -20,42 +20,13 @@
  * @param callsign
  * @param api_name
  * @param out
- * @param max_out_ln
- * @return
- */
-size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, char *out,
-								  size_t max_out_ln)
-{
-	size_t total_ln = 0;
-
-	// copy station callsign and an api name to a buffer for log file prefix.
-	// only after this place files might be created. prefix is 48 bytes long
-	// indexes:
-	// -> 0~10 	- API name				- 	11 characters
-	// -> 12~17	- callsign				-	6 characters
-	// -> 19 		- current time and date
-	strncpy (out, api_name.c_str (), 11);
-	total_ln = strlen (out);
-	out[total_ln++] = '_';
-	strncpy (out + total_ln, callsign.c_str (), 6);
-	total_ln = strlen (out);
-	out[total_ln++] = '_';
-	TimeTools::getCurrentLocalTimeFnString (out + total_ln, max_out_ln - total_ln);
-	total_ln = strlen (out);
-
-	return total_ln;
-}
-
-/**
- *
- * @param callsign
- * @param api_name
- * @param out
  * @return
  */
 size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, std::string &out)
 {
 	size_t total_ln = 0;
+
+	std::string prefix = out;
 
 	// copy station callsign and an api name to a buffer for log file prefix.
 	// only after this place files might be created. prefix is 48 bytes long
@@ -64,6 +35,11 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
 	// -> 12~17	- callsign				-	6 characters
 	// -> 19 		- current time and date
 	out.clear ();
+	if (prefix.length() > 0)
+	{
+		out.append(prefix);
+		out.push_back ('_');
+	}
 	out.append (api_name);
 	out.push_back ('_');
 	out.push_back ('_');
