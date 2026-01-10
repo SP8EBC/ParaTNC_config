@@ -221,6 +221,18 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			if (event_id == EVENTS_PWR_SAVE_BATT_LOW_GOING_SLEEP) {
 				out = event_log_str_pwr_save_going_sleep;
 			}
+			else if (event_id == EVENTS_PWR_SAVE_GO_TO_INTERMEDIATE_SLEEP) {
+				out = event_log_str_pwr_save_goto_intermediate_sleep;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_WOKEN_UP_RTC_INTERRUPT) {
+				out = event_log_str_pwr_save_wokenup_rtc_it;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_WOKEN_UP_AFTER_LAST_SLEEP) {
+				out = event_log_str_pwr_save_wokenup_after_last;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_WOKEN_UP_EXITED) {
+				out = event_log_str_pwr_save_wokenup_exited;
+			}
 			break;
 		case EVENT_SRC_PACKET_TX_HANDLER:	 break;
 		case EVENT_SRC_APRSIS: {

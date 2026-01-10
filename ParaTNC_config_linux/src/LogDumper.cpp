@@ -30,6 +30,7 @@ LogDumper::LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, Seri
 								serialRxBackgroundWorker(_serial_thread){
 	// TODO Auto-generated constructor stub
 	timeout = false;
+	progress = 0;
 }
 
 LogDumper::~LogDumper() {
