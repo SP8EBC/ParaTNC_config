@@ -233,6 +233,27 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			else if (event_id == EVENTS_PWR_SAVE_WOKEN_UP_EXITED) {
 				out = event_log_str_pwr_save_wokenup_exited;
 			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_C0) {
+				out = event_log_str_pwr_save_state_c0;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_C1) {
+				out = event_log_str_pwr_save_state_c1;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_C2) {
+				out = event_log_str_pwr_save_state_c2;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_C3) {
+				out = event_log_str_pwr_save_state_c3;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_M4) {
+				out = event_log_str_pwr_save_state_m4;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_M4A) {
+				out = event_log_str_pwr_save_state_m4a;
+			}
+			else if (event_id == EVENTS_PWR_SAVE_STATE_I5) {
+				out = event_log_str_pwr_save_state_i5;
+			}
 			break;
 		case EVENT_SRC_PACKET_TX_HANDLER:	 break;
 		case EVENT_SRC_APRSIS: {
@@ -291,6 +312,9 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			else if (event_id == EVENTS_GSM_GPRS_WARN_NOT_REGISTERED_TO_NETWORK) {
 				out = event_log_str_tcpip_warn_not_registered_to_nework;
 			}
+			else if (event_id == EVENTS_GSM_GPRS_WARN_SERIAL_RX_ERROR) {
+				out = event_log_str_tcpip_warn_serial_rx_error;
+			}
 			else if (event_id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
 				out = event_log_str_tcpip_bootup_registered_network;
 			}
@@ -302,6 +326,12 @@ const char * event_id_to_str(event_log_source_t source, uint8_t event_id)
 			}
 			else if (event_id == EVENTS_GSM_GPRS_IP_ADDRESS) {
 				out = event_log_str_tcpip_bootup_ip_address;
+			}
+			else if (event_id == EVENTS_GSM_GPRS_HANDSHAKING) {
+				out = event_log_str_tcpip_handshaking;
+			}
+			else if (event_id == EVENTS_GSM_GPRS_POWERED_ON) {
+				out = event_log_str_tcpip_powered_on;
 			}
 
 			break;
