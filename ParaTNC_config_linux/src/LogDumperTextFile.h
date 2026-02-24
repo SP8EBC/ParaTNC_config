@@ -53,6 +53,10 @@ class LogDumperTextFile {
 	void storeConfigFirstRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 	void storeConfigSecondRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
 
+	void storeSwitchingPowersavingMode(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeWokenUpAfterLastSleep(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeGoToSleep(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+
 
 public:
 	LogDumperTextFile();

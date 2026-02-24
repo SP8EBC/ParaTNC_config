@@ -65,7 +65,7 @@ public:
 	LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, SerialRxBackgroundWorker& _serial_thread);
 	virtual ~LogDumper();
 
-	void dumpEventsToReport(uint32_t startAddress, uint32_t endAddress, std::string filename);
+	void dumpEventsToReport(uint32_t startAddress, uint32_t endAddress, std::string filename, bool exitOnFirstCrcFail);
 };
 
 #endif /* SRC_LOGDUMPER_H_ */

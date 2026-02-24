@@ -126,7 +126,7 @@ void LogDumper::timeoutCallback(void) {
 }
 
 void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
-		std::string filename) {
+		std::string filename, bool exitOnFirstCrcFail) {
 
 	uint32_t decoded_events = 0u;
 	uint32_t events_with_failed_crc	= 0u;
@@ -193,6 +193,10 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 			else {
 				events_with_failed_crc++;
 				std::cout << "E = LogDumper::dumpEventsToReport, crc error for address 0x" << std::hex << address <<std::endl;
+
+				if (exitOnFirstCrcFail) {
+					break;
+				}
 			}
 
 	    }

@@ -106,6 +106,15 @@ void LogDumperTextFile::storeEntryInExport(const event_log_exposed_t * eventLogE
 	else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_FLASHING_STARTUP) {
 		storeFlashingStartup(eventLogEntry,timestamp);
 	}
+	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_SWITCHING_MODE) {
+		storeSwitchingPowersavingMode(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_WOKEN_UP_AFTER_LAST_SLEEP) {
+		storeWokenUpAfterLastSleep(eventLogEntry,timestamp);
+	}
+	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_GO_TO_SLEEP) {
+		storeGoToSleep(eventLogEntry,timestamp);
+	}
 	else {
 
 	// add_cell_fmt
@@ -562,3 +571,122 @@ void LogDumperTextFile::storeConfigSecondRestore (const event_log_exposed_t *eve
     set_hline(table, BORDER_SINGLE);
 	lineAbove = true;
 }
+
+static const char * powersaveToString(const uint16_t val)
+{
+	switch (val)
+	{
+		case 0:	return "PWSAVE_NONE"; break;
+		case 1: return "PWSAVE_NORMAL"; break;
+		case 3: return "PWSAVE_AGGRESV"; break;
+		default: return "unknown??"; break;
+	}
+}
+
+void LogDumperTextFile::storeSwitchingPowersavingMode(const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	//add_cell(table, "dupa");
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->severity_str);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d \n -", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->source_str_name);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "Switching powersaving mode\n -");
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Current WX frames interval: %u, packet_tx_get_meteo_counter: %u",
+						eventLogEntry->param,
+						eventLogEntry->param2);
+	next_row(table);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Minutes to next WX packet: %u, New powersave mode: %s",
+						eventLogEntry->wparam,
+						powersaveToString(eventLogEntry->wparam2));
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+}
+
+void LogDumperTextFile::storeWokenUpAfterLastSleep(const event_log_exposed_t *eventLogEntry,
+		const struct tm *const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	//add_cell(table, "dupa");
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->severity_str);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d \n -", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->source_str_name);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "Wokenup - after last one\n p: 0x%X, p2: 0x%X, w: 0x%X, w2: 0x%X", eventLogEntry->param, eventLogEntry->param2, eventLogEntry->wparam, eventLogEntry->wparam2);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "packet_tx_meteo_counter: %u, packet_tx_meteo_gsm_counter: %u",
+						eventLogEntry->param,
+						eventLogEntry->param2);
+	next_row(table);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "packet_tx_get_minutes_to_next_wx: %u, packet_tx_meteo_interval: %u",
+						eventLogEntry->wparam,
+						eventLogEntry->wparam2);
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+}
+
+void LogDumperTextFile::storeGoToSleep(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp)
+{
+    set_hline(table, BORDER_SINGLE);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	//add_cell(table, "dupa");
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->severity_str);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%02d-%02d %02d:%02d \n -", timestamp->tm_mday, timestamp->tm_mon + 1, timestamp->tm_hour, timestamp->tm_min);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "%s \n -", eventLogEntry->source_str_name);
+	set_span(table, 1, 2);
+	override_vertical_alignment(table, V_ALIGN_CENTER);
+	add_cell_fmt(table, "Going to sleep\n -");
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Current WX frames interval: %u, packet_tx_get_meteo_counter: %u",
+						eventLogEntry->param,
+						eventLogEntry->param2);
+	next_row(table);
+	set_span(table, 7, 1);
+	add_cell_fmt(table, "Minutes to next WX packet: %u, Powersave mode: %s",
+						eventLogEntry->wparam,
+						powersaveToString(eventLogEntry->wparam2));
+	next_row(table);
+    set_hline(table, BORDER_SINGLE);
+}
+

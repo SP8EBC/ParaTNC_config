@@ -113,6 +113,8 @@ int main (int argc, char *argv[])
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RESTART, &srvReset));
 
+	bool breakEventsLogDumpOnCrcFail = false;
+
 	SerialRxBackgroundWorker worker(&s, callbackMap, nrc_callback);
 	worker.backgroundTimeoutCallback = timeout_callback;
 
@@ -125,6 +127,7 @@ int main (int argc, char *argv[])
 	boost::program_options::options_description generalOptions("General Options");
 	boost::program_options::options_description_easy_init goInit = generalOptions.add_options();
 	goInit("port,P", boost::program_options::value<std::string>(&portName), " : Serial port used for communication");
+	goInit("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
 
 	boost::program_options::options_description diagnosticServices("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit = diagnosticServices.add_options();
@@ -203,6 +206,10 @@ int main (int argc, char *argv[])
 		batchConfig.monitorMode = false;
 		batchConfig.writeConfig = false;
 		batchConfig.amendConfig = true;
+	}
+
+	if (odVariablesMap.count ("valid-events")) {
+		breakEventsLogDumpOnCrcFail = true;
 	}
 
 	if (batchConfig.writeConfig && batchConfig.amendConfig) {
@@ -348,7 +355,7 @@ int main (int argc, char *argv[])
 		std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry
 				  << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
 
-		logDumper.dumpEventsToReport (logAreaStart, logAreaEnd, fileNamePrefix + ".log");
+		logDumper.dumpEventsToReport (logAreaStart, logAreaEnd, fileNamePrefix + ".log", breakEventsLogDumpOnCrcFail);
 	}
 	worker.terminate ();
 
