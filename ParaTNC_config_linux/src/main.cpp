@@ -7,6 +7,7 @@
 #include "../shared/services/SrvReadMemory.h"
 #include "../shared/services/SrvReset.h"
 #include "../shared/services/SrvSendStartupConfig.h"
+#include "../shared/services/SrvRoutineControl.h"
 #include "BatchConfig_t.h"
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
@@ -40,6 +41,7 @@ SrvSendStartupConfig srvSendStartupConfig (128);
 SrvReadDid srvReadDid;
 SrvReadMemory srvReadMemory;
 SrvReset srvReset;
+SrvRoutineControl srvRoutineControl;
 
 // Declaration of thread condition variable
 pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
@@ -97,6 +99,7 @@ int main (int argc, char *argv[])
 	srvReadDid.setSerialContext(&s);
 	srvReadMemory.setSerialContext(&s);
 	srvReset.setSerialContext(&s);
+	srvRoutineControl.setSerialContext(&s);
 
 	srvGetVersion.setConditionVariable(&cond1);
 	srvRunningConfig.setConditionVariable(&cond1);
@@ -104,6 +107,7 @@ int main (int argc, char *argv[])
 	srvReadDid.setConditionVariable(&cond1);
 	srvReadMemory.setConditionVariable(&cond1);
 	srvReset.setConditionVariable(&cond1);
+	srvRoutineControl.setConditionVariable(&cond1);
 
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
@@ -112,6 +116,7 @@ int main (int argc, char *argv[])
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RESTART, &srvReset));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ROUTINE_CONTROL, &srvRoutineControl));
 
 	bool breakEventsLogDumpOnCrcFail = false;
 

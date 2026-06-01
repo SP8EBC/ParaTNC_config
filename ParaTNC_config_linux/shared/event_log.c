@@ -259,6 +259,9 @@ const char *event_id_to_str (event_log_source_t source, uint8_t event_id)
 		}
 		else if (event_id == EVENTS_TX_HANDLER_INFO_SET_CURRENT_COUNTERS) {
 			out = event_log_str_packet_tx_handler_info_set_counters;
+		}
+		else if (event_id == EVENTS_TX_HANDLER_INFO_SENDING_WXFRAME_APRSIS) {
+			out = event_log_str_packet_tx_handler_info_sending_wx_frame_via_gsm;
 		}		
 		break;
 	case EVENT_SRC_APRSIS: {
@@ -291,6 +294,9 @@ const char *event_id_to_str (event_log_source_t source, uint8_t event_id)
 		}
 		else if (event_id == EVENTS_APRSIS_WARN_DEAD_TRANSMIT) {
 			out = event_log_str_aprsis_warn_dead_transmit;
+		}
+		else if (event_id == EVENTS_APRSIS_INFO_CONNECTING_APRSIS) {
+			out = event_log_str_aprsis_connecting;
 		}
 		break;
 	}
@@ -344,8 +350,20 @@ const char *event_id_to_str (event_log_source_t source, uint8_t event_id)
 		else if (event_id == EVENTS_GSM_GPRS_INITIALIZING_GET_PIN_STATUS) {
 			out = event_log_str_tcpip_get_pin_status;
 		}
+		else if (event_id == EVENTS_GSM_GPRS_INITIALIZING_GET_PIN_STATUS_DONE) {
+			out = event_log_str_tcpip_initializing_get_pin_status_done;
+		}
 		else if (event_id == EVENTS_GSM_GPRS_WARN_GET_NETWORK_REGISTRATION) {
 			out = event_log_str_tcpip_warn_get_network_registration;
+		}
+		else if (event_id == EVENTS_GSM_GPRS_INITIALIZING_GET_NETWORK_REGISTR) {
+			out = event_log_str_tcpip_get_network_registration;
+		}
+		else if (event_id == EVENTS_GSM_GPRS_INITIALIZING_GET_NETWORK_REGISTR_DONE) {
+			out = event_log_str_tcpip_initializing_get_network_reg_done;
+		}
+		else if (event_id == EVENTS_GSM_GPRS_INITIALIZING_GET_IMSI) {
+			out = event_log_str_tcpip_get_imsi;
 		}
 		break;
 	case EVENT_SRC_TCPIP:
