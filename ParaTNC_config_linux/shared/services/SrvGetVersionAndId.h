@@ -50,10 +50,18 @@ class SrvGetVersionAndId: public IService {
 	static bool hyphenCheck(char x);
 public:
 	/**
-	 * Sends a request to upload current running configuration
+	 * @brief sends prepared request to the TNC. It is assumed that either a content of the
+	 * request is already prepared, or it is fixed as per protocol definition
+	 * @note in case of GetVersionAndIt request content is fixed and const
 	 */
 	virtual void sendRequest();
 
+	/**
+	 * @brief To be used after sending a request to a TNC, to lock calling thread while waiting
+	 * for TNC and response, and automatically call a callback after this response is received
+	 * @note callback is called from a context if this function
+	 * @param cbk called in case of Negative Response Code is received 
+	 */
 	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	virtual ~SrvGetVersionAndId();

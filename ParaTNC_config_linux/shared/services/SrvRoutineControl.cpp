@@ -25,9 +25,6 @@ void SrvRoutineControl::sendRequest ()
 	}
 }
 
-void SrvRoutineControl::restart ()
-{
-}
 
 void SrvRoutineControl::waitForTransmissionDone ()
 {

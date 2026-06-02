@@ -80,6 +80,12 @@ public:
 	 */
 	virtual void sendRequest();
 
+	/**
+	 * @brief To be used after sending a request to a TNC, to lock calling thread while waiting
+	 * for TNC and response, and automatically call a callback after this response is received
+	 * @note callback is called from a context if this function
+	 * @param cbk called in case of Negative Response Code is received 
+	 */
 	virtual void receiveSynchronously(IService_NegativeResponseCodeCbk cbk);
 
 	/**
