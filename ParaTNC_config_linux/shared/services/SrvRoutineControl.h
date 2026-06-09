@@ -14,6 +14,7 @@
 #include "../shared/kiss_communication_service_ids.h"
 #include "../shared/exceptions/TimeoutE.h"
 #include "../shared/types/RoutineControlSubfunction.h"
+#include "../shared/types/RoutineControlResult.h"
 
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 #include <windows.h>
@@ -38,8 +39,7 @@ class SrvRoutineControl : public virtual IService {
 #endif
 
 	/**
-	 * Request data send to the controller, it is not const nor static as
-	 * it contains DID number
+	 * Request data send to the controller, it is neither const nor static
 	 */
 	std::vector<uint8_t> requestData;
 
@@ -57,12 +57,21 @@ class SrvRoutineControl : public virtual IService {
 	 * @brief Routine ID requested in last call
 	 */
 	uint16_t routineId;
+
+	RoutineControlResult lastResult;
   public:
 	/**
 	 * @brief sends prepared request to the TNC. It is assumed that either a content of the
 	 * request is already prepared, or it is fixed as per protocol definition
 	 */
 	virtual void sendRequest();
+
+	/**
+	 *
+	 * @param id
+	 * @param subfunc
+	 */
+	void callRoutine(uint16_t id, RoutineControlSubfunction subfunc, uint16_t wparam, uint32_t lparam);
 
 	/**
 	 * @brief locks calling thread until transmission from host PC to TNC is done
