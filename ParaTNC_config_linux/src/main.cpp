@@ -80,6 +80,15 @@ static void timeout_callback (void)
 	pthread_cond_signal (&cond1);
 }
 
+void routine_result_callback(RoutineControlResult result) 
+{
+	std::cout << "I = routine_result_callback, routineId " << result.routineId <<
+	", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode << std::endl;
+
+	pthread_cond_signal (&cond1);
+
+}
+
 int main (int argc, char *argv[])
 {
 #ifndef _ONLY_MANUAL_CFG
@@ -294,6 +303,12 @@ int main (int argc, char *argv[])
 		s.waitForTransmissionDone ();
 
 		// wait for software version
+		pthread_mutex_lock (&lock);
+		pthread_cond_wait (&cond1, &lock);
+		pthread_mutex_unlock (&lock);
+
+		srvRoutineControl.startRoutine(0x5254, routine_result_callback, 0x0909, 0x001A0619);
+
 		pthread_mutex_lock (&lock);
 		pthread_cond_wait (&cond1, &lock);
 		pthread_mutex_unlock (&lock);

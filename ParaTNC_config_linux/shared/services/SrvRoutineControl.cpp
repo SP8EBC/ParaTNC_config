@@ -7,7 +7,7 @@
 
 #include "SrvRoutineControl.h"
 
-SrvRoutineControl::SrvRoutineControl () : lastResult {0u}
+SrvRoutineControl::SrvRoutineControl () : lastResult{0u}
 {
 #if defined(_MSC_VER) && (_MSC_VER <= 1400)
 	syncEvent = OpenEvent (EVENT_ALL_ACCESS, false, L"ServiceSyncEv");
@@ -18,6 +18,7 @@ SrvRoutineControl::SrvRoutineControl () : lastResult {0u}
 	s = 0;
 	requestedSubfunction = ROUTINE_CTRL_SUBFUNC_UNINIT;
 	routineId = 0;
+	responseCallback = NULL;
 }
 
 void SrvRoutineControl::sendRequest ()
@@ -43,25 +44,28 @@ SrvRoutineControl::~SrvRoutineControl ()
 	// TODO Auto-generated destructor stub
 }
 
-void SrvRoutineControl::callRoutine (uint16_t id, RoutineControlSubfunction subfunc,
-									 uint16_t wparam, uint32_t lparam)
+bool SrvRoutineControl::startRoutine (uint16_t id, SrvRoutineControl_ResultCbk callback,
+									  uint16_t wparam, uint32_t lparam)
 {
 	// check if all variables are set correctly
 	if (this->s != NULL) {
-		// wipe content of request buffer
-		requestData.clear ();
 
-		// service identifier
-		requestData.push_back (KISS_ROUTINE_CONTROL);
+		// if response callback pointer is set to null, the communication is idle. a TNC under test
+		// is not busy on executing a diagnostic routine or any other diagnostics service
+		if (responseCallback == NULL) {
 
-		// subfunction
-		requestData.push_back ((uint8_t)subfunc);
+			// wipe content of request buffer
+			requestData.clear ();
 
-		// address
-		requestData.push_back ((uint8_t)((id & 0x00FFu)));
-		requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
+			// service identifier
+			requestData.push_back (KISS_ROUTINE_CONTROL);
 
-		if (subfunc == ROUTINE_CTRL_SUBFUNC_START) {
+			// subfunction
+			requestData.push_back ((uint8_t)KISS_ROUTINE_CONTROL_SUBFUNC_START);
+
+			// address
+			requestData.push_back ((uint8_t)((id & 0x00FFu)));
+			requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
 
 			// uint32_t parameter
 			requestData.push_back ((uint8_t)((lparam & 0x000000FFu)));
@@ -72,29 +76,105 @@ void SrvRoutineControl::callRoutine (uint16_t id, RoutineControlSubfunction subf
 			// uint16_t parameter
 			requestData.push_back ((uint8_t)((wparam & 0x00FFu)));
 			requestData.push_back ((uint8_t)((wparam & 0xFF00u) >> 8));
+
+			responseCallback = callback;
+
+			sendRequest ();
+
+			return true;
 		}
+		else {
+			// if responseCallback is set
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
+}
+
+bool SrvRoutineControl::stopRoutine (uint16_t id, SrvRoutineControl_ResultCbk callback)
+{
+	// check if all variables are set correctly
+	if (this->s != NULL && (responseCallback == NULL)) {
+		// wipe content of request buffer
+		requestData.clear ();
+
+		// service identifier
+		requestData.push_back (KISS_ROUTINE_CONTROL);
+
+		// subfunction
+		requestData.push_back ((uint8_t)KISS_ROUTINE_CONTROL_SUBFUNC_STOP);
+
+		// address
+		requestData.push_back ((uint8_t)((id & 0x00FFu)));
+		requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
+		
+		responseCallback = callback;
 
 		sendRequest ();
+
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool SrvRoutineControl::requestRoutineResult (uint16_t id, SrvRoutineControl_ResultCbk callback)
+{
+	// check if all variables are set correctly
+	if (this->s != NULL && (responseCallback == NULL)) {
+		// wipe content of request buffer
+		requestData.clear ();
+
+		// service identifier
+		requestData.push_back (KISS_ROUTINE_CONTROL);
+
+		// subfunction
+		requestData.push_back ((uint8_t)KISS_ROUTINE_CONTROL_SUBFUNC_RESULT);
+
+		// address
+		requestData.push_back ((uint8_t)((id & 0x00FFu)));
+		requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
+		
+		responseCallback = callback;
+
+		sendRequest ();
+
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
 void SrvRoutineControl::callback (
 	const std::vector<unsigned char, std::allocator<unsigned char>> *frame)
 {
-	if (frame == NULL)
-	{
+	if (frame == NULL) {
 		return;
 	}
 
-	const RoutineControlSubfunction subfunc = (RoutineControlSubfunction)frame->at(2);
+	// by design, if this callback is invoked, the positive, non-NRC response was received
+	// please look at @link{SerialRxBackgroundWorker::worker}
+	const RoutineControlSubfunction subfunc = (RoutineControlSubfunction)frame->at (2);
+	uint16_t routineId = frame->at (3) | (frame->at (4) << 8); 
 
-	switch (subfunc)
-	{
+	RoutineControlResult result = {0};
+	result.routineId = routineId;
+	result.subfunction = subfunc;
+
+	switch (subfunc) {
+	case ROUTINE_CTRL_SUBFUNC_UNINIT: break;
+	case ROUTINE_CTRL_SUBFUNC_REQUEST_RES: 
+		result.resultCode = frame->at (3) | (frame->at (4) << 8); 
 	case ROUTINE_CTRL_SUBFUNC_START:
 	case ROUTINE_CTRL_SUBFUNC_STOP:
-	case ROUTINE_CTRL_SUBFUNC_REQUEST_RES:
+		if (responseCallback != NULL) 
+		{
+			responseCallback(result);
+		}
 		break;
 	}
-
-
 }

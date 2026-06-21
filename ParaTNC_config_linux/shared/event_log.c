@@ -169,6 +169,12 @@ const char *event_id_to_str (event_log_source_t source, uint8_t event_id)
 		else if (event_id == EVENTS_MAIN_CALLBACK_POSTTX) {
 			out = event_log_str_main_callback_posttx;
 		}
+		else if (event_id == EVENTS_MAIN_PSAVING_SUSPEND_TASKS) {
+			out = event_log_str_main_powersaving_suspend_tasks;
+		}
+		else if (event_id == EVENTS_MAIN_PSAVING_RESTORE_TASKS) {
+			out = event_log_str_main_powersaving_restoring_tasks;
+		}
 		break;
 	}
 	case EVENT_SRC_WX_HANDLER: {

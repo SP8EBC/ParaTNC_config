@@ -263,6 +263,8 @@ static const char * event_log_str_main_warn_first_restore      = "Restoring 1st 
 static const char * event_log_str_main_warn_second_restore     = "Restoring 2nd config area\0";
 static const char * event_log_str_main_callback_pretx			= "CALLBACK_PRETX\0";
 static const char * event_log_str_main_callback_posttx			= "CALLBACK_POSTTX\0";
+static const char * event_log_str_main_powersaving_suspend_tasks = "Suspending tasks for powersaving\0";
+static const char * event_log_str_main_powersaving_restoring_tasks = "Restoring tasks for powersaving\0";
 
 /**
  * Modbus RTU 

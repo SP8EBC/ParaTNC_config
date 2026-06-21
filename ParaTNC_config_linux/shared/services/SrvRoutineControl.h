@@ -22,6 +22,8 @@
 #include <pthread.h>
 #endif
 
+typedef void(*SrvRoutineControl_ResultCbk)(RoutineControlResult result) ;
+
 class SrvRoutineControl : public virtual IService {
 	/**
 	 * Pointer to serial port context used to talk with TNC
@@ -37,6 +39,11 @@ class SrvRoutineControl : public virtual IService {
 	 */
 	pthread_cond_t * conditionVariable;
 #endif
+
+	/**
+	 * Callback used after the response to routine control is received
+	 */
+	SrvRoutineControl_ResultCbk responseCallback;
 
 	/**
 	 * Request data send to the controller, it is neither const nor static
@@ -58,6 +65,9 @@ class SrvRoutineControl : public virtual IService {
 	 */
 	uint16_t routineId;
 
+	/**
+	 * @brief
+	 */
 	RoutineControlResult lastResult;
   public:
 	/**
@@ -71,7 +81,11 @@ class SrvRoutineControl : public virtual IService {
 	 * @param id
 	 * @param subfunc
 	 */
-	void callRoutine(uint16_t id, RoutineControlSubfunction subfunc, uint16_t wparam, uint32_t lparam);
+	bool startRoutine(uint16_t id, SrvRoutineControl_ResultCbk callback, uint16_t wparam, uint32_t lparam);
+
+	bool stopRoutine(uint16_t id, SrvRoutineControl_ResultCbk callback);
+
+	bool requestRoutineResult(uint16_t id, SrvRoutineControl_ResultCbk callback);
 
 	/**
 	 * @brief locks calling thread until transmission from host PC to TNC is done

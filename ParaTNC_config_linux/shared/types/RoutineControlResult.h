@@ -10,8 +10,11 @@
 
 #include <cstdint>
 
+#include "RoutineControlSubfunction.h"
+
 typedef struct RoutineControlResult {
 	uint16_t routineId;	//!< which this result corresponds to
+	RoutineControlSubfunction subfunction; //!< This result corresponds to
 	uint8_t wasNrc;	//!< Set to non zero if a Routine Control request resulted in NRC
 	uint16_t resultCode; //!< Routine result itself or NRC value
 }RoutineControlResult;
