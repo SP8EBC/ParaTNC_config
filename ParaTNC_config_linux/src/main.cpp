@@ -14,6 +14,7 @@
 #include "LogDumper.h"
 #include "ProgramConfig.h"
 #include "TimeTools.h"
+#include "Routines.hpp"
 #include "serial/Serial.h"
 #include <iomanip>
 #include <iostream>
@@ -158,6 +159,8 @@ int main (int argc, char *argv[])
 	boost::program_options::variables_map odVariablesMap;
 	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
 	boost::program_options::notify(odVariablesMap);
+
+	Routines routines(srvRoutineControl);
 
 	bool portOpenResult = false;
 

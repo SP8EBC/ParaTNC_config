@@ -14,7 +14,8 @@ CPP_SRCS += \
 ../src/ProgramConfig.cpp \
 ../src/TimeTools.cpp \
 ../src/main.cpp \
-../src/mainAuxFunctions.cpp 
+../src/mainAuxFunctions.cpp	\
+../src/Routines.cpp 
 
 CPP_DEPS += \
 ./src/AuxStuff.d \
@@ -27,7 +28,8 @@ CPP_DEPS += \
 ./src/ProgramConfig.d \
 ./src/TimeTools.d \
 ./src/main.d \
-./src/mainAuxFunctions.d 
+./src/mainAuxFunctions.d \
+./src/Routines.d 
 
 OBJS += \
 ./src/AuxStuff.o \
@@ -40,7 +42,8 @@ OBJS += \
 ./src/ProgramConfig.o \
 ./src/TimeTools.o \
 ./src/main.o \
-./src/mainAuxFunctions.o 
+./src/mainAuxFunctions.o \
+./src/Routines.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
