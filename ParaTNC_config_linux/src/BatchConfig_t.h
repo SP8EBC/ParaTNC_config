@@ -8,12 +8,11 @@
 #ifndef SRC_BATCHCONFIG_T_H_
 #define SRC_BATCHCONFIG_T_H_
 
-
 typedef struct BatchConfig {
 	BatchConfig ()
 		: defaultBatch (false), monitorMode (false), performRestart (false), readDid (false),
-		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false), amendConfig(false),
-		  configFileToWrite ()
+		  monitorDid (false), didToRead (), readConfig (false), writeConfig (false),
+		  amendConfig (false), configFileToWrite (), routineSetRtc (false)
 	{
 	}
 
@@ -32,7 +31,8 @@ typedef struct BatchConfig {
 	bool writeConfig;
 	bool amendConfig;
 	std::string configFileToWrite;
-} BatchConfig;
 
+	bool routineSetRtc;
+} BatchConfig;
 
 #endif /* SRC_BATCHCONFIG_T_H_ */

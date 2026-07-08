@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/Debug/ParaTNC_config",
-            "args": [],
+            "args": ["--routine-rtc"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

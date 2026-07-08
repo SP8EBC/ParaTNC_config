@@ -6,6 +6,7 @@
  */
 
 #include "SrvRoutineControl.h"
+#include <iostream>
 
 SrvRoutineControl::SrvRoutineControl () : lastResult{0u}
 {
@@ -79,6 +80,9 @@ bool SrvRoutineControl::startRoutine (uint16_t id, SrvRoutineControl_ResultCbk c
 
 			responseCallback = callback;
 
+			std::cout << "D = SrvRoutineControl::startRoutine, id: " << std::hex << id
+					  << ", wparam: 0x" << std::hex << wparam << ", lparam: 0x" << lparam << std::endl;
+
 			sendRequest ();
 
 			return true;
@@ -109,7 +113,7 @@ bool SrvRoutineControl::stopRoutine (uint16_t id, SrvRoutineControl_ResultCbk ca
 		// address
 		requestData.push_back ((uint8_t)((id & 0x00FFu)));
 		requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
-		
+
 		responseCallback = callback;
 
 		sendRequest ();
@@ -137,7 +141,7 @@ bool SrvRoutineControl::requestRoutineResult (uint16_t id, SrvRoutineControl_Res
 		// address
 		requestData.push_back ((uint8_t)((id & 0x00FFu)));
 		requestData.push_back ((uint8_t)((id & 0xFF00u) >> 8));
-		
+
 		responseCallback = callback;
 
 		sendRequest ();
@@ -159,7 +163,7 @@ void SrvRoutineControl::callback (
 	// by design, if this callback is invoked, the positive, non-NRC response was received
 	// please look at @link{SerialRxBackgroundWorker::worker}
 	const RoutineControlSubfunction subfunc = (RoutineControlSubfunction)frame->at (2);
-	uint16_t routineId = frame->at (3) | (frame->at (4) << 8); 
+	uint16_t routineId = frame->at (3) | (frame->at (4) << 8);
 
 	RoutineControlResult result = {0};
 	result.routineId = routineId;
@@ -167,13 +171,11 @@ void SrvRoutineControl::callback (
 
 	switch (subfunc) {
 	case ROUTINE_CTRL_SUBFUNC_UNINIT: break;
-	case ROUTINE_CTRL_SUBFUNC_REQUEST_RES: 
-		result.resultCode = frame->at (3) | (frame->at (4) << 8); 
+	case ROUTINE_CTRL_SUBFUNC_REQUEST_RES: result.resultCode = frame->at (3) | (frame->at (4) << 8);
 	case ROUTINE_CTRL_SUBFUNC_START:
 	case ROUTINE_CTRL_SUBFUNC_STOP:
-		if (responseCallback != NULL) 
-		{
-			responseCallback(result);
+		if (responseCallback != NULL) {
+			responseCallback (result);
 		}
 		break;
 	}

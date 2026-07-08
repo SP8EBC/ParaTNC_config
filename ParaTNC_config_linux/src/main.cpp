@@ -6,15 +6,15 @@
 #include "../shared/services/SrvReadDid.h"
 #include "../shared/services/SrvReadMemory.h"
 #include "../shared/services/SrvReset.h"
-#include "../shared/services/SrvSendStartupConfig.h"
 #include "../shared/services/SrvRoutineControl.h"
+#include "../shared/services/SrvSendStartupConfig.h"
 #include "BatchConfig_t.h"
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
 #include "LogDumper.h"
 #include "ProgramConfig.h"
-#include "TimeTools.h"
 #include "Routines.hpp"
+#include "TimeTools.h"
 #include "serial/Serial.h"
 #include <iomanip>
 #include <iostream>
@@ -72,22 +72,18 @@ size_t fileNamePrefixLenght = 0;
 BatchConfig batchConfig;
 
 static void nrc_callback (uint16_t nrc)
-{
-	exit (nrc);
-}
+{ exit (nrc); }
 
 static void timeout_callback (void)
+{ pthread_cond_signal (&cond1); }
+
+void routine_result_callback (RoutineControlResult result)
 {
-	pthread_cond_signal (&cond1);
-}
-
-void routine_result_callback(RoutineControlResult result) 
-{
-	std::cout << "I = routine_result_callback, routineId " << result.routineId <<
-	", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode << std::endl;
+	std::cout << "I = routine_result_callback, routineId " << result.routineId
+			  << ", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode
+			  << std::endl;
 
 	pthread_cond_signal (&cond1);
-
 }
 
 int main (int argc, char *argv[])
@@ -152,13 +148,21 @@ int main (int argc, char *argv[])
 	dsInit("read-config,R", " : Read running config and store it in bin and text file");
 	dsInit("write-config,W", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Write complete startup config from text file");
 	dsInit("amend-config,A", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Partially Amend config from (incomplete) text file");
+	dsInit("routine-rtc,RR", " : Call routine to set RTC to local date and time of this PC");
 
 	od.add(generalOptions);
 	od.add(diagnosticServices);
 
 	boost::program_options::variables_map odVariablesMap;
-	boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
-	boost::program_options::notify(odVariablesMap);
+	try {
+		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
+		boost::program_options::notify(odVariablesMap);
+	}
+	catch (boost::wrapexcept<boost::program_options::unknown_option>& ex)
+	{
+		std::cout << ex.what() << std::endl << od << std::endl;
+		exit(-2);
+	}
 
 	Routines routines(srvRoutineControl);
 
@@ -224,7 +228,13 @@ int main (int argc, char *argv[])
 		batchConfig.writeConfig = false;
 		batchConfig.amendConfig = true;
 	}
-
+	
+	if (odVariablesMap.count ("routine-rtc")) {
+		batchConfig.defaultBatch = false;
+		batchConfig.monitorMode = false;
+		batchConfig.routineSetRtc = true;
+	}
+	
 	if (odVariablesMap.count ("valid-events")) {
 		breakEventsLogDumpOnCrcFail = true;
 	}
@@ -259,6 +269,9 @@ int main (int argc, char *argv[])
 	}
 	else if (!batchConfig.defaultBatch && !batchConfig.monitorMode) {
 		// exec diagnostic services in order
+		if (batchConfig.routineSetRtc) {
+			routines.setRtcToLocalDateTime();
+		}
 		if (batchConfig.readDid) {
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
@@ -310,11 +323,11 @@ int main (int argc, char *argv[])
 		pthread_cond_wait (&cond1, &lock);
 		pthread_mutex_unlock (&lock);
 
-		srvRoutineControl.startRoutine(0x5254, routine_result_callback, 0x0909, 0x001A0619);
+		// srvRoutineControl.startRoutine (0x5254, routine_result_callback, 0x0909, 0x001A0619);
 
-		pthread_mutex_lock (&lock);
-		pthread_cond_wait (&cond1, &lock);
-		pthread_mutex_unlock (&lock);
+		// pthread_mutex_lock (&lock);
+		// pthread_cond_wait (&cond1, &lock);
+		// pthread_mutex_unlock (&lock);
 
 		srvRunningConfig.sendRequest ();
 		s.waitForTransmissionDone ();
@@ -378,7 +391,10 @@ int main (int argc, char *argv[])
 		std::cout << "I = main, logOldestEntry at: 0x" << std::hex << logOldestEntry
 				  << ", logNewestEntry at: 0x" << logNewestEntry << std::endl;
 
-		logDumper.dumpEventsToReport (logAreaStart, logAreaEnd, fileNamePrefix + ".log", breakEventsLogDumpOnCrcFail);
+		logDumper.dumpEventsToReport (logAreaStart,
+									  logAreaEnd,
+									  fileNamePrefix + ".log",
+									  breakEventsLogDumpOnCrcFail);
 	}
 	worker.terminate ();
 
