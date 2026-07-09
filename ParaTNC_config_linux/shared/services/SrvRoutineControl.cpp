@@ -81,7 +81,8 @@ bool SrvRoutineControl::startRoutine (uint16_t id, SrvRoutineControl_ResultCbk c
 			responseCallback = callback;
 
 			std::cout << "D = SrvRoutineControl::startRoutine, id: " << std::hex << id
-					  << ", wparam: 0x" << std::hex << wparam << ", lparam: 0x" << lparam << std::endl;
+					  << ", wparam: 0x" << std::hex << wparam << ", lparam: 0x" << lparam
+					  << std::endl;
 
 			sendRequest ();
 
@@ -174,6 +175,9 @@ void SrvRoutineControl::callback (
 	case ROUTINE_CTRL_SUBFUNC_REQUEST_RES: result.resultCode = frame->at (3) | (frame->at (4) << 8);
 	case ROUTINE_CTRL_SUBFUNC_START:
 	case ROUTINE_CTRL_SUBFUNC_STOP:
+		std::cout << "D = SrvRoutineControl::callback, routineId: 0x" << std::hex << routineId
+				  << ", subfunc: " << std::hex << subfunc << ", resultCode: 0x" << std::hex
+				  << result.resultCode << std::endl;
 		if (responseCallback != NULL) {
 			responseCallback (result);
 		}

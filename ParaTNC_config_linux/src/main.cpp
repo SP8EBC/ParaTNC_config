@@ -122,7 +122,7 @@ int main (int argc, char *argv[])
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_DID_RESP, &srvReadDid));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_READ_MEM_ADDR_RESP, &srvReadMemory));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RESTART, &srvReset));
-	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ROUTINE_CONTROL, &srvRoutineControl));
+	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ROUTINE_CONTROL_RESP, &srvRoutineControl));
 
 	bool breakEventsLogDumpOnCrcFail = false;
 
@@ -164,7 +164,7 @@ int main (int argc, char *argv[])
 		exit(-2);
 	}
 
-	Routines routines(srvRoutineControl);
+	Routines routines(srvRoutineControl, srvReadDid);
 
 	bool portOpenResult = false;
 
