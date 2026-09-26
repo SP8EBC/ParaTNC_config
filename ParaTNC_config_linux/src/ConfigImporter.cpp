@@ -280,7 +280,14 @@ void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::s
         mode.setWxDustSensor(parseUint8(value));
     } else if (key == "wxptsensor") {
     	CONFIG_IMPORTE_SET_FLAG(modeFlags, 8);
-        mode.setWxPtSensor(parseUint8(value));
+        BasicConfigPtSensor ptSensor(value);
+        const uint8_t ptSensorAsUint = ptSensor.toUint8();
+        if (verboseLogging)
+        {
+            std::cout << "---- ConfigImporter::parseModeConfigSetting, ptSensor, value: " << value << 
+            ", ptSensorAsUint: 0x" << std::hex << (int)ptSensorAsUint << std::endl;  
+        }
+        mode.setWxPtSensor(ptSensorAsUint);
     } else if (key == "victron") {
     	CONFIG_IMPORTE_SET_FLAG(modeFlags, 9);
         mode.setVictron(parseUint8(value));

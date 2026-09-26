@@ -68,6 +68,8 @@ private:
     void addSetting(const std::string& key, bool value, const std::string& typeComment);
     void addSetting(const std::string& key, const std::string& value, const std::string& typeComment);
     
+    void addSettingPt(const std::string& key, uint8_t value, const std::string& typeComment);
+    
     std::string escapeValue(const std::string& value);
     std::string formatFloat(float value);
 };
