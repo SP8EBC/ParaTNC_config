@@ -71,6 +71,8 @@ size_t fileNamePrefixLenght = 0;
 
 BatchConfig batchConfig;
 
+bool verboseLogging;
+
 static void nrc_callback (uint16_t nrc)
 { exit (nrc); }
 
@@ -139,6 +141,7 @@ int main (int argc, char *argv[])
 	boost::program_options::options_description_easy_init goInit = generalOptions.add_options();
 	goInit("port,P", boost::program_options::value<std::string>(&portName), " : Serial port used for communication");
 	goInit("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
+	goInit("verbose", " : Print more things on the console");
 
 	boost::program_options::options_description diagnosticServices("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit = diagnosticServices.add_options();
@@ -187,6 +190,13 @@ int main (int argc, char *argv[])
 		std::cout << "E = main, cannot open and configure serial port. application cannot continue!"
 				  << std::endl;
 		return -1;
+	}
+
+	if (odVariablesMap.count ("verbose")) {
+		verboseLogging = true;
+	}
+	else {
+		verboseLogging = false;
 	}
 
 	if (odVariablesMap.count ("restart")) {

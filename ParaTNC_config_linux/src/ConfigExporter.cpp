@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <iostream>
 
+extern bool verboseLogging;
+
 ConfigExporter::ConfigExporter(std::shared_ptr<IConfigurationManager> configManager)
     : configManager(configManager) {}
 
@@ -276,22 +278,42 @@ void ConfigExporter::addSection(const std::string& sectionName) {
 }
 
 void ConfigExporter::addSetting(const std::string& key, uint8_t value, const std::string& typeComment) {
+    if (verboseLogging)
+    {
+        std::cout << "---- ConfigExporter::addSettings:283, key: " << key << ", value: " << static_cast<int>(value) << std::endl;
+    }
     iniContent << key << " = " << static_cast<int>(value) << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, uint16_t value, const std::string& typeComment) {
+    if (verboseLogging)
+    {
+        std::cout << "---- ConfigExporter::addSettings:291, key: " << key << ", value: " << value << std::endl;
+    }   
     iniContent << key << " = " << value << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, float value, const std::string& typeComment) {
+    if (verboseLogging)
+    {
+        std::cout << "---- ConfigExporter::addSettings:299, key: " << key << ", value: " << formatFloat(value) << std::endl;
+    }   
     iniContent << key << " = " << formatFloat(value) << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, bool value, const std::string& typeComment) {
+    if (verboseLogging)
+    {
+        std::cout << "---- ConfigExporter::addSettings:307, key: " << key << ", value: " << (value ? "true" : "false") << std::endl;
+    }   
     iniContent << key << " = " << (value ? "true" : "false") << "\t\t# " << typeComment << "\n";
 }
 
 void ConfigExporter::addSetting(const std::string& key, const std::string& value, const std::string& typeComment) {
+    if (verboseLogging)
+    {
+        std::cout << "---- ConfigExporter::addSettings:315, key: " << key << ", value: " << escapeValue(value) << std::endl;
+    }   
     iniContent << key << " = " << escapeValue(value) << "\t\t# " << typeComment << "\n";
 }
 

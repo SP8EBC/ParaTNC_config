@@ -6,6 +6,8 @@
 
 #include "ConfigImporter.h"
 
+extern bool verboseLogging;
+
 #define CONFIG_IMPORTE_SET_FLAG(flag, bitpos)			\
 		flag |= (1 << bitpos)							\
 
@@ -175,6 +177,10 @@ bool ConfigImporter::parseSetting(const std::string& line) {
 void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::string& value) {
     IBasicConfig& basic = configManager->getBasicConfig();
     
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseBasicConfigSetting, key: " << key << ", value: " << value << std::endl;  
+    }
+
     if (key == "callsign") {
     	CONFIG_IMPORTE_SET_FLAG(basicFlags, 0);
         basic.setCallsign(parseString(value));
@@ -244,6 +250,10 @@ void ConfigImporter::parseBasicConfigSetting(const std::string& key, const std::
 void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::string& value) {
     IModeConfig& mode = configManager->getModeConfig();
     
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseModeConfigSetting, key: " << key << ", value: " << value << std::endl;  
+    }
+    
     if (key == "digi") {
     	CONFIG_IMPORTE_SET_FLAG(modeFlags, 0);
         mode.setDigi(parseUint8(value));
@@ -301,6 +311,10 @@ void ConfigImporter::parseModeConfigSetting(const std::string& key, const std::s
 void ConfigImporter::parseSourceConfigSetting(const std::string& key, const std::string& value) {
     ISourceConfig& source = configManager->getSourceConfig();
     
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseSourceConfigSetting, key: " << key << ", value: " << value << std::endl;  
+    }
+    
     if (key == "temperature") {
     	CONFIG_IMPORTE_SET_FLAG(sourceFlags, 0);
         source.setTemperature(parseUint8(value));
@@ -318,7 +332,11 @@ void ConfigImporter::parseSourceConfigSetting(const std::string& key, const std:
 
 void ConfigImporter::parseUmbConfigSetting(const std::string& key, const std::string& value) {
     IUmbConfig& umb = configManager->getUmbConfig();
-    
+  
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseUmbConfigSetting, key: " << key << ", value: " << value << std::endl;  
+    }  
+  
     if (key == "slaveclass") {
     	CONFIG_IMPORTE_SET_FLAG(umbFlags, 0);
         umb.setSlaveClass(parseUint16(value));
@@ -345,6 +363,10 @@ void ConfigImporter::parseUmbConfigSetting(const std::string& key, const std::st
 
 void ConfigImporter::parseRtuConfigSetting(const std::string& key, const std::string& value) {
     IRtuConfig& rtu = configManager->getRtuConfig();
+    
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseRtuConfigSetting, key: " << key << ", value: " << value << std::endl;  
+    }   
     
     if (key == "slavespeed") {
     	CONFIG_IMPORTE_SET_FLAG(rtuFlags, 0);
@@ -384,6 +406,10 @@ void ConfigImporter::parseRtuSlaveConfigSetting(uint8_t id, const std::string& k
 	IRtuConfig &rtu = configManager->getRtuConfig ();
 
 	auto slave = rtu.getSlave (id);
+    
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseRtuSlaveConfigSetting, id: " << (int)id << ", key: " << key << ", value: " << value << std::endl;  
+    }
 
 	if (key == "busaddress") {
 		slave.busAddress = (parseUint8 (value));
@@ -445,6 +471,10 @@ void ConfigImporter::parseRtuSlaveConfigSetting(uint8_t id, const std::string& k
 void ConfigImporter::parseGsmConfigSetting(const std::string& key, const std::string& value) {
     IGsmConfig& gsm = configManager->getGsmConfig();
     
+    if (verboseLogging) {
+        std::cout << "---- ConfigImporter::parseGsmConfigSettin, key: " << key << ", value: " << value << std::endl;  
+    }
+    
     if (key == "pin") {
     	CONFIG_IMPORTE_SET_FLAG(gsmFlags, 0);
         gsm.setPin(parseString(value));
@@ -482,6 +512,18 @@ void ConfigImporter::parseGsmConfigSetting(const std::string& key, const std::st
 }
 
 uint8_t ConfigImporter::parseUint8(const std::string& value) {
+
+    std::string lowercaseValue = toLowerCase(value);
+
+    if (lowercaseValue == "true" || lowercaseValue == "yes" || lowercaseValue == "on") {
+        std::cout << "W = ConfigImporter::parseUint8, '" << value << "' explicitly converted to 1, when an integer was expected" << std::endl;
+        return static_cast<uint8_t>(1);
+    }
+    else if (lowercaseValue == "false" || lowercaseValue == "no" || lowercaseValue == "off") {
+        std::cout << "W = ConfigImporter::parseUint8, '" << value << "' explicitly converted to 0, when an integer was expected" << std::endl;
+        return static_cast<uint8_t>(0);
+    }
+
     try {
         int val = std::stoi(value);
         return static_cast<uint8_t>(val & 0xFF);
