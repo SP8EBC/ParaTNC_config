@@ -180,10 +180,10 @@ int main (int argc, char *argv[])
 
 	if (portName.length () > 1) {
 		std::cout << "I = main, opening user specified port " << portName << std::endl;
-		portOpenResult = s.init (portName, B9600);
+		portOpenResult = s.init (portName, 9600);
 	}
 	else {
-		portOpenResult = s.init ("/dev/ttyS0", B9600);
+		portOpenResult = s.init ("/dev/ttyS0", 9600);
 	}
 
 	if (!portOpenResult) {

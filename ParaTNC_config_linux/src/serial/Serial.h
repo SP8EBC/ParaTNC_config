@@ -8,13 +8,6 @@
 #ifndef SERIAL_SERIAL_H_
 #define SERIAL_SERIAL_H_
 
-#include <stdio.h>      // standard input / output functions
-#include <stdlib.h>
-#include <string.h>     // string function definitions
-#include <unistd.h>     // UNIX standard function definitions
-#include <fcntl.h>      // File control definitions
-#include <errno.h>      // Error number definitions
-#include <termios.h>    // POSIX terminal control definitions
 #include <string>
 
 #include <memory>
@@ -22,6 +15,15 @@
 #include <stdint.h>
 
 #include "../shared/types/SerialState.h"
+
+/**
+ * Serial port from wjwwood library, which does all operating system specific
+ * stuff internally. It is only forward declared here to keep the library
+ * include path (and the library header itself) local to Serial.cpp
+ */
+namespace serial {
+	class Serial;
+}
 
 /**
  * Due to some unfortunate omission there is a inconsistency in KISS extented protocol.
@@ -43,6 +45,23 @@
 #define SERIAL_RAW_ARRAY_SIZE	2048
 
 /**
+ * How long (in milliseconds) a single read call waits for data before it
+ * gives up and returns with nothing received
+ */
+#define SERIAL_READ_TIMEOUT_MSEC		300u
+
+/**
+ * Constant part of a timeout (in milliseconds) used for transmission
+ */
+#define SERIAL_WRITE_TIMEOUT_MSEC		1000u
+
+/**
+ * Per byte part of a transmission timeout (in milliseconds). Ten milliseconds
+ * for each byte is way more than enough even for slowest baudrates used here
+ */
+#define SERIAL_WRITE_TIMEOUT_PER_BYTE_MSEC	10u
+
+/**
  * Class implementing communication through serial port
  */
 class Serial {
@@ -53,15 +72,10 @@ class Serial {
 	SerialState serialState;
 
 	/**
-	 * Handle to serial port
+	 * Serial port itself. All operating system specific calls are done
+	 * by the library, this class only uses its portable API
 	 */
-	int handle;
-
-	/**
-	 * Linux stuff
-	 */
-	struct termios tty;
-	struct termios tty_old;
+	std::unique_ptr<serial::Serial> port;
 
 	/**
 	 * Array which holds data received from device connected to serial port
@@ -88,11 +102,11 @@ public:
 
 	/**
 	 * Initializes and opens serial port
-	 * @param port
-	 * @param speed
+	 * @param portName
+	 * @param baudrate	baudrate as a plain number of bits per second, like 9600
 	 * @return
 	 */
-	bool init(std::string port, speed_t speed);
+	bool init(std::string portName, uint32_t baudrate);
 	void testTransmit();
 
 	/**

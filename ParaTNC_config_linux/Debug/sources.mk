@@ -38,4 +38,7 @@ shared/services \
 src \
 src/ctable-master/src \
 src/serial \
+src/wjwwood_serial/src \
+src/wjwwood_serial/src/impl \
+src/wjwwood_serial/src/impl/list_ports \
 

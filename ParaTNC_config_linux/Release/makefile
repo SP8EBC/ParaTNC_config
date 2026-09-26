@@ -8,6 +8,9 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/wjwwood_serial/src/impl/list_ports/subdir.mk
+-include src/wjwwood_serial/src/impl/subdir.mk
+-include src/wjwwood_serial/src/subdir.mk
 -include src/serial/subdir.mk
 -include src/ctable-master/src/subdir.mk
 -include src/subdir.mk

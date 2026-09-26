@@ -9,6 +9,7 @@
 #include "SrvReadDid.h"
 #include "../shared/kiss_communication_service_ids.h"
 
+#include <cstring>
 #include <iostream>
 
 SrvReadDid::SrvReadDid() {
