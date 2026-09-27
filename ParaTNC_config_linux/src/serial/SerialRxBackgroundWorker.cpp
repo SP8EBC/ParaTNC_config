@@ -8,7 +8,7 @@
 #include "../AuxStuff.h"
 #include "../shared/exceptions/TimeoutE.h"
 #include "../shared/kiss_communication_service_ids.h"
-#include <pthread.h>
+#include <semaphore.h>
 #include <serial/SerialRxBackgroundWorker.h>
 
 #include <iostream>
@@ -18,8 +18,6 @@ SerialRxBackgroundWorker::SerialRxBackgroundWorker (Serial *serial,
 													std::function<void (uint16_t)> _nrcCallback)
 	: ctx (serial), callbackMap (callbcks), nrcCallback (_nrcCallback)
 {
-	workerStartSync = PTHREAD_COND_INITIALIZER;
-
 	workerLock = PTHREAD_MUTEX_INITIALIZER;
 
 	thread = -1;
@@ -50,7 +48,7 @@ void SerialRxBackgroundWorker::waitForStartup (void)
 
 	// if not wait on condition variable
 	pthread_mutex_lock (&this->workerLock);
-	pthread_cond_wait (&this->workerStartSync, &this->workerLock);
+	sem_wait (&this->workerStartSync);
 	pthread_mutex_unlock (&this->workerLock);
 }
 
@@ -69,9 +67,9 @@ void SerialRxBackgroundWorker::worker (void)
 	std::cout << "I = SerialWorker::worker, start " << std::endl;
 
 	// signalize a waiting thread that this worker has started
-	pthread_mutex_lock (&this->workerLock);
-	pthread_cond_signal (&this->workerStartSync);
-	pthread_mutex_unlock (&this->workerLock);
+	// pthread_mutex_lock (&this->workerLock);			// TODO::
+	sem_post (&this->workerStartSync);				
+	// pthread_mutex_unlock (&this->workerLock);		// TODO::???
 
 	// set flag which is then used by waiting thread to check if worker
 	// had started before that thread
@@ -135,8 +133,18 @@ bool SerialRxBackgroundWorker::start (void)
 		// initialize mutex
 		const int mutex_init_result = pthread_mutex_init (&workerLock, NULL);
 
-		// initialize condition variable
-		const int cond_init_result = pthread_cond_init (&workerStartSync, NULL);
+		// initialize semaphore
+		//		If  pshared  has the value 0, then the semaphore is shared between the threads of a process, 
+		//		and should be located at some address that is visible
+		//		to all threads (e.g., a global variable, or a variable allocated dynamically on the heap).
+
+		//		If pshared is nonzero, then the semaphore is shared between processes, and should be located 
+		//		in  a  region  of  shared  memory  (see  shm_open(3), mmap(2), and shmget(2)).  
+		//		(Since a child created by fork(2) inherits its parent's memory mappings, 
+		//		it can also access the semaphore.)  Any process that can access the shared memory 
+		//		region can operate on the semaphore using sem_post(3), sem_wait(3), and so on.
+
+		const int cond_init_result = sem_init (&workerStartSync, (int)0, (unsigned int)0);
 
 		// check and proceed only if all things were initialized correctly
 		if (cond_init_result == 0 && mutex_init_result == 0) {

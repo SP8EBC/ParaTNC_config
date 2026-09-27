@@ -19,7 +19,7 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <pthread.h>
+#include <semaphore.h>
 #include <serial/SerialRxBackgroundWorker.h>
 #include <vector>
 
@@ -45,7 +45,7 @@ SrvReset srvReset;
 SrvRoutineControl srvRoutineControl;
 
 // Declaration of thread condition variable
-pthread_cond_t cond1 = PTHREAD_COND_INITIALIZER;
+sem_t cond1;
 
 // declaring mutex
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -77,7 +77,7 @@ static void nrc_callback (uint16_t nrc)
 { exit (nrc); }
 
 static void timeout_callback (void)
-{ pthread_cond_signal (&cond1); }
+{ sem_post (&cond1); }
 
 void routine_result_callback (RoutineControlResult result)
 {
@@ -85,7 +85,7 @@ void routine_result_callback (RoutineControlResult result)
 			  << ", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode
 			  << std::endl;
 
-	pthread_cond_signal (&cond1);
+	sem_post (&cond1);
 }
 
 int main (int argc, char *argv[])
@@ -267,11 +267,10 @@ int main (int argc, char *argv[])
 
 		while (true) {
 			srvReadDid.sendRequestForDid (did);
-			s.waitForTransmissionDone ();
 
 			pthread_mutex_lock (&lock);
 			// wait for configuration to be received
-			pthread_cond_wait (&cond1, &lock);
+			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
 
 			sleep (1);
@@ -326,25 +325,17 @@ int main (int argc, char *argv[])
 	}
 	else {
 		srvGetVersion.sendRequest ();
-		s.waitForTransmissionDone ();
 
 		// wait for software version
 		pthread_mutex_lock (&lock);
-		pthread_cond_wait (&cond1, &lock);
+		sem_wait (&cond1);
 		pthread_mutex_unlock (&lock);
 
-		// srvRoutineControl.startRoutine (0x5254, routine_result_callback, 0x0909, 0x001A0619);
-
-		// pthread_mutex_lock (&lock);
-		// pthread_cond_wait (&cond1, &lock);
-		// pthread_mutex_unlock (&lock);
-
 		srvRunningConfig.sendRequest ();
-		s.waitForTransmissionDone ();
 
 		pthread_mutex_lock (&lock);
 		// wait for configuration to be received
-		pthread_cond_wait (&cond1, &lock);
+		sem_wait (&cond1);
 		pthread_mutex_unlock (&lock);
 
 		std::string callsign;
@@ -372,11 +363,10 @@ int main (int argc, char *argv[])
 					  << std::endl;
 
 			srvReadDid.sendRequestForDid (did_list[i]);
-			s.waitForTransmissionDone ();
 
 			pthread_mutex_lock (&lock);
 			// wait for configuration to be received
-			pthread_cond_wait (&cond1, &lock);
+			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
 
 			if (did_list[i] == 0xFF00U) {

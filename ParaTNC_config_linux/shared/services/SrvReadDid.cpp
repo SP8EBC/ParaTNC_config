@@ -340,7 +340,7 @@ void SrvReadDid::callback(
 #else
 	if (conditionVariable != 0x00) {
 
-		pthread_cond_signal(conditionVariable);
+		sem_post(conditionVariable);
 	}
 #endif
 }

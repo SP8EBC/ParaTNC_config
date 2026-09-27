@@ -24,7 +24,7 @@ const uint16_t LogDumper::daysInYearByMonth[2][13] =
 };
 
 
-LogDumper::LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, SerialRxBackgroundWorker& _serial_thread) :
+LogDumper::LogDumper(SrvReadMemory& _srvReadMemory, sem_t& _cond1, SerialRxBackgroundWorker& _serial_thread) :
 								srvReadMemory(_srvReadMemory),
 								cond1(_cond1),
 								serialRxBackgroundWorker(_serial_thread){
@@ -122,7 +122,7 @@ bool LogDumper::convertEventToExposedEvent(const event_log_t * event, event_log_
 
 void LogDumper::timeoutCallback(void) {
 	timeout = true;
-	pthread_cond_signal(&cond1);
+	sem_post(&cond1);
 }
 
 void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
@@ -161,11 +161,11 @@ void LogDumper::dumpEventsToReport(uint32_t startAddress, uint32_t endAddress,
 				". Total progress: " << currentProgress << "%" << std::endl;
 	    const uint32_t address = startAddress + (logEntrySize * i);
 	    srvReadMemory.sendRequestForMemoryRange(address, sizeof(event_log_t));
-	    srvReadMemory.waitForTransmissionDone();
+	    //srvReadMemory.waitForTransmissionDone();
 
 	    pthread_mutex_lock(&lock);
 	    // wait for configuration to be received
-	    pthread_cond_wait(&cond1, &lock);
+	    sem_wait(&cond1);
 	    pthread_mutex_unlock(&lock);
 
 	    if (timeout) {

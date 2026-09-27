@@ -16,7 +16,7 @@
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 #include <windows.h>
 #else
-#include <pthread.h>
+#include <semaphore.h>
 #endif
 
 
@@ -33,7 +33,7 @@ class SrvReadMemory: public IService {
 	 * Condition variable used to synchronize and lock another thread until
 	 * memory erase is done. TNC sends ACK after flash operation is done.
 	 */
-	pthread_cond_t * conditionVariable;
+	sem_t * conditionVariable;
 #endif
 
 	/**
@@ -81,7 +81,7 @@ public:
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 
 #else
-	void setConditionVariable(pthread_cond_t * conditionVariable) {
+	void setConditionVariable(sem_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 #endif

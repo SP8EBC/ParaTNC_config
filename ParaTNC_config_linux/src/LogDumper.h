@@ -36,7 +36,7 @@ class LogDumper {
 	};
 
 	SrvReadMemory& srvReadMemory;
-	pthread_cond_t& cond1;
+	sem_t& cond1;
 
 	SerialRxBackgroundWorker &serialRxBackgroundWorker;
 
@@ -62,7 +62,7 @@ protected:
 
 public:
 
-	LogDumper(SrvReadMemory& _srvReadMemory, pthread_cond_t& _cond1, SerialRxBackgroundWorker& _serial_thread);
+	LogDumper(SrvReadMemory& _srvReadMemory, sem_t& _cond1, SerialRxBackgroundWorker& _serial_thread);
 	virtual ~LogDumper();
 
 	void dumpEventsToReport(uint32_t startAddress, uint32_t endAddress, std::string filename, bool exitOnFirstCrcFail);

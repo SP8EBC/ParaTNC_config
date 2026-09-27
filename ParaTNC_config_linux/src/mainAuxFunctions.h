@@ -47,7 +47,7 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name,
  * @param _cond1
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
-				   pthread_cond_t &_cond1);
+				   sem_t &_cond1);
 
 /**
  *
@@ -59,7 +59,7 @@ void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_m
  */
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														pthread_cond_t &_cond1);
+														sem_t &_cond1);
 
 
 /**
@@ -73,7 +73,7 @@ std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_sr
  */
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														pthread_cond_t &_cond1,
+														sem_t &_cond1,
 														std::string _fileNamePrefix);
 
 /**
@@ -92,7 +92,7 @@ std::shared_ptr<IConfigurationManager>
 main_writeConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvReadDid &_srvReadDid,
 				  SrvEraseStartupConfig &_srvEraseConfig,
 				  SrvSendStartupConfig &_srvSendStartupConfig, BatchConfig &_batchConfig,
-				  Serial &_s, pthread_mutex_t &_lock, pthread_cond_t &_cond1);
+				  Serial &_s, pthread_mutex_t &_lock, sem_t &_cond1);
 
 /**
  *
@@ -109,6 +109,6 @@ void
 main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvReadDid &_srvReadDid,
 				  SrvEraseStartupConfig &_srvEraseConfig,
 				  SrvSendStartupConfig &_srvSendStartupConfig,
-				  Serial &_s, pthread_mutex_t &_lock, pthread_cond_t &_cond1);
+				  Serial &_s, pthread_mutex_t &_lock, sem_t &_cond1);
 
 #endif /* SRC_MAINAUXFUNCTIONS_H_ */

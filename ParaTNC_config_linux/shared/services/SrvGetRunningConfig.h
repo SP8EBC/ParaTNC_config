@@ -19,7 +19,7 @@
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 #include <windows.h>
 #else
-#include <pthread.h>
+#include <semaphore.h>
 #endif
 
 class SrvGetRunningConfig : public IService {
@@ -40,7 +40,7 @@ class SrvGetRunningConfig : public IService {
 	 *	Condition variable used to synchronize threads and wait for all configuration to be
 	 *	received from TNC
 	 */
-	pthread_cond_t * conditionVariable;
+	sem_t * conditionVariable;
 #endif
 
 	/**
@@ -117,7 +117,7 @@ public:
 #if defined (_MSC_VER) && (_MSC_VER <= 1400)
 
 #else
-	void setConditionVariable(pthread_cond_t * conditionVariable) {
+	void setConditionVariable(sem_t * conditionVariable) {
 		this->conditionVariable = conditionVariable;
 	}
 #endif

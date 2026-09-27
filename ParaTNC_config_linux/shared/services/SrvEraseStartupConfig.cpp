@@ -7,7 +7,6 @@
 #include "stdafx.h"
 
 #include "SrvEraseStartupConfig.h"
-//#include "../types/NRC.h"
 #include "../kiss_communication_service_ids.h"
 
 #include <vector>
@@ -76,7 +75,7 @@ void SrvEraseStartupConfig::callback(
 	SetEvent(syncEvent);
 #else
 	if (conditionVariable != 0x00) {
-		pthread_cond_signal(conditionVariable);
+		sem_post(conditionVariable);
 	}
 #endif
 

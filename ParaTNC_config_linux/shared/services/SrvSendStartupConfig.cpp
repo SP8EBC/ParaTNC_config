@@ -35,7 +35,6 @@ SrvSendStartupConfig::SrvSendStartupConfig(int _singleFrameLn) : singleFrameLn(_
 
 	internalSync = CreateEvent(NULL, false, false, L"SendConfigSyncEv");
 #else
-	internalSync = PTHREAD_COND_INITIALIZER;
 
 	conditionVariable = 0;
 #endif
@@ -56,7 +55,6 @@ SrvSendStartupConfig::SrvSendStartupConfig(const SrvSendStartupConfig &other) : 
 
 	internalSync = CreateEvent(NULL, false, false, L"SendConfigSyncEv");
 #else
-	internalSync = PTHREAD_COND_INITIALIZER;
 
 	conditionVariable = 0;
 #endif
@@ -120,9 +118,6 @@ void SrvSendStartupConfig::sendRequest() {
 		// increase currrent offset
 		currentOffset += singleFrameLn;
 
-		//usleep(40000);
-		//sleep(5);
-
 		// transmit fame to TNC
 		if (s != 0) {
 			s->transmitKissFrame(segmentedData);
@@ -135,7 +130,7 @@ void SrvSendStartupConfig::sendRequest() {
 	    pthread_mutex_lock(&lock);
 
 	    // wait for configuration to be received
-	    pthread_cond_wait(&internalSync, &lock);
+	    sem_wait(&internalSync);
 
 	    pthread_mutex_unlock(&lock);
 #endif
@@ -184,7 +179,6 @@ void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk
 				segmentedData.insert(segmentedData.end(), begin + currentOffset, begin + currentOffset + singleFrameLn);
 			}
 
-			//std::cout << "I = SrvSendStartupConfig::receiveSynchronously, currentOffset: 0x" << std::hex << (int)currentOffset  << std::dec << std::endl;
 			std::cout << "I = SrvSendStartupConfig::receiveSynchronously, " << i << " from " << howManyFrames
 					  << ", currentOffset: 0x" << std::hex << (int)currentOffset << std::dec
 					  << std::endl;
@@ -209,18 +203,6 @@ void SrvSendStartupConfig::receiveSynchronously(IService_NegativeResponseCodeCbk
 						  << AuxStuff::nrcToString (operationResult) << std::endl;
 			}
 
-//	#if defined (_MSC_VER) && (_MSC_VER <= 1400)
-//			// TODO: Do not ignore return value here
-//			WaitForSingleObject(internalSync, (DWORD)1234u);
-//	#else
-//		    pthread_mutex_lock(&lock);
-//
-//		    // wait for configuration to be received
-//		    pthread_cond_wait(&internalSync, &lock);
-//
-//		    pthread_mutex_unlock(&lock);
-//	#endif
-
 			response.clear();
 		}
 	}
@@ -240,10 +222,10 @@ void SrvSendStartupConfig::callback(
 
 	SetEvent(syncEvent);
 #else
-	pthread_cond_signal(&internalSync);
+	sem_post(&internalSync);
 
 	if (conditionVariable) {
-		pthread_cond_signal(conditionVariable);
+		sem_post(conditionVariable);
 	}
 #endif
 }

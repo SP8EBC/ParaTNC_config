@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <map>
+#include <semaphore.h>
 
 #include "Serial.h"
 
@@ -35,7 +36,7 @@ class SerialRxBackgroundWorker {
 	/**
 	 *
 	 */
-	pthread_cond_t workerStartSync;
+	sem_t workerStartSync;
 
 	pthread_mutex_t workerLock;
 

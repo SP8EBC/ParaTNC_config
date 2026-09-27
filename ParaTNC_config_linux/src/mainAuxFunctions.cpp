@@ -9,7 +9,7 @@
 
 #include "../shared/services/SrvGetVersionAndId.h"
 #include "serial/Serial.h"
-#include <pthread.h>
+#include <semaphore.h>
 
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
@@ -60,26 +60,26 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
  * @param _cond1
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
-				   pthread_cond_t &_cond1)
+				   sem_t &_cond1)
 {
 	_srvReadDid.sendRequestForDid (did);
-	_s.waitForTransmissionDone ();
+	//_s.waitForTransmissionDone ();
 	pthread_mutex_lock (&_lock);
 	// wait for DID value to be received
-	pthread_cond_wait (&_cond1, &_lock);
+	sem_wait (&_cond1);
 	pthread_mutex_unlock (&_lock);
 	const DidResponse &response = _srvReadDid.getDidResponse ();
 }
 
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														pthread_cond_t &_cond1)
+														sem_t &_cond1)
 {
 	_srvRunningConfig.sendRequest ();
-	_s.waitForTransmissionDone ();
+	//_s.waitForTransmissionDone ();
 	pthread_mutex_lock (&_lock);
 	// wait for configuration to be received
-	pthread_cond_wait (&_cond1, &_lock);
+	sem_wait (&_cond1);
 	pthread_mutex_unlock (&_lock);
 	if (_srvRunningConfig.isValidatedOk ()) {
 		// create configuration manager from received data. CRC validation is done inside
@@ -105,7 +105,7 @@ std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_sr
  */
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														pthread_cond_t &_cond1,
+														sem_t &_cond1,
 														std::string _fileNamePrefix)
 {
 	std::string callsign; // this is required to create export filename
@@ -144,7 +144,7 @@ std::shared_ptr<IConfigurationManager>
 main_writeConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvReadDid &_srvReadDid,
 				  SrvEraseStartupConfig &_srvEraseConfig,
 				  SrvSendStartupConfig &_srvSendStartupConfig, BatchConfig &_batchConfig,
-				  Serial &_s, pthread_mutex_t &_lock, pthread_cond_t &_cond1)
+				  Serial &_s, pthread_mutex_t &_lock, sem_t &_cond1)
 {
 	if (!_configManager) {
 		_configManager = std::make_shared<ConfigurationManager> ();
@@ -186,7 +186,7 @@ main_writeConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvRead
 void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
 					   SrvReadDid &_srvReadDid, SrvEraseStartupConfig &_srvEraseConfig,
 					   SrvSendStartupConfig &_srvSendStartupConfig, Serial &_s,
-					   pthread_mutex_t &_lock, pthread_cond_t &_cond1)
+					   pthread_mutex_t &_lock, sem_t &_cond1)
 {
 	if (!_configManager) {
 		throw std::runtime_error ("_configManager must be set!");
@@ -194,10 +194,10 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
 
 	// read DID 0xF000u -> config_running_pgm_counter
 	_srvReadDid.sendRequestForDid (0xF000u);
-	_s.waitForTransmissionDone ();
+	//_s.waitForTransmissionDone ();
 	pthread_mutex_lock (&_lock);
 	// wait for DID value to be received
-	pthread_cond_wait (&_cond1, &_lock);
+	sem_wait (&_cond1);
 	pthread_mutex_unlock (&_lock);
 	const DidResponse &response = _srvReadDid.getDidResponse ();
 	// check if DID response for id 0xF000 has correct type
@@ -213,10 +213,10 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
 
 		// send startup config erase request
 		_srvEraseConfig.sendRequest ();
-		_s.waitForTransmissionDone ();
+		//_s.waitForTransmissionDone ();
 		pthread_mutex_lock (&_lock);
 		// wait for erase to be done
-		pthread_cond_wait (&_cond1, &_lock);
+		sem_wait (&_cond1);
 		pthread_mutex_unlock (&_lock);
 		std::cout << "I = main, erase done" << std::endl;
 
