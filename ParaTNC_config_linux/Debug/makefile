@@ -8,17 +8,17 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include lib/wjwwood_serial/src/impl/list_ports/subdir.mk
--include lib/wjwwood_serial/src/impl/subdir.mk
--include lib/wjwwood_serial/src/subdir.mk
 -include src/serial/subdir.mk
--include lib/ctable-master/src/subdir.mk
 -include src/subdir.mk
 -include shared/services/subdir.mk
 -include shared/exceptions/subdir.mk
 -include shared/crc/subdir.mk
 -include shared/config/subdir.mk
 -include shared/subdir.mk
+-include lib/wjwwood_serial/src/impl/list_ports/subdir.mk
+-include lib/wjwwood_serial/src/impl/subdir.mk
+-include lib/wjwwood_serial/src/subdir.mk
+-include lib/ctable-master/src/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++M_DEPS)),)
 -include $(C++M_DEPS)

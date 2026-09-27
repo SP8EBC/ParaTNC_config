@@ -11,10 +11,10 @@ CPP_SRCS += \
 ../src/LogDumper.cpp \
 ../src/LogDumperTextFile.cpp \
 ../src/LogDumper_test.cpp \
+../src/Routines.cpp \
 ../src/TimeTools.cpp \
 ../src/main.cpp \
-../src/mainAuxFunctions.cpp	\
-../src/Routines.cpp 
+../src/mainAuxFunctions.cpp 
 
 CPP_DEPS += \
 ./src/AuxStuff.d \
@@ -24,10 +24,10 @@ CPP_DEPS += \
 ./src/LogDumper.d \
 ./src/LogDumperTextFile.d \
 ./src/LogDumper_test.d \
+./src/Routines.d \
 ./src/TimeTools.d \
 ./src/main.d \
-./src/mainAuxFunctions.d \
-./src/Routines.d 
+./src/mainAuxFunctions.d 
 
 OBJS += \
 ./src/AuxStuff.o \
@@ -37,24 +37,24 @@ OBJS += \
 ./src/LogDumper.o \
 ./src/LogDumperTextFile.o \
 ./src/LogDumper_test.o \
+./src/Routines.o \
 ./src/TimeTools.o \
 ./src/main.o \
-./src/mainAuxFunctions.o \
-./src/Routines.o 
+./src/mainAuxFunctions.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../lib/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../lib/ctable-master/src -I../src/ -I../lib/wjwwood_serial/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
 src/TimeTools.o: ../src/TimeTools.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -U_XOPEN_SOURCE -I../src/shared -I../lib/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -U_XOPEN_SOURCE -I../src/shared -I../lib/ctable-master/src -I../src/ -I../lib/wjwwood_serial/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -62,7 +62,7 @@ src/TimeTools.o: ../src/TimeTools.cpp src/subdir.mk
 clean: clean-src
 
 clean-src:
-	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/ConfigExporter.d ./src/ConfigExporter.o ./src/ConfigImporter.d ./src/ConfigImporter.o ./src/LogDumper.d ./src/LogDumper.o ./src/LogDumperTextFile.d ./src/LogDumperTextFile.o ./src/LogDumper_test.d ./src/LogDumper_test.o ./src/ProgramConfig.d ./src/ProgramConfig.o ./src/TimeTools.d ./src/TimeTools.o ./src/main.d ./src/main.o ./src/mainAuxFunctions.d ./src/mainAuxFunctions.o
+	-$(RM) ./src/AuxStuff.d ./src/AuxStuff.o ./src/AuxStuff_test.d ./src/AuxStuff_test.o ./src/ConfigExporter.d ./src/ConfigExporter.o ./src/ConfigImporter.d ./src/ConfigImporter.o ./src/LogDumper.d ./src/LogDumper.o ./src/LogDumperTextFile.d ./src/LogDumperTextFile.o ./src/LogDumper_test.d ./src/LogDumper_test.o ./src/Routines.d ./src/Routines.o ./src/TimeTools.d ./src/TimeTools.o ./src/main.d ./src/main.o ./src/mainAuxFunctions.d ./src/mainAuxFunctions.o
 
 .PHONY: clean-src
 

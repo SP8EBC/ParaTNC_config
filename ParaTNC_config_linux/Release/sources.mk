@@ -3,18 +3,25 @@
 ################################################################################
 
 ASM_SRCS := 
+C++M_SRCS := 
 C++_SRCS := 
+CCM_SRCS := 
 CC_SRCS := 
 CPP_SRCS := 
+CXXM_SRCS := 
 CXX_SRCS := 
 C_SRCS := 
 C_UPPER_SRCS := 
 OBJ_SRCS := 
 O_SRCS := 
+SX_SRCS := 
 S_UPPER_SRCS := 
+C++M_DEPS := 
 C++_DEPS := 
+CCM_DEPS := 
 CC_DEPS := 
 CPP_DEPS := 
+CXXM_DEPS := 
 CXX_DEPS := 
 C_DEPS := 
 C_UPPER_DEPS := 
@@ -23,15 +30,15 @@ OBJS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+lib/ctable-master/src \
+lib/wjwwood_serial/src/impl/list_ports \
+lib/wjwwood_serial/src/impl \
+lib/wjwwood_serial/src \
 shared/config \
 shared/crc \
 shared \
 shared/exceptions \
 shared/services \
 src \
-lib/ctable-master/src \
 src/serial \
-lib/wjwwood_serial/src \
-lib/wjwwood_serial/src/impl \
-lib/wjwwood_serial/src/impl/list_ports \
 

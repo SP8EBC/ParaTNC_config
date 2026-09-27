@@ -20,6 +20,7 @@
 #include <memory>
 #include <semaphore.h>
 #include <serial/SerialRxBackgroundWorker.h>
+#include <serial/SerialPromptUserForPort.h>
 #include <vector>
 
 #include "../shared/config/ConfigVer0.h"
@@ -176,7 +177,8 @@ int main (int argc, char *argv[])
 		portOpenResult = s.init (portName, 9600);
 	}
 	else {
-		portOpenResult = s.init ("/dev/ttyS0", 9600);
+		std::string port = SerialPromptUserForPort::promptForSerial();
+		portOpenResult = s.init (port, 9600);
 	}
 
 	if (!portOpenResult) {

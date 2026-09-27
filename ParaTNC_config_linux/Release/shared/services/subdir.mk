@@ -13,6 +13,8 @@ CPP_SRCS += \
 ../shared/services/SrvReadMemory.cpp \
 ../shared/services/SrvReadMemory_test.cpp \
 ../shared/services/SrvReset.cpp \
+../shared/services/SrvRoutineControl.cpp \
+../shared/services/SrvRoutineControl_test.cpp \
 ../shared/services/SrvSendStartupConfig.cpp 
 
 CPP_DEPS += \
@@ -25,6 +27,8 @@ CPP_DEPS += \
 ./shared/services/SrvReadMemory.d \
 ./shared/services/SrvReadMemory_test.d \
 ./shared/services/SrvReset.d \
+./shared/services/SrvRoutineControl.d \
+./shared/services/SrvRoutineControl_test.d \
 ./shared/services/SrvSendStartupConfig.d 
 
 OBJS += \
@@ -37,6 +41,8 @@ OBJS += \
 ./shared/services/SrvReadMemory.o \
 ./shared/services/SrvReadMemory_test.o \
 ./shared/services/SrvReset.o \
+./shared/services/SrvRoutineControl.o \
+./shared/services/SrvRoutineControl_test.o \
 ./shared/services/SrvSendStartupConfig.o 
 
 
@@ -44,7 +50,7 @@ OBJS += \
 shared/services/%.o: ../shared/services/%.cpp shared/services/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++98 -I../src/shared -I../src/ -I"/home/mateusz/Documents/___STM32/ParaTNC_config/ParaTNC_config_linux/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../lib/ctable-master/src -I../src/ -I../lib/wjwwood_serial/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -52,7 +58,7 @@ shared/services/%.o: ../shared/services/%.cpp shared/services/subdir.mk
 clean: clean-shared-2f-services
 
 clean-shared-2f-services:
-	-$(RM) ./shared/services/IService.d ./shared/services/IService.o ./shared/services/SrvEraseStartupConfig.d ./shared/services/SrvEraseStartupConfig.o ./shared/services/SrvGetRunningConfig.d ./shared/services/SrvGetRunningConfig.o ./shared/services/SrvGetVersionAndId.d ./shared/services/SrvGetVersionAndId.o ./shared/services/SrvReadDid.d ./shared/services/SrvReadDid.o ./shared/services/SrvReadDid_test.d ./shared/services/SrvReadDid_test.o ./shared/services/SrvReadMemory.d ./shared/services/SrvReadMemory.o ./shared/services/SrvReadMemory_test.d ./shared/services/SrvReadMemory_test.o ./shared/services/SrvReset.d ./shared/services/SrvReset.o ./shared/services/SrvSendStartupConfig.d ./shared/services/SrvSendStartupConfig.o
+	-$(RM) ./shared/services/IService.d ./shared/services/IService.o ./shared/services/SrvEraseStartupConfig.d ./shared/services/SrvEraseStartupConfig.o ./shared/services/SrvGetRunningConfig.d ./shared/services/SrvGetRunningConfig.o ./shared/services/SrvGetVersionAndId.d ./shared/services/SrvGetVersionAndId.o ./shared/services/SrvReadDid.d ./shared/services/SrvReadDid.o ./shared/services/SrvReadDid_test.d ./shared/services/SrvReadDid_test.o ./shared/services/SrvReadMemory.d ./shared/services/SrvReadMemory.o ./shared/services/SrvReadMemory_test.d ./shared/services/SrvReadMemory_test.o ./shared/services/SrvReset.d ./shared/services/SrvReset.o ./shared/services/SrvRoutineControl.d ./shared/services/SrvRoutineControl.o ./shared/services/SrvRoutineControl_test.d ./shared/services/SrvRoutineControl_test.o ./shared/services/SrvSendStartupConfig.d ./shared/services/SrvSendStartupConfig.o
 
 .PHONY: clean-shared-2f-services
 

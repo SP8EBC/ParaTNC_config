@@ -30,15 +30,15 @@ OBJS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+lib/ctable-master/src \
+lib/wjwwood_serial/src/impl/list_ports \
+lib/wjwwood_serial/src/impl \
+lib/wjwwood_serial/src \
 shared/config \
 shared/crc \
 shared \
 shared/exceptions \
 shared/services \
 src \
-lib/ctable-master/src \
 src/serial \
-lib/wjwwood_serial/src \
-lib/wjwwood_serial/src/impl \
-lib/wjwwood_serial/src/impl/list_ports \
 

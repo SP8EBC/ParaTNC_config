@@ -5,14 +5,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/serial/Serial.cpp \
+../src/serial/SerialPromptUserForPort.cpp \
 ../src/serial/SerialRxBackgroundWorker.cpp 
 
 CPP_DEPS += \
 ./src/serial/Serial.d \
+./src/serial/SerialPromptUserForPort.d \
 ./src/serial/SerialRxBackgroundWorker.d 
 
 OBJS += \
 ./src/serial/Serial.o \
+./src/serial/SerialPromptUserForPort.o \
 ./src/serial/SerialRxBackgroundWorker.o 
 
 
@@ -20,7 +23,7 @@ OBJS += \
 src/serial/%.o: ../src/serial/%.cpp src/serial/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../lib/wjwwood_serial/include -I../src/shared -I../lib/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../lib/ctable-master/src -I../src/ -I../lib/wjwwood_serial/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
@@ -28,7 +31,7 @@ src/serial/%.o: ../src/serial/%.cpp src/serial/subdir.mk
 clean: clean-src-2f-serial
 
 clean-src-2f-serial:
-	-$(RM) ./src/serial/Serial.d ./src/serial/Serial.o ./src/serial/SerialRxBackgroundWorker.d ./src/serial/SerialRxBackgroundWorker.o
+	-$(RM) ./src/serial/Serial.d ./src/serial/Serial.o ./src/serial/SerialPromptUserForPort.d ./src/serial/SerialPromptUserForPort.o ./src/serial/SerialRxBackgroundWorker.d ./src/serial/SerialRxBackgroundWorker.o
 
 .PHONY: clean-src-2f-serial
 
