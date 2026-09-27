@@ -12,7 +12,6 @@
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
 #include "LogDumper.h"
-#include "ProgramConfig.h"
 #include "Routines.hpp"
 #include "TimeTools.h"
 #include "serial/Serial.h"
@@ -90,13 +89,7 @@ void routine_result_callback (RoutineControlResult result)
 
 int main (int argc, char *argv[])
 {
-#ifndef _ONLY_MANUAL_CFG
-	// ProgramConfig::readConfigFromFile("");
-#endif
 
-#ifdef _ONLY_MANUAL_CFG
-	ProgramConfig::manualConfig ();
-#endif
 	// clang-format off
 	TimeTools::initBoostTimezones();
 

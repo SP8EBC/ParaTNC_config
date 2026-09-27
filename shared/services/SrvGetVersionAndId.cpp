@@ -134,7 +134,7 @@ void SrvGetVersionAndId::callback(
 	SetEvent(syncEvent);
 #else
 	if (conditionVariable != 0) {
-		pthread_cond_signal(conditionVariable);
+		sem_post(conditionVariable);
 	}
 #endif
 

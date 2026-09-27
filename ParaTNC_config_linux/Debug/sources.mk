@@ -36,9 +36,9 @@ shared \
 shared/exceptions \
 shared/services \
 src \
-src/ctable-master/src \
+lib/ctable-master/src \
 src/serial \
-src/wjwwood_serial/src \
-src/wjwwood_serial/src/impl \
-src/wjwwood_serial/src/impl/list_ports \
+lib/wjwwood_serial/src \
+lib/wjwwood_serial/src/impl \
+lib/wjwwood_serial/src/impl/list_ports \
 

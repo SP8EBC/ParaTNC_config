@@ -81,7 +81,7 @@ void SrvGetRunningConfig::callback(const std::vector<uint8_t> * frame) {
 			SetEvent(syncEvent);
 #else
 			if (conditionVariable) {
-				pthread_cond_signal(conditionVariable);
+				sem_post(conditionVariable);
 			}
 #endif
 		}

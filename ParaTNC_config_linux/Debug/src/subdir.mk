@@ -11,7 +11,6 @@ CPP_SRCS += \
 ../src/LogDumper.cpp \
 ../src/LogDumperTextFile.cpp \
 ../src/LogDumper_test.cpp \
-../src/ProgramConfig.cpp \
 ../src/TimeTools.cpp \
 ../src/main.cpp \
 ../src/mainAuxFunctions.cpp	\
@@ -25,7 +24,6 @@ CPP_DEPS += \
 ./src/LogDumper.d \
 ./src/LogDumperTextFile.d \
 ./src/LogDumper_test.d \
-./src/ProgramConfig.d \
 ./src/TimeTools.d \
 ./src/main.d \
 ./src/mainAuxFunctions.d \
@@ -39,7 +37,6 @@ OBJS += \
 ./src/LogDumper.o \
 ./src/LogDumperTextFile.o \
 ./src/LogDumper_test.o \
-./src/ProgramConfig.o \
 ./src/TimeTools.o \
 ./src/main.o \
 ./src/mainAuxFunctions.o \
@@ -50,14 +47,14 @@ OBJS += \
 src/%.o: ../src/%.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../src/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -D_XOPEN_SOURCE=600 -I../src/shared -I../lib/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
 src/TimeTools.o: ../src/TimeTools.cpp src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++17 -U_XOPEN_SOURCE -I../src/shared -I../src/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++17 -U_XOPEN_SOURCE -I../src/shared -I../lib/ctable-master/src -I../src/ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

@@ -20,7 +20,7 @@ OBJS += \
 src/serial/%.o: ../src/serial/%.cpp src/serial/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -std=c++98 -I../src/wjwwood_serial/include -I../src/shared -I../src/ -I"/home/mateusz/Documents/___STM32/ParaTNC_config/ParaTNC_config_linux/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	g++ -std=c++98 -I../lib/wjwwood_serial/include -I../src/shared -I../src/ -I"/home/mateusz/Documents/___STM32/ParaTNC_config/ParaTNC_config_linux/src" -O3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

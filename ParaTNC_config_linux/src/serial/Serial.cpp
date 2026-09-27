@@ -11,8 +11,6 @@
 
 #include <serial/serial.h>
 
-#include "../ProgramConfig.h"
-
 #include "../shared/exceptions/TimeoutE.h"
 #include "../shared/exceptions/TransmissionFailedEx.h"
 
