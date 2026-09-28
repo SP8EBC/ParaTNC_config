@@ -19,8 +19,8 @@
 #include <iostream>
 #include <memory>
 #include <semaphore.h>
-#include <serial/SerialRxBackgroundWorker.h>
 #include <serial/SerialPromptUserForPort.h>
+#include <serial/SerialRxBackgroundWorker.h>
 #include <vector>
 
 #include "../shared/config/ConfigVer0.h"
@@ -74,10 +74,14 @@ BatchConfig batchConfig;
 bool verboseLogging;
 
 static void nrc_callback (uint16_t nrc)
-{ exit (nrc); }
+{
+	exit (nrc);
+}
 
 static void timeout_callback (void)
-{ sem_post (&cond1); }
+{
+	sem_post (&cond1);
+}
 
 void routine_result_callback (RoutineControlResult result)
 {
@@ -177,7 +181,7 @@ int main (int argc, char *argv[])
 		portOpenResult = s.init (portName, 9600);
 	}
 	else {
-		std::string port = SerialPromptUserForPort::promptForSerial();
+		std::string port = SerialPromptUserForPort::promptForSerial ();
 		portOpenResult = s.init (port, 9600);
 	}
 
@@ -233,13 +237,13 @@ int main (int argc, char *argv[])
 		batchConfig.writeConfig = false;
 		batchConfig.amendConfig = true;
 	}
-	
+
 	if (odVariablesMap.count ("routine-rtc")) {
 		batchConfig.defaultBatch = false;
 		batchConfig.monitorMode = false;
 		batchConfig.routineSetRtc = true;
 	}
-	
+
 	if (odVariablesMap.count ("valid-events")) {
 		breakEventsLogDumpOnCrcFail = true;
 	}
@@ -274,7 +278,7 @@ int main (int argc, char *argv[])
 	else if (!batchConfig.defaultBatch && !batchConfig.monitorMode) {
 		// exec diagnostic services in order
 		if (batchConfig.routineSetRtc) {
-			routines.setRtcToLocalDateTime();
+			routines.setRtcToLocalDateTime ();
 		}
 		if (batchConfig.readDid) {
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);

@@ -1,13 +1,13 @@
 
 #include "Serial.h"
 
-#include <iostream>
-#include <ios>
-#include <stdint.h>
 #include <cstring>
-#include <vector>
+#include <ios>
+#include <iostream>
+#include <stdint.h>
 #include <string>
 #include <sys/time.h>
+#include <vector>
 
 #include <serial/serial.h>
 
@@ -16,12 +16,12 @@
 
 #include "../shared/types/ReceivingState.h"
 
-#define _FEND	(uint8_t)0xC0
-#define _FESC	(uint8_t)0xDB
-#define _TFEND	(uint8_t)0xDC
-#define _TFESC	(uint8_t)0xDD
+#define _FEND  (uint8_t)0xC0
+#define _FESC  (uint8_t)0xDB
+#define _TFEND (uint8_t)0xDC
+#define _TFESC (uint8_t)0xDD
 
-#define _NONSTANDARD	(uint8_t)0x0F
+#define _NONSTANDARD (uint8_t)0x0F
 
 #define FRAME_LN_OFFSET 2
 
@@ -47,7 +47,8 @@ const uint8_t Serial::TFEND[] = {_TFEND};
  */
 const uint8_t Serial::TFESC[] = {_TFESC};
 
-Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), rawArrayIterator(0), timeouts(0) {
+Serial::Serial () : serialState (SERIAL_NOT_CONFIGURED), rawArrayIterator (0), timeouts (0)
+{
 	memset (raw, 0x00, SERIAL_RAW_ARRAY_SIZE);
 }
 
@@ -56,7 +57,8 @@ Serial::Serial() : serialState(SERIAL_NOT_CONFIGURED), rawArrayIterator(0), time
  * automatically added
  * @param frame
  */
-void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
+void Serial::transmitKissFrame (const std::vector<uint8_t> &frame)
+{
 
 	size_t transmissionResult = 0;
 
@@ -65,7 +67,7 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		return;
 	}
 
-	//std::cout << "I = serial::transmitKissFrame, frame size: " << frame.size() << std::endl;
+	// std::cout << "I = serial::transmitKissFrame, frame size: " << frame.size() << std::endl;
 
 	if (this->serialState == SERIAL_IDLE) {
 
@@ -74,52 +76,54 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
 		std::vector<uint8_t> toTransmit;
 
 		// send FEND at begining
-		toTransmit.push_back(*Serial::FEND);
+		toTransmit.push_back (*Serial::FEND);
 
 		// send the content itself
-		for (std::vector<uint8_t>::const_iterator it = frame.begin(); it != frame.end(); it++) {
+		for (std::vector<uint8_t>::const_iterator it = frame.begin (); it != frame.end (); it++) {
 
 			// get byte fron the iterator
 			const uint8_t byte = *it;
 
 			switch (byte) {
-				case _FEND:
-					toTransmit.push_back(*Serial::FESC);
-					toTransmit.push_back(*Serial::TFEND);
-					break;
-				case _FESC:
-					toTransmit.push_back(*Serial::FESC);
-					toTransmit.push_back(*Serial::TFESC);
-					break;
-				default: {
-					// no special action needed
-					// put this byte into the buffer as-is
-					toTransmit.push_back(byte);
-					break;
-				}
+			case _FEND:
+				toTransmit.push_back (*Serial::FESC);
+				toTransmit.push_back (*Serial::TFEND);
+				break;
+			case _FESC:
+				toTransmit.push_back (*Serial::FESC);
+				toTransmit.push_back (*Serial::TFESC);
+				break;
+			default: {
+				// no special action needed
+				// put this byte into the buffer as-is
+				toTransmit.push_back (byte);
+				break;
+			}
 			}
 		}
 
 		// send FEND at the end
-		toTransmit.push_back(*Serial::FEND);
+		toTransmit.push_back (*Serial::FEND);
 
 		try {
-			transmissionResult = this->port->write(toTransmit);
+			transmissionResult = this->port->write (toTransmit);
 		}
-		catch (const std::exception & e) {
-			std::cout << "E = serial::transmitKissFrame, error has occured while sending: " << e.what() << std::endl;
+		catch (const std::exception &e) {
+			std::cout << "E = serial::transmitKissFrame, error has occured while sending: "
+					  << e.what () << std::endl;
 
-			throw TransmissionFailedEx();
+			throw TransmissionFailedEx ();
 		}
 
 		// check if everything has been pushed out to the serial port
-		if (transmissionResult != toTransmit.size()) {
-			std::cout << "E = serial::transmitKissFrame, only " << transmissionResult << " bytes out of " << toTransmit.size() << " have been sent" << std::endl;
+		if (transmissionResult != toTransmit.size ()) {
+			std::cout << "E = serial::transmitKissFrame, only " << transmissionResult
+					  << " bytes out of " << toTransmit.size () << " have been sent" << std::endl;
 
-			throw TransmissionFailedEx();
+			throw TransmissionFailedEx ();
 		}
 
-		//std::cout << "D = serial::transmitKissFrame, transmission done " << std::endl;
+		// std::cout << "D = serial::transmitKissFrame, transmission done " << std::endl;
 	}
 }
 
@@ -131,7 +135,8 @@ void Serial::transmitKissFrame(const std::vector<uint8_t> & frame) {
  * the controlled stalled for some reason.
  * @param frame
  */
-void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
+void Serial::receiveKissFrame (std::vector<uint8_t> &frame)
+{
 	struct timeval receivingStart, currentTime;
 
 	ReceivingState receivingState = RX_ST_WAITING_FOR_FEND;
@@ -151,35 +156,37 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 	int16_t expectedRxLength = 0;
 
 	// get a time when reception start
-	gettimeofday(&receivingStart, NULL);
+	gettimeofday (&receivingStart, NULL);
 
 	// zero
 	memset (raw, 0x00, SERIAL_RAW_ARRAY_SIZE);
 	do {
 		// get current time
-		gettimeofday(&currentTime, NULL);
+		gettimeofday (&currentTime, NULL);
 
 		// try to receive single byte
 		try {
-			rxLn = this->port->read(&rxData, 1);
+			rxLn = this->port->read (&rxData, 1);
 		}
-		catch (const std::exception & e) {
-			std::cout << "E = serial::receiveKissFrame, error has occured while receiving: " << e.what() << std::endl;
+		catch (const std::exception &e) {
+			std::cout << "E = serial::receiveKissFrame, error has occured while receiving: "
+					  << e.what () << std::endl;
 
-			throw TransmissionFailedEx();
+			throw TransmissionFailedEx ();
 		}
 
 		// no data has been received
 		if (rxLn == 0) {
-			//std::cout << "W = serial::receiveKissFrame" << std::endl;
+			// std::cout << "W = serial::receiveKissFrame" << std::endl;
 
 			// check if timeout, as without this the loop would spin here
 			// forever if the controller stops talking at all
 			if (currentTime.tv_sec - receivingStart.tv_sec > 10) {
 				timeouts++;
-				std::cout << "E = serial::receiveKissFrame, timeout has occured for " << timeouts << " time" << std::endl;
+				std::cout << "E = serial::receiveKissFrame, timeout has occured for " << timeouts
+						  << " time" << std::endl;
 
-				throw TimeoutE();
+				throw TimeoutE ();
 			}
 
 			if (verboseLogging) {
@@ -191,7 +198,7 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		}
 
 		// put received data into
-		raw[rawArrayIterator++]	= rxData;
+		raw[rawArrayIterator++] = rxData;
 		if (rawArrayIterator >= SERIAL_RAW_ARRAY_SIZE - 1) {
 			rawArrayIterator = 0;
 		}
@@ -202,10 +209,11 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		// for no sense.
 		if (currentTime.tv_sec - receivingStart.tv_sec > 10) {
 			timeouts++;
-			std::cout << "E = serial::receiveKissFrame, timeout has occured for " << timeouts << " time" << std::endl;
+			std::cout << "E = serial::receiveKissFrame, timeout has occured for " << timeouts
+					  << " time" << std::endl;
 
-			throw TimeoutE();
-			//continue;
+			throw TimeoutE ();
+			// continue;
 		}
 
 		if (receivingState == RX_ST_STARTED) {
@@ -215,32 +223,35 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 			// check if all bytes has been received
 			if (expectedRxLength <= 0) {
 				receivingState = RX_ST_DONE;
-				//std::cout << "I = serial::receiveKissFrame, receiving done, frame->size(): " << frame->size() << std::endl;
-				// do not place the last byte as this is always FEND
+				// std::cout << "I = serial::receiveKissFrame, receiving done, frame->size(): " <<
+				// frame->size() << std::endl;
+				//  do not place the last byte as this is always FEND
 				if (rxData != *FEND) {
-					std::cout << "E = serial::receiveKissFrame, the last byte is 0x" << std::hex << (int)rxData << std::dec << " not 0xC0 (FEND). " << std::endl;
-
+					std::cout << "E = serial::receiveKissFrame, the last byte is 0x" << std::hex
+							  << (int)rxData << std::dec << " not 0xC0 (FEND). " << std::endl;
 				}
 			}
 			else {
 				// add data to output buffer
-				frame.push_back(rxData);
+				frame.push_back (rxData);
 
 				if (rxData == *FEND) {
-					std::cout << "E = serial::receiveKissFrame, unexpected 0xC0 (FEND)! current expectedRxLength: " << expectedRxLength << ", i: " << rawArrayIterator << std::endl;
-
+					std::cout << "E = serial::receiveKissFrame, unexpected 0xC0 (FEND)! current "
+								 "expectedRxLength: "
+							  << expectedRxLength << ", i: " << rawArrayIterator << std::endl;
 				}
 			}
 		}
 
 		// the next byte after NONSTANDARD holds a frame size (from FEND to FEND)
 		if (receivingState == RX_ST_STARTED_WAITING_FOR_LN) {
-			expectedRxLength = rxData - 3;		// exclude FEND at the start and this byte
+			expectedRxLength = rxData - 3; // exclude FEND at the start and this byte
 			receivingState = RX_ST_STARTED;
 
-			//std::cout << "D = serial::receiveKissFrame, expectedRxLength: " << expectedRxLength << std::endl;
+			// std::cout << "D = serial::receiveKissFrame, expectedRxLength: " << expectedRxLength
+			// << std::endl;
 
-			frame.push_back(rxData);
+			frame.push_back (rxData);
 		}
 
 		if (receivingState == RX_ST_STARTED_WAITING_FOR_NONSTANDARD) {
@@ -252,12 +263,11 @@ void Serial::receiveKissFrame(std::vector<uint8_t> & frame) {
 		if (receivingState == RX_ST_WAITING_FOR_FEND && rxData == *FEND) {
 			receivingState = RX_ST_STARTED_WAITING_FOR_NONSTANDARD;
 		}
-	} while(receivingState != RX_ST_DONE);
-
-
+	} while (receivingState != RX_ST_DONE);
 }
 
-Serial::~Serial() {
+Serial::~Serial ()
+{
 	// unique_ptr closes and destroys the port from the library
 }
 
@@ -267,12 +277,12 @@ Serial::~Serial() {
  * @param baudrate	baudrate as a plain number of bits per second, like 9600
  * @return
  */
-bool Serial::init(std::string portName, uint32_t baudrate)
+bool Serial::init (std::string portName, uint32_t baudrate)
 {
 	// timeouts used by the library. Inter byte timeout is disabled, a single
 	// read waits SERIAL_READ_TIMEOUT_MSEC at most and then returns with
 	// whatever has been received (which might be nothing at all)
-	serial::Timeout portTimeouts (serial::Timeout::max(),
+	serial::Timeout portTimeouts (serial::Timeout::max (),
 								  SERIAL_READ_TIMEOUT_MSEC,
 								  0,
 								  SERIAL_WRITE_TIMEOUT_MSEC,
@@ -291,40 +301,43 @@ bool Serial::init(std::string portName, uint32_t baudrate)
 		this->port->setStopbits (serial::stopbits_one);
 		this->port->setFlowcontrol (serial::flowcontrol_none);
 
-		this->port->open();
+		this->port->open ();
 	}
-	catch (const std::exception & e) {
-		std::cout << "E = serial::init, cannot open serial port " << portName << ", " << e.what() << std::endl;
+	catch (const std::exception &e) {
+		std::cout << "E = serial::init, cannot open serial port " << portName << ", " << e.what ()
+				  << std::endl;
 
-		this->port.reset();
+		this->port.reset ();
 
 		return false;
 	}
 
-	if (!this->port->isOpen()) {
+	if (!this->port->isOpen ()) {
 		std::cout << "E = serial::init, serial port " << portName << " is not opened" << std::endl;
 
-		this->port.reset();
+		this->port.reset ();
 
 		return false;
 	}
 
 	// get rid of anything the operating system could buffer before the port was opened
-	this->port->flushInput();
+	this->port->flushInput ();
 
 	this->serialState = SERIAL_IDLE;
 
-	std::cout << "I = serial::init, serial port " << portName << " has been configured" << std::endl;
+	std::cout << "I = serial::init, serial port " << portName << " has been configured"
+			  << std::endl;
 
 	return true;
 }
 
-void Serial::waitForTransmissionDone() {
+void Serial::waitForTransmissionDone ()
+{
 
 	if (serialState == SERIAL_NOT_CONFIGURED) {
 		return;
 	}
 
 	// this waits until everything written to the port is physically sent out
-	this->port->flush();
+	this->port->flush ();
 }

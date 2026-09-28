@@ -111,8 +111,6 @@ bool Routines::setRtcToLocalDateTime ()
 		return false;
 	}
 
-	
-
 	// the routine finished; report success only if it was not a negative response
 	return (result.wasNrc == 0);
 }

@@ -8,8 +8,8 @@
 #ifndef SRC_LOGDUMPERTEXTFILE_H_
 #define SRC_LOGDUMPERTEXTFILE_H_
 
-#include <string>
 #include "time.h"
+#include <string>
 
 #include "../shared/event_log_t.h"
 #include "table.h"
@@ -20,7 +20,7 @@ class LogDumperTextFile {
 	 * Internal object from ctable library representing a table all event log
 	 * records will be printed in (presumably in some pretty way :) )
 	 */
-	struct Table * table;
+	struct Table *table;
 
 	std::string fn;
 
@@ -31,42 +31,58 @@ class LogDumperTextFile {
 	 * @param eventLogEntry
 	 * @param timestamp
 	 */
-	void storeTimesyncEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeTimesyncEntryInExport (const event_log_exposed_t *eventLogEntry,
+									 const struct tm *const timestamp);
 
-	void storeHardfaultException(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeSupervisorFault(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeSupervisorFaultTimestamp(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeHardfaultException (const event_log_exposed_t *eventLogEntry,
+								  const struct tm *const timestamp);
+	void storeSupervisorFault (const event_log_exposed_t *eventLogEntry,
+							   const struct tm *const timestamp);
+	void storeSupervisorFaultTimestamp (const event_log_exposed_t *eventLogEntry,
+										const struct tm *const timestamp);
 
-	void storeCyclic(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeBootupComplete(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeCyclic (const event_log_exposed_t *eventLogEntry, const struct tm *const timestamp);
+	void storeBootupComplete (const event_log_exposed_t *eventLogEntry,
+							  const struct tm *const timestamp);
 
-	void storeGsmRegisteredNetwork(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeGsmImsi(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeGsmIpAddress(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeGsmRegisteredNetwork (const event_log_exposed_t *eventLogEntry,
+									const struct tm *const timestamp);
+	void storeGsmImsi (const event_log_exposed_t *eventLogEntry, const struct tm *const timestamp);
+	void storeGsmIpAddress (const event_log_exposed_t *eventLogEntry,
+							const struct tm *const timestamp);
 
-	void storeFanetFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeFanetFail (const event_log_exposed_t *eventLogEntry,
+						 const struct tm *const timestamp);
 
-	void storeErasingStartup(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeFlashingStartup(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeConfigFirstCrcFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeConfigSecondCrcFail(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeConfigFirstRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeConfigSecondRestore(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeErasingStartup (const event_log_exposed_t *eventLogEntry,
+							  const struct tm *const timestamp);
+	void storeFlashingStartup (const event_log_exposed_t *eventLogEntry,
+							   const struct tm *const timestamp);
+	void storeConfigFirstCrcFail (const event_log_exposed_t *eventLogEntry,
+								  const struct tm *const timestamp);
+	void storeConfigSecondCrcFail (const event_log_exposed_t *eventLogEntry,
+								   const struct tm *const timestamp);
+	void storeConfigFirstRestore (const event_log_exposed_t *eventLogEntry,
+								  const struct tm *const timestamp);
+	void storeConfigSecondRestore (const event_log_exposed_t *eventLogEntry,
+								   const struct tm *const timestamp);
 
-	void storeSwitchingPowersavingMode(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeWokenUpAfterLastSleep(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void storeGoToSleep(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
+	void storeSwitchingPowersavingMode (const event_log_exposed_t *eventLogEntry,
+										const struct tm *const timestamp);
+	void storeWokenUpAfterLastSleep (const event_log_exposed_t *eventLogEntry,
+									 const struct tm *const timestamp);
+	void storeGoToSleep (const event_log_exposed_t *eventLogEntry,
+						 const struct tm *const timestamp);
 
+  public:
+	LogDumperTextFile ();
+	virtual ~LogDumperTextFile ();
 
-public:
-	LogDumperTextFile();
-	virtual ~LogDumperTextFile();
+	void startTextExport (std::string filename);
 
-	void startTextExport(std::string filename);
-
-
-	void storeEntryInExport(const event_log_exposed_t * eventLogEntry, const struct tm * const timestamp);
-	void closeAndSaveTextExport(void);
+	void storeEntryInExport (const event_log_exposed_t *eventLogEntry,
+							 const struct tm *const timestamp);
+	void closeAndSaveTextExport (void);
 };
 
 #endif /* SRC_LOGDUMPERTEXTFILE_H_ */

@@ -8,9 +8,9 @@
 #ifndef SRC_SERIAL_SERIALRXBACKGROUNDWORKER_H_
 #define SRC_SERIAL_SERIALRXBACKGROUNDWORKER_H_
 
-#include <memory>
 #include <functional>
 #include <map>
+#include <memory>
 #include <semaphore.h>
 
 #include "Serial.h"
@@ -26,7 +26,7 @@ class SerialRxBackgroundWorker {
 	/**
 	 * Serial used to receive data in background
 	 */
-	Serial * ctx;
+	Serial *ctx;
 
 	/**
 	 * Handle to thread worker
@@ -43,12 +43,12 @@ class SerialRxBackgroundWorker {
 	/**
 	 * Static wrapper to workaround static call to pthread_create
 	 */
-	static void * wrapper(void * object);
+	static void *wrapper (void *object);
 
 	/**
 	 * Worker itself which is called by the wrapper
 	 */
-	void worker(void);
+	void worker (void);
 
 	/**
 	 * Here worker will place data received from controller
@@ -58,7 +58,7 @@ class SerialRxBackgroundWorker {
 	/**
 	 * Map pointing to
 	 */
-	std::map<uint8_t, IService*> callbackMap;
+	std::map<uint8_t, IService *> callbackMap;
 
 	bool workerLoop;
 
@@ -67,28 +67,28 @@ class SerialRxBackgroundWorker {
 	 */
 	bool workerStarted;
 
-	SerialRxBackgroundWorker * pointerThis;
+	SerialRxBackgroundWorker *pointerThis;
 
 	std::function<void (uint16_t)> nrcCallback;
 
-public:
+  public:
 	/**
 	 * Optional pointer to a callback, which is used by background thread in
 	 * case a timeout
 	 */
 	std::function<void (void)> backgroundTimeoutCallback;
 
+	bool start (void);
 
-	bool start(void);
+	void terminate (void);
 
-	void terminate(void);
+	void waitForStartup (void);
 
-	void waitForStartup(void);
+	SerialRxBackgroundWorker (Serial *serial, std::map<uint8_t, IService *> callbcks,
+							  std::function<void (uint16_t)> _nrcCallback);
+	virtual ~SerialRxBackgroundWorker ();
 
-	SerialRxBackgroundWorker(Serial * serial, std::map<uint8_t, IService*> callbcks, std::function<void (uint16_t)> _nrcCallback);
-	virtual ~SerialRxBackgroundWorker();
-
-	SerialRxBackgroundWorker& operator=(const SerialRxBackgroundWorker &other);
+	SerialRxBackgroundWorker &operator= (const SerialRxBackgroundWorker &other);
 };
 
 #endif /* SRC_SERIAL_SERIALRXBACKGROUNDWORKER_H_ */

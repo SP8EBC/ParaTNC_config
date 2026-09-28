@@ -35,7 +35,9 @@ SerialRxBackgroundWorker::~SerialRxBackgroundWorker ()
 
 SerialRxBackgroundWorker &
 SerialRxBackgroundWorker::operator= (const SerialRxBackgroundWorker &other)
-{ return *this; }
+{
+	return *this;
+}
 
 void SerialRxBackgroundWorker::waitForStartup (void)
 {
@@ -68,7 +70,7 @@ void SerialRxBackgroundWorker::worker (void)
 
 	// signalize a waiting thread that this worker has started
 	// pthread_mutex_lock (&this->workerLock);			// TODO::
-	sem_post (&this->workerStartSync);				
+	sem_post (&this->workerStartSync);
 	// pthread_mutex_unlock (&this->workerLock);		// TODO::???
 
 	// set flag which is then used by waiting thread to check if worker
@@ -134,14 +136,14 @@ bool SerialRxBackgroundWorker::start (void)
 		const int mutex_init_result = pthread_mutex_init (&workerLock, NULL);
 
 		// initialize semaphore
-		//		If  pshared  has the value 0, then the semaphore is shared between the threads of a process, 
-		//		and should be located at some address that is visible
-		//		to all threads (e.g., a global variable, or a variable allocated dynamically on the heap).
+		//		If  pshared  has the value 0, then the semaphore is shared between the threads of a
+		//process, 		and should be located at some address that is visible 		to all threads (e.g., a
+		//global variable, or a variable allocated dynamically on the heap).
 
-		//		If pshared is nonzero, then the semaphore is shared between processes, and should be located 
-		//		in  a  region  of  shared  memory  (see  shm_open(3), mmap(2), and shmget(2)).  
-		//		(Since a child created by fork(2) inherits its parent's memory mappings, 
-		//		it can also access the semaphore.)  Any process that can access the shared memory 
+		//		If pshared is nonzero, then the semaphore is shared between processes, and should be
+		//located 		in  a  region  of  shared  memory  (see  shm_open(3), mmap(2), and shmget(2)).
+		//		(Since a child created by fork(2) inherits its parent's memory mappings,
+		//		it can also access the semaphore.)  Any process that can access the shared memory
 		//		region can operate on the semaphore using sem_post(3), sem_wait(3), and so on.
 
 		const int cond_init_result = sem_init (&workerStartSync, (int)0, (unsigned int)0);

@@ -10,93 +10,95 @@
 #ifndef CONFIG_IMPORTER_H_
 #define CONFIG_IMPORTER_H_
 
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
+#include "../shared/config/ConfigVer0.h"
 #include <algorithm>
 #include <cctype>
+#include <fstream>
 #include <iostream>
 #include <memory>
-#include "../shared/config/ConfigVer0.h"
+#include <sstream>
+#include <string>
+#include <vector>
 
 /**
  * ConfigImporter - Imports configuration from INI format
- * 
+ *
  * This class provides functionality to read INI format text files and
  * populate ConfigurationManager objects. Parsing is case-insensitive
  * for sections and keys, but preserves case for string values.
  */
 class ConfigImporter {
-public:
-    /**
-     * Constructor
-     * @param configManager Reference to the ConfigurationManager instance to populate
-     */
-    explicit ConfigImporter(std::shared_ptr<IConfigurationManager> configManager);
-    
-    /**
-     * Import configuration from INI file
-     * @param filepath Path to the INI file to read
-     * @return true if successful, false otherwise
-     */
-    bool importFromFile(const std::string& filepath);
-    
-    /**
-     * Import configuration from string
-     * @param content INI formatted string content
-     * @return true if successful, false otherwise
-     */
-    bool importFromString(const std::string& content);
-    
-    bool allSet();
+  public:
+	/**
+	 * Constructor
+	 * @param configManager Reference to the ConfigurationManager instance to populate
+	 */
+	explicit ConfigImporter (std::shared_ptr<IConfigurationManager> configManager);
 
-private:
-    std::shared_ptr<IConfigurationManager> configManager;
-    std::string currentSection;
-    
-    // Helper methods
-    std::string toLowerCase(const std::string& str);
-    std::string trim(const std::string& str);
-    std::string stripComment(const std::string& line);
-    bool parseSection(const std::string& line);
-    bool parseSetting(const std::string& line);
-    
-    // Section parsers
-    void parseBasicConfigSetting(const std::string& key, const std::string& value);
-    void parseModeConfigSetting(const std::string& key, const std::string& value);
-    void parseSourceConfigSetting(const std::string& key, const std::string& value);
-    void parseUmbConfigSetting(const std::string& key, const std::string& value);
-    void parseRtuConfigSetting(const std::string& key, const std::string& value);
-    void parseRtuSlaveConfigSetting(uint8_t id, const std::string& key, const std::string& value);
-    void parseGsmConfigSetting(const std::string& key, const std::string& value);
-    
-    // Type conversion helpers
-    uint8_t parseUint8(const std::string& value);
-    uint16_t parseUint16(const std::string& value);
-    float parseFloat(const std::string& value);
-    bool parseBoolean(const std::string& value);
-    std::string parseString(const std::string& value);
+	/**
+	 * Import configuration from INI file
+	 * @param filepath Path to the INI file to read
+	 * @return true if successful, false otherwise
+	 */
+	bool importFromFile (const std::string &filepath);
 
-	constexpr static auto checkFlags = [](uint64_t flag, uint8_t bits) -> bool {
+	/**
+	 * Import configuration from string
+	 * @param content INI formatted string content
+	 * @return true if successful, false otherwise
+	 */
+	bool importFromString (const std::string &content);
+
+	bool allSet ();
+
+  private:
+	std::shared_ptr<IConfigurationManager> configManager;
+	std::string currentSection;
+
+	// Helper methods
+	std::string toLowerCase (const std::string &str);
+	std::string trim (const std::string &str);
+	std::string stripComment (const std::string &line);
+	bool parseSection (const std::string &line);
+	bool parseSetting (const std::string &line);
+
+	// Section parsers
+	void parseBasicConfigSetting (const std::string &key, const std::string &value);
+	void parseModeConfigSetting (const std::string &key, const std::string &value);
+	void parseSourceConfigSetting (const std::string &key, const std::string &value);
+	void parseUmbConfigSetting (const std::string &key, const std::string &value);
+	void parseRtuConfigSetting (const std::string &key, const std::string &value);
+	void parseRtuSlaveConfigSetting (uint8_t id, const std::string &key, const std::string &value);
+	void parseGsmConfigSetting (const std::string &key, const std::string &value);
+
+	// Type conversion helpers
+	uint8_t parseUint8 (const std::string &value);
+	uint16_t parseUint16 (const std::string &value);
+	float parseFloat (const std::string &value);
+	bool parseBoolean (const std::string &value);
+	std::string parseString (const std::string &value);
+
+	constexpr static auto checkFlags = [] (uint64_t flag, uint8_t bits) -> bool {
 		uint64_t mask = 0;
 		for (int i = 0; i <= bits; i++) {
 			mask |= (1 << i);
 		}
-		if (flag == mask)	return true;
-		else return false;
+		if (flag == mask)
+			return true;
+		else
+			return false;
 	};
 
-    // Flags which settings in sections have been set
-    uint64_t basicFlags;
-    uint64_t modeFlags;
-    uint64_t sourceFlags;
-    uint64_t umbFlags;
-    uint64_t rtuFlags;
-    uint64_t gsmFlags;
+	// Flags which settings in sections have been set
+	uint64_t basicFlags;
+	uint64_t modeFlags;
+	uint64_t sourceFlags;
+	uint64_t umbFlags;
+	uint64_t rtuFlags;
+	uint64_t gsmFlags;
 
-    uint8_t rtuSlavesCounter;
-    uint64_t rtuSlaveFlags;
+	uint8_t rtuSlavesCounter;
+	uint64_t rtuSlaveFlags;
 };
 
 #endif /* CONFIG_IMPORTER_H_ */

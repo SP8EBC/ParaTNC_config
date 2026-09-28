@@ -35,9 +35,8 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
 	// -> 12~17	- callsign				-	6 characters
 	// -> 19 		- current time and date
 	out.clear ();
-	if (prefix.length() > 0)
-	{
-		out.append(prefix);
+	if (prefix.length () > 0) {
+		out.append (prefix);
 		out.push_back ('_');
 	}
 	out.append (api_name);
@@ -105,8 +104,7 @@ std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_sr
  */
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														sem_t &_cond1,
-														std::string _fileNamePrefix)
+														sem_t &_cond1, std::string _fileNamePrefix)
 {
 	std::string callsign; // this is required to create export filename
 	std::string apiName;  // this is required to create export filename

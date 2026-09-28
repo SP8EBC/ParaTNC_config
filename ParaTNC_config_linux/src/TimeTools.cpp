@@ -11,12 +11,12 @@ boost::local_time::tz_database TimeTools::timezones;
 
 bool TimeTools::timezonesInit = false;
 
-TimeTools::TimeTools() {
+TimeTools::TimeTools ()
+{
 	// TODO Auto-generated constructor stub
-
 }
 
-TimeTools::~TimeTools() {
+TimeTools::~TimeTools ()
+{
 	// TODO Auto-generated destructor stub
 }
-

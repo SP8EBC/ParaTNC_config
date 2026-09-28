@@ -7,12 +7,12 @@
 
 #include "AuxStuff.h"
 
-AuxStuff::AuxStuff() {
+AuxStuff::AuxStuff ()
+{
 	// TODO Auto-generated constructor stub
-
 }
 
-AuxStuff::~AuxStuff() {
+AuxStuff::~AuxStuff ()
+{
 	// TODO Auto-generated destructor stub
 }
-

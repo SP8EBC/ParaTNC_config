@@ -63,7 +63,9 @@ class Routines {
   public:
 	Routines (SrvRoutineControl &srvRoutineControl, SrvReadDid &srvReadDid)
 		: m_srvRoutineControl{srvRoutineControl}, m_srvReadDid{srvReadDid}
-	{ ; }
+	{
+		;
+	}
 
 	bool setRtcToLocalDateTime ();
 };

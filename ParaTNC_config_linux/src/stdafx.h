@@ -8,8 +8,6 @@
 #ifndef SRC_STDAFX_H_
 #define SRC_STDAFX_H_
 
-
 // just a stub
-
 
 #endif /* SRC_STDAFX_H_ */

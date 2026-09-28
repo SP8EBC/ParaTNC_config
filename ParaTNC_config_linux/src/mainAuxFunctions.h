@@ -10,8 +10,8 @@
 
 #include "../shared/services/SrvEraseStartupConfig.h"
 #include "../shared/services/SrvGetRunningConfig.h"
-#include "../shared/services/SrvSendStartupConfig.h"
 #include "../shared/services/SrvReadDid.h"
+#include "../shared/services/SrvSendStartupConfig.h"
 
 #include <memory>
 
@@ -26,7 +26,7 @@
  * @return
  */
 size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, char *out,
-										 size_t max_out_ln);
+								  size_t max_out_ln);
 
 /**
  *
@@ -35,8 +35,7 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
  * @param out
  * @return
  */
-size_t main_make_filename_prefix (std::string &callsign, std::string &api_name,
-										 std::string &out);
+size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, std::string &out);
 
 /**
  *
@@ -61,7 +60,6 @@ std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_sr
 														Serial &_s, pthread_mutex_t &_lock,
 														sem_t &_cond1);
 
-
 /**
  *
  * @param _srvRunningConfig
@@ -73,8 +71,7 @@ std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_sr
  */
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
 														Serial &_s, pthread_mutex_t &_lock,
-														sem_t &_cond1,
-														std::string _fileNamePrefix);
+														sem_t &_cond1, std::string _fileNamePrefix);
 
 /**
  *
@@ -105,10 +102,9 @@ main_writeConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvRead
  * @param _cond1
  * @return
  */
-void
-main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager, SrvReadDid &_srvReadDid,
-				  SrvEraseStartupConfig &_srvEraseConfig,
-				  SrvSendStartupConfig &_srvSendStartupConfig,
-				  Serial &_s, pthread_mutex_t &_lock, sem_t &_cond1);
+void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
+					   SrvReadDid &_srvReadDid, SrvEraseStartupConfig &_srvEraseConfig,
+					   SrvSendStartupConfig &_srvSendStartupConfig, Serial &_s,
+					   pthread_mutex_t &_lock, sem_t &_cond1);
 
 #endif /* SRC_MAINAUXFUNCTIONS_H_ */

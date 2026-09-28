@@ -10,9 +10,9 @@
 
 #include <string>
 
+#include "../shared/services/SrvReadMemory.h"
 #include "LogDumperTextFile.h"
 #include "serial/SerialRxBackgroundWorker.h"
-#include "../shared/services/SrvReadMemory.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +22,6 @@ extern "C" {
 }
 #endif
 
-
 class LogDumper {
 
 	/**
@@ -30,13 +29,13 @@ class LogDumper {
 	 * file report
 	 */
 	enum LogDumper_TextFileStatus {
-		NOT_STARTED,     /**< NOT_STARTED */
-		STARTED,         /**< STARTED */
-		WRITEN_AND_CLOSED/**< WRITEN_AND_CLOSED */
+		NOT_STARTED,	  /**< NOT_STARTED */
+		STARTED,		  /**< STARTED */
+		WRITEN_AND_CLOSED /**< WRITEN_AND_CLOSED */
 	};
 
-	SrvReadMemory& srvReadMemory;
-	sem_t& cond1;
+	SrvReadMemory &srvReadMemory;
+	sem_t &cond1;
 
 	SerialRxBackgroundWorker &serialRxBackgroundWorker;
 
@@ -49,23 +48,23 @@ class LogDumper {
 
 	int progress;
 
-	void timeoutCallback(void);
+	void timeoutCallback (void);
 
 	static const uint16_t daysInYearByMonth[2][13];
 
-	static void getTimestampFromEvent(const event_log_exposed_t * const in, struct tm * out);
+	static void getTimestampFromEvent (const event_log_exposed_t *const in, struct tm *out);
 
-protected:
+  protected:
+	static bool convertEventToExposedEvent (const event_log_t *event, event_log_exposed_t &exposed,
+											struct tm &decodedDateTime);
 
-	static bool convertEventToExposedEvent(const event_log_t * event, event_log_exposed_t & exposed, struct tm & decodedDateTime);
+  public:
+	LogDumper (SrvReadMemory &_srvReadMemory, sem_t &_cond1,
+			   SerialRxBackgroundWorker &_serial_thread);
+	virtual ~LogDumper ();
 
-
-public:
-
-	LogDumper(SrvReadMemory& _srvReadMemory, sem_t& _cond1, SerialRxBackgroundWorker& _serial_thread);
-	virtual ~LogDumper();
-
-	void dumpEventsToReport(uint32_t startAddress, uint32_t endAddress, std::string filename, bool exitOnFirstCrcFail);
+	void dumpEventsToReport (uint32_t startAddress, uint32_t endAddress, std::string filename,
+							 bool exitOnFirstCrcFail);
 };
 
 #endif /* SRC_LOGDUMPER_H_ */

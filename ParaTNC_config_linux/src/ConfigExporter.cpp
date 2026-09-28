@@ -291,7 +291,9 @@ void ConfigExporter::exportGsmConfig ()
 }
 
 void ConfigExporter::addSection (const std::string &sectionName)
-{ iniContent << "[" << sectionName << "]\n"; }
+{
+	iniContent << "[" << sectionName << "]\n";
+}
 
 void ConfigExporter::addSetting (const std::string &key, uint8_t value,
 								 const std::string &typeComment)
