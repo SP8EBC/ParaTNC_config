@@ -59,8 +59,8 @@ bool Routines::setRtcToLocalDateTime ()
 	uint16_t wparam = static_cast<uint16_t> ((static_cast<uint16_t> (hours) << 8) |
 											 static_cast<uint16_t> (minutes));
 
-	std::cout << "I = Routines::setRtcToLocalDateTime, set to " << year << "-" << month << "-"
-			  << day << ", " << hours << ":" << minutes << std::endl;
+	std::cout << "I = Routines::setRtcToLocalDateTime, set to " << (int)year << "-" << (int)month << "-"
+			  << (int)day << ", " << (int)hours << ":" << (int)minutes << std::endl;
 
 	// Take the lock and clear the predicate *before* the request is sent. The
 	// response callback runs on the serial RX background worker thread and can

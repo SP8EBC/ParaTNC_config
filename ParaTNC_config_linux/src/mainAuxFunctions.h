@@ -107,4 +107,15 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
 					   SrvSendStartupConfig &_srvSendStartupConfig, Serial &_s,
 					   pthread_mutex_t &_lock, sem_t &_cond1);
 
+/**
+ *
+ * @param argc
+ * @param argv
+ * @param batchConfig
+ * @param portName
+ * @param breakEventsLogDumpOnCrcFail
+ */
+void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
+							 std::string *portName, bool *breakEventsLogDumpOnCrcFail);
+
 #endif /* SRC_MAINAUXFUNCTIONS_H_ */

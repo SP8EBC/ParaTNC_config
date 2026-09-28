@@ -29,8 +29,6 @@
 
 #include "../shared/event_log.h"
 
-#include <boost/program_options.hpp>
-
 std::map<uint8_t, IService *> callbackMap;
 
 Serial s;
@@ -64,24 +62,16 @@ uint32_t logAreaEnd = 0;
 uint32_t logOldestEntry = 0;
 uint32_t logNewestEntry = 0;
 
-std::string portName;
-
 std::string fileNamePrefix;
 size_t fileNamePrefixLenght = 0;
-
-BatchConfig batchConfig;
 
 bool verboseLogging;
 
 static void nrc_callback (uint16_t nrc)
-{
-	exit (nrc);
-}
+{ exit (nrc); }
 
 static void timeout_callback (void)
-{
-	sem_post (&cond1);
-}
+{ sem_post (&cond1); }
 
 void routine_result_callback (RoutineControlResult result)
 {
@@ -94,6 +84,8 @@ void routine_result_callback (RoutineControlResult result)
 
 int main (int argc, char *argv[])
 {
+	std::string portName;
+	BatchConfig batchConfig;
 
 	// clang-format off
 	TimeTools::initBoostTimezones();
@@ -133,48 +125,11 @@ int main (int argc, char *argv[])
 
 	batchConfig.defaultBatch = true;
 
-	boost::program_options::options_description od("");
-
-	boost::program_options::options_description generalOptions("General Options");
-	boost::program_options::options_description_easy_init goInit = generalOptions.add_options();
-	goInit("port,P", boost::program_options::value<std::string>(&portName), " : Serial port used for communication");
-	goInit("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
-	goInit("verbose", " : Print more things on the console");
-
-	boost::program_options::options_description diagnosticServices("Diagnostic Services", 120, 90);
-	boost::program_options::options_description_easy_init dsInit = diagnosticServices.add_options();
-	dsInit("restart", " : Restart ParaMETEO");
-	dsInit("read-did,r", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
-	dsInit("monitor-did,m", boost::program_options::value<std::string>(&batchConfig.didToRead), " : Read specified DID each 2 second until this program is closed");
-	dsInit("read-config,R", " : Read running config and store it in bin and text file");
-	dsInit("write-config,W", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Write complete startup config from text file");
-	dsInit("amend-config,A", boost::program_options::value<std::string>(&batchConfig.configFileToWrite), " : Partially Amend config from (incomplete) text file");
-	dsInit("routine-rtc,RR", " : Call routine to set RTC to local date and time of this PC");
-
-	od.add(generalOptions);
-	od.add(diagnosticServices);
-
-	boost::program_options::variables_map odVariablesMap;
-	try {
-		boost::program_options::store(boost::program_options::parse_command_line(argc, argv, od), odVariablesMap);
-		boost::program_options::notify(odVariablesMap);
-	}
-	catch (boost::wrapexcept<boost::program_options::unknown_option>& ex)
-	{
-		std::cout << ex.what() << std::endl << od << std::endl;
-		exit(-2);
-	}
+	parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail);
 
 	Routines routines(srvRoutineControl, srvReadDid);
 
 	bool portOpenResult = false;
-
-	std::cout << od << std::endl;
-	// clang-format on
-
-	for (auto &it : odVariablesMap) {
-		std::cout << "D = main, odVariablesMap [" << it.first << "]" << std::endl;
-	}
 
 	if (portName.length () > 1) {
 		std::cout << "I = main, opening user specified port " << portName << std::endl;
@@ -189,73 +144,6 @@ int main (int argc, char *argv[])
 		std::cout << "E = main, cannot open and configure serial port. application cannot continue!"
 				  << std::endl;
 		return -1;
-	}
-
-	if (odVariablesMap.count ("verbose")) {
-		verboseLogging = true;
-	}
-	else {
-		verboseLogging = false;
-	}
-
-	if (odVariablesMap.count ("restart")) {
-		std::cout << "I = main, restart will be performed instead of normal operation!"
-				  << std::endl;
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.performRestart = true;
-	}
-
-	if (odVariablesMap.count ("read-did")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.readDid = true;
-	}
-
-	if (odVariablesMap.count ("monitor-did")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = true;
-		batchConfig.monitorDid = true;
-	}
-
-	if (odVariablesMap.count ("read-config")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.readConfig = true;
-	}
-
-	if (odVariablesMap.count ("write-config")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.writeConfig = true;
-		batchConfig.amendConfig = false;
-	}
-
-	if (odVariablesMap.count ("amend-config")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.writeConfig = false;
-		batchConfig.amendConfig = true;
-	}
-
-	if (odVariablesMap.count ("routine-rtc")) {
-		batchConfig.defaultBatch = false;
-		batchConfig.monitorMode = false;
-		batchConfig.routineSetRtc = true;
-	}
-
-	if (odVariablesMap.count ("valid-events")) {
-		breakEventsLogDumpOnCrcFail = true;
-	}
-
-	if (batchConfig.writeConfig && batchConfig.amendConfig) {
-		throw std::runtime_error ("Cannot ammend and write at once!!");
-	}
-
-	if (batchConfig.monitorMode && !batchConfig.defaultBatch) {
-		std::cout << "W = main, conflicting settings! DID or memory monitoring has a precendense "
-					 "over the rest"
-				  << std::endl;
 	}
 
 	worker.start ();
