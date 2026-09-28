@@ -9,6 +9,7 @@
 #include "SrvReadDid.h"
 #include "../shared/kiss_communication_service_ids.h"
 
+#include <cstring>
 #include <iostream>
 
 SrvReadDid::SrvReadDid() {
@@ -339,7 +340,7 @@ void SrvReadDid::callback(
 #else
 	if (conditionVariable != 0x00) {
 
-		pthread_cond_signal(conditionVariable);
+		sem_post(conditionVariable);
 	}
 #endif
 }
