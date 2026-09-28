@@ -40,5 +40,6 @@ shared \
 shared/exceptions \
 shared/services \
 src \
+src/did_decoder \
 src/serial \
 

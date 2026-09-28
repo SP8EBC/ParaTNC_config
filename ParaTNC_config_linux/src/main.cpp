@@ -68,10 +68,14 @@ size_t fileNamePrefixLenght = 0;
 bool verboseLogging;
 
 static void nrc_callback (uint16_t nrc)
-{ exit (nrc); }
+{
+	exit (nrc);
+}
 
 static void timeout_callback (void)
-{ sem_post (&cond1); }
+{
+	sem_post (&cond1);
+}
 
 void routine_result_callback (RoutineControlResult result)
 {
