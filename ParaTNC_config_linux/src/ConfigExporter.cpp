@@ -172,10 +172,10 @@ void ConfigExporter::exportSourceConfig ()
 		ISourceConfig &source = configManager->getSourceConfig ();
 		addSection ("SourceConfig");
 
-		addSetting ("temperature", source.getTemperature (), "uint8_t");
-		addSetting ("pressure", source.getPressure (), "uint8_t");
-		addSetting ("humidity", source.getHumidity (), "uint8_t");
-		addSetting ("wind", source.getWind (), "uint8_t");
+		addSettingSource ("temperature", SourceConfigForWhat::Temperature, source.getTemperature (), "uint8_t");
+		addSettingSource ("pressure", SourceConfigForWhat::Pressure, source.getPressure (), "uint8_t");
+		addSettingSource ("humidity", SourceConfigForWhat::Humidity, source.getHumidity (), "uint8_t");
+		addSettingSource ("wind", SourceConfigForWhat::Wind, source.getWind (), "uint8_t");
 
 		iniContent << "\n";
 	}
@@ -350,10 +350,21 @@ void ConfigExporter::addSettingPt (const std::string &key, uint8_t value,
 	BasicConfigPtSensor ptSensor (value);
 	std::string convertedValue = ptSensor.toString ();
 	if (verboseLogging) {
-		std::cout << "---- ConfigExporter::addSettingPt:351, key: " << key << ", value: 0x"
-				  << std::hex << (int)value << ", convertedValue: " << convertedValue << std::endl;
+		std::cout << "---- ConfigExporter::addSettingPt, key: " << key << ", value: 0x"
+				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue << std::endl;
 	}
 	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
+}
+
+void ConfigExporter::addSettingSource (const std::string &key, SourceConfigForWhat what, uint8_t value, const std::string &typeComment)
+{
+	SourceConfigSourceConfig source(value, what);
+	std::string convertedValue = source.toString();
+	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
+	if (verboseLogging) {
+		std::cout << "---- ConfigExporter::addSettingSource, key: " << key << ", value: 0x"
+				  << std::hex << (int)value << ", convertedValue: " << std::dec <<  convertedValue << std::endl;
+	}
 }
 
 std::string ConfigExporter::escapeValue (const std::string &value)

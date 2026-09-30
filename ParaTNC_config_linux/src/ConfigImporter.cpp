@@ -369,26 +369,36 @@ void ConfigImporter::parseSourceConfigSetting (const std::string &key, const std
 {
 	ISourceConfig &source = configManager->getSourceConfig ();
 
-	if (verboseLogging) {
-		std::cout << "---- ConfigImporter::parseSourceConfigSetting, key: " << key
-				  << ", value: " << value << std::endl;
-	}
+	uint8_t encodedValue = 0;
 
 	if (key == "temperature") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 0);
-		source.setTemperature (parseUint8 (value));
+		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Temperature);
+		source.setTemperature (sourcecfg.toUint8());
+		encodedValue = sourcecfg.toUint8();
 	}
 	else if (key == "pressure") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 1);
-		source.setPressure (parseUint8 (value));
+		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Pressure);
+		source.setPressure (sourcecfg.toUint8());
+		encodedValue = sourcecfg.toUint8();
 	}
 	else if (key == "humidity") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 2);
-		source.setHumidity (parseUint8 (value));
+		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Humidity);
+		source.setHumidity (sourcecfg.toUint8());
+		encodedValue = sourcecfg.toUint8();
 	}
 	else if (key == "wind") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 3);
-		source.setWind (parseUint8 (value));
+		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Wind);
+		source.setWind (sourcecfg.toUint8());
+		encodedValue = sourcecfg.toUint8();
+	}
+
+	if (verboseLogging) {
+		std::cout << "---- ConfigImporter::parseSourceConfigSetting, key: " << key
+				  << ", value: " << value << ", encodedValue: " << (int)encodedValue << std::endl;
 	}
 }
 

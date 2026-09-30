@@ -26,7 +26,7 @@ OBJS += \
 lib/ctable-master/src/%.o: ../lib/ctable-master/src/%.c lib/ctable-master/src/subdir.mk
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -D_XOPEN_SOURCE=600 -I../src/ -I../lib/ctable-master/src -I../src/shared -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
+	gcc -D_XOPEN_SOURCE=600 -I../src/ -I../lib/ctable-master/src -I../shared -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

@@ -70,6 +70,8 @@ class ConfigExporter {
 					 const std::string &typeComment);
 
 	void addSettingPt (const std::string &key, uint8_t value, const std::string &typeComment);
+	void addSettingSource (const std::string &key, SourceConfigForWhat what, uint8_t value, const std::string &typeComment);
+
 
 	std::string escapeValue (const std::string &value);
 	std::string formatFloat (float value);
