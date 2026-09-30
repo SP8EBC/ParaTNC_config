@@ -367,7 +367,7 @@ struct SourceConfigSourceConfig {
 				out = "INTERNAL";
 			}
 			else {
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 				out = "???"; // generally this should never happen.
 			}
 			break;
@@ -380,7 +380,7 @@ struct SourceConfigSourceConfig {
 				std::cout
 					<< "E = SourceConfigSourceConfig::toString, INTERNAL_PT1000 makes sense only"
 					<< " for temperature readout!!" << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		case WX_SOURCE_UMB: out = "UMB"; break;
@@ -394,7 +394,7 @@ struct SourceConfigSourceConfig {
 				std::cout
 					<< "E = SourceConfigSourceConfig::toString, SOURCE_FULL_RTU makes sense only"
 					<< " for wind readout!!" << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		case WX_SOURCE_DAVIS_SERIAL: out = "DAVIS_SERIAL_LOGGER"; break;
@@ -431,7 +431,7 @@ struct SourceConfigSourceConfig {
 				std::cout << "E = SourceConfigSourceConfig::SourceConfigSourceConfig, "
 							 "what: SourceConfigForWhat::Wind, from: "
 						  << (int)from << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		case SourceConfigForWhat::Temperature:
@@ -442,7 +442,7 @@ struct SourceConfigSourceConfig {
 				std::cout << "E = SourceConfigSourceConfig::SourceConfigSourceConfig, "
 							 "what: SourceConfigForWhat::Temperature, from: "
 						  << (int)from << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		case SourceConfigForWhat::Pressure:
@@ -453,7 +453,7 @@ struct SourceConfigSourceConfig {
 				std::cout << "E = SourceConfigSourceConfig::SourceConfigSourceConfig, "
 							 "what: SourceConfigForWhat::Pressure, from: "
 						  << (int)from << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		case SourceConfigForWhat::Humidity:
@@ -464,7 +464,7 @@ struct SourceConfigSourceConfig {
 				std::cout << "E = SourceConfigSourceConfig::SourceConfigSourceConfig, "
 							 "what: SourceConfigForWhat::Pressure, from: "
 						  << (int)from << std::endl;
-				throw std::runtime_error ("malformed input");
+				throw std::out_of_range ("malformed input");
 			}
 			break;
 		}
@@ -509,8 +509,15 @@ struct SourceConfigSourceConfig {
 			std::cout << "E = SourceConfigSourceConfig::SourceConfigSourceConfig, "
 						 "from: "
 					  << from << std::endl;
-			throw std::runtime_error (
-				"unknown value 'from' to construct an instance of SourceConfigSourceConfig from!");
+			throw std::out_of_range ("unknown value from text config to construct an instance of "
+									  "SourceConfigSourceConfig from!");
+		}
+
+		if ((upper == "INTERNAL") && (what == SourceConfigForWhat::Temperature)) {
+			std::cout
+				<< "W = SourceConfigSourceConfig::SourceConfigSourceConfig, "
+				   "You've selected 'NTERNAL' for temperature source what result in 1Wire sensor! "
+				<< std::endl;
 		}
 	}
 
@@ -519,6 +526,82 @@ struct SourceConfigSourceConfig {
 	 * a controller configuration NvMem area
 	 */
 	uint8_t toUint8 () const { return static_cast<uint8_t> (source); }
+};
+
+// ============================================================================
+// Specific decoders/encoders to more user-friendy values for powersave
+// ============================================================================
+
+struct ModeConfigPowersave {
+	config_data_powersave_mode_t powersave;
+
+	std::string toString ()
+	{
+		switch (powersave) {
+		case PWSAVE_NONE: return "NONE";
+		case PWSAVE_NORMAL: return "NORMAL";
+		case PWSAVE_AGGRESV: return "AGGRESIVE";
+		default:
+			throw std::out_of_range ("ConfigModePowersave::toString(), unknown and not allowed "
+									  "value of powersave mode!");
+		}
+	}
+
+	/**
+	 * @brief Converts value from the controller config NvMem area, field
+	 * 'config_data_powersave_mode_t' from config_data_mode_t to internal value used by this tool
+	 */
+	ModeConfigPowersave (uint8_t from)
+	{
+		// sanitize user input
+		switch (from) {
+		case PWSAVE_NONE: powersave = PWSAVE_NONE; break;
+		case PWSAVE_NORMAL: powersave = PWSAVE_NORMAL; break;
+		case PWSAVE_AGGRESV: powersave = PWSAVE_AGGRESV; break;
+		default:
+			std::cout << "E = ConfigModePowersave::ConfigModePowersave, "
+						 "from: "
+					  << (int)from << std::endl;
+			throw std::out_of_range (
+				"ConfigModePowersave::ConfigModePowersave, unknown and not allowed "
+				"value from config NvMem area!");
+		}
+	}
+
+	/**
+	 * @brief Converts string read from configuration text file to internal value used by this
+	 * config tool
+	 */
+	ModeConfigPowersave (std::string from)
+	{
+		std::string upper = from;
+		std::transform (upper.begin (), upper.end (), upper.begin (), [] (unsigned char c) {
+			return std::toupper (c);
+		});
+
+		if (upper == "NONE") {
+			powersave = PWSAVE_NONE;
+		}
+		else if (upper == "NORMAL") {
+			powersave = PWSAVE_NORMAL;
+		}
+		else if (upper == "AGGRESIVE") {
+			powersave = PWSAVE_AGGRESV;
+		}
+		else {
+			std::cout << "E = ConfigModePowersave::ConfigModePowersave, "
+						 "from: "
+					  << from << std::endl;
+			throw std::out_of_range ("unknown value from text config to construct an instance of "
+									  "SourceConfigSourceConfig from!");
+		}
+	}
+
+	/**
+	 * @brief Converts internal value used by this tool back to a single byte to be stored in
+	 * a controller configuration NvMem area
+	 */
+	uint8_t toUint8 () const { return static_cast<uint8_t> (powersave); }
 };
 
 #endif /* SHARED_CONFIG_CONFIGVER0_SPECIFIC_H_ */

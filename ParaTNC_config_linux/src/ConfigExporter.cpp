@@ -155,7 +155,7 @@ void ConfigExporter::exportModeConfig ()
 		addSetting ("digiOnlySsid", mode.getDigiOnlySsid (), "uint8_t");
 		addSetting ("digiViscousDelay", mode.getDigiViscousDelay (), "uint8_t");
 		addSetting ("digiDelay100msec", mode.getDigiDelay100msec (), "uint8_t");
-		addSetting ("powersave", mode.getPowersave (), "uint8_t");
+		addSettingPowersave ("powersave", mode.getPowersave (), "uint8_t");
 		addSetting ("powersaveKeepGsm", mode.getPowersaveKeepGsm (), "uint8_t");
 		addSetting ("gsm", mode.getGsm (), "uint8_t");
 
@@ -172,9 +172,18 @@ void ConfigExporter::exportSourceConfig ()
 		ISourceConfig &source = configManager->getSourceConfig ();
 		addSection ("SourceConfig");
 
-		addSettingSource ("temperature", SourceConfigForWhat::Temperature, source.getTemperature (), "uint8_t");
-		addSettingSource ("pressure", SourceConfigForWhat::Pressure, source.getPressure (), "uint8_t");
-		addSettingSource ("humidity", SourceConfigForWhat::Humidity, source.getHumidity (), "uint8_t");
+		addSettingSource ("temperature",
+						  SourceConfigForWhat::Temperature,
+						  source.getTemperature (),
+						  "uint8_t");
+		addSettingSource ("pressure",
+						  SourceConfigForWhat::Pressure,
+						  source.getPressure (),
+						  "uint8_t");
+		addSettingSource ("humidity",
+						  SourceConfigForWhat::Humidity,
+						  source.getHumidity (),
+						  "uint8_t");
 		addSettingSource ("wind", SourceConfigForWhat::Wind, source.getWind (), "uint8_t");
 
 		iniContent << "\n";
@@ -350,20 +359,35 @@ void ConfigExporter::addSettingPt (const std::string &key, uint8_t value,
 	BasicConfigPtSensor ptSensor (value);
 	std::string convertedValue = ptSensor.toString ();
 	if (verboseLogging) {
-		std::cout << "---- ConfigExporter::addSettingPt, key: " << key << ", value: 0x"
-				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue << std::endl;
+		std::cout << "---- ConfigExporter::addSettingPt, key: " << key << ", value: 0x" << std::hex
+				  << (int)value << ", convertedValue: " << std::dec << convertedValue << std::endl;
 	}
 	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
 }
 
-void ConfigExporter::addSettingSource (const std::string &key, SourceConfigForWhat what, uint8_t value, const std::string &typeComment)
+void ConfigExporter::addSettingSource (const std::string &key, SourceConfigForWhat what,
+									   uint8_t value, const std::string &typeComment)
 {
-	SourceConfigSourceConfig source(value, what);
-	std::string convertedValue = source.toString();
+	SourceConfigSourceConfig source (value, what);
+	std::string convertedValue = source.toString ();
 	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
 	if (verboseLogging) {
 		std::cout << "---- ConfigExporter::addSettingSource, key: " << key << ", value: 0x"
-				  << std::hex << (int)value << ", convertedValue: " << std::dec <<  convertedValue << std::endl;
+				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue
+				  << std::endl;
+	}
+}
+
+void ConfigExporter::addSettingPowersave (const std::string &key, uint8_t value,
+										  const std::string &typeComment)
+{
+	ModeConfigPowersave powersave(value);
+	std::string convertedValue = powersave.toString();
+	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
+	if (verboseLogging) {
+		std::cout << "---- ConfigExporter::addSettingPowersave, key: " << key << ", value: 0x"
+				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue
+				  << std::endl;
 	}
 }
 

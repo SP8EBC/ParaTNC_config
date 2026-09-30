@@ -353,7 +353,13 @@ void ConfigImporter::parseModeConfigSetting (const std::string &key, const std::
 	}
 	else if (key == "powersave") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 14);
-		mode.setPowersave (parseUint8 (value));
+		ModeConfigPowersave powersave(value);
+		const uint8_t uint8 = powersave.toUint8 ();
+		if (verboseLogging) {
+			std::cout << "---- ConfigImporter::parseModeConfigSetting, powersave, value: " << value
+					  << ", ptSensorAsUint: 0x" << std::hex << (int)uint8 << std::endl;
+		}
+		mode.setPowersave (uint8);
 	}
 	else if (key == "powersavekeepgsm") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 15);
