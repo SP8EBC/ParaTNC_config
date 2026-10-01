@@ -398,6 +398,10 @@ struct SourceConfigSourceConfig {
 			}
 			break;
 		case WX_SOURCE_DAVIS_SERIAL: out = "DAVIS_SERIAL_LOGGER"; break;
+		default:
+			std::cout << "E = SourceConfigSourceConfig::toString, screwed source value: "
+					  << (int)source << std::endl;
+			throw std::out_of_range ("malformed input");
 		}
 
 		return out;
@@ -435,7 +439,9 @@ struct SourceConfigSourceConfig {
 			}
 			break;
 		case SourceConfigForWhat::Temperature:
-			if (from <= WX_SOURCE_INTERNAL_PT100) {
+			if ((from == WX_SOURCE_INTERNAL) || (from == WX_SOURCE_INTERNAL_PT100) ||
+				(from == WX_SOURCE_UMB) || (from == WX_SOURCE_RTU) ||
+				(from == WX_SOURCE_DAVIS_SERIAL)) {
 				source = (config_data_wx_sources_enum_t)from;
 			}
 			else {
@@ -446,7 +452,8 @@ struct SourceConfigSourceConfig {
 			}
 			break;
 		case SourceConfigForWhat::Pressure:
-			if (from != WX_SOURCE_INTERNAL_PT100) {
+			if ((from == WX_SOURCE_INTERNAL) || (from == WX_SOURCE_UMB) ||
+				(from == WX_SOURCE_RTU) || (from == WX_SOURCE_DAVIS_SERIAL)) {
 				source = (config_data_wx_sources_enum_t)from;
 			}
 			else {
@@ -457,7 +464,8 @@ struct SourceConfigSourceConfig {
 			}
 			break;
 		case SourceConfigForWhat::Humidity:
-			if (from != WX_SOURCE_INTERNAL_PT100) {
+			if ((from == WX_SOURCE_INTERNAL) || (from == WX_SOURCE_UMB) ||
+				(from == WX_SOURCE_RTU) || (from == WX_SOURCE_DAVIS_SERIAL)) {
 				source = (config_data_wx_sources_enum_t)from;
 			}
 			else {
@@ -722,7 +730,10 @@ struct ModeConfigWx {
 	{
 		uint8_t out = 0;
 
-		if (mode == ModeConfigWxValues::Enabled) {
+		if (mode == ModeConfigWxValues::Disabled) {
+			out = 0;
+		}
+		else if (mode == ModeConfigWxValues::Enabled) {
 			out |= WX_ENABLED;
 			out |= WX_INTERNAL_DISABLE_DALLAS;
 		}
