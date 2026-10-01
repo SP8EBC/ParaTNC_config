@@ -295,7 +295,13 @@ void ConfigImporter::parseModeConfigSetting (const std::string &key, const std::
 	}
 	else if (key == "wx") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 1);
-		mode.setWx (parseUint8 (value));
+		ModeConfigWx wx (value);
+		const uint8_t wxAsUint = wx.toUint8();
+		mode.setWx (wxAsUint);
+		if (verboseLogging) {
+			std::cout << "---- ConfigImporter::parseModeConfigSetting, wx, value: " << value
+					  << ", wxAsUint: 0x" << std::hex << (int)wxAsUint << std::endl;
+		}
 	}
 	else if (key == "wxumb") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 2);

@@ -141,7 +141,7 @@ void ConfigExporter::exportModeConfig ()
 		addSection ("ModeConfig");
 
 		addSetting ("digi", mode.getDigi (), "uint8_t");
-		addSetting ("wx", mode.getWx (), "uint8_t");
+		addSettingWx ("wx", mode.getWx (), "uint8_t");
 		addSetting ("wxUmb", mode.getWxUmb (), "uint8_t");
 		addSetting ("wxModbus", mode.getWxModbus (), "uint8_t");
 		addSetting ("wxDavis", mode.getWxDavis (), "uint8_t");
@@ -386,6 +386,18 @@ void ConfigExporter::addSettingPowersave (const std::string &key, uint8_t value,
 	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
 	if (verboseLogging) {
 		std::cout << "---- ConfigExporter::addSettingPowersave, key: " << key << ", value: 0x"
+				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue
+				  << std::endl;
+	}
+}
+
+void ConfigExporter::addSettingWx (const std::string &key, uint8_t value, const std::string &typeComment)
+{
+	ModeConfigWx wx(value);
+	std::string convertedValue = wx.toString();
+	iniContent << key << " = " << convertedValue << "\t\t# " << typeComment << "\n";
+	if (verboseLogging) {
+		std::cout << "---- ConfigExporter::addSettingWx, key: " << key << ", value: 0x"
 				  << std::hex << (int)value << ", convertedValue: " << std::dec << convertedValue
 				  << std::endl;
 	}
