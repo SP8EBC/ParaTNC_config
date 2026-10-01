@@ -35,6 +35,7 @@ lib/wjwwood_serial/src/impl/list_ports \
 lib/wjwwood_serial/src/impl \
 lib/wjwwood_serial/src \
 shared/config \
+shared/config/build \
 shared/crc \
 shared \
 shared/exceptions \

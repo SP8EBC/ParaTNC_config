@@ -14,6 +14,7 @@ RM := rm -rf
 -include shared/services/subdir.mk
 -include shared/exceptions/subdir.mk
 -include shared/crc/subdir.mk
+-include shared/config/build/subdir.mk
 -include shared/config/subdir.mk
 -include shared/subdir.mk
 -include lib/wjwwood_serial/src/impl/list_ports/subdir.mk

@@ -510,7 +510,7 @@ struct SourceConfigSourceConfig {
 						 "from: "
 					  << from << std::endl;
 			throw std::out_of_range ("unknown value from text config to construct an instance of "
-									  "SourceConfigSourceConfig from!");
+									 "SourceConfigSourceConfig from!");
 		}
 
 		if ((upper == "INTERNAL") && (what == SourceConfigForWhat::Temperature)) {
@@ -543,7 +543,7 @@ struct ModeConfigPowersave {
 		case PWSAVE_AGGRESV: return "AGGRESIVE";
 		default:
 			throw std::out_of_range ("ConfigModePowersave::toString(), unknown and not allowed "
-									  "value of powersave mode!");
+									 "value of powersave mode!");
 		}
 	}
 
@@ -593,7 +593,7 @@ struct ModeConfigPowersave {
 						 "from: "
 					  << from << std::endl;
 			throw std::out_of_range ("unknown value from text config to construct an instance of "
-									  "SourceConfigSourceConfig from!");
+									 "SourceConfigSourceConfig from!");
 		}
 	}
 
@@ -602,6 +602,151 @@ struct ModeConfigPowersave {
 	 * a controller configuration NvMem area
 	 */
 	uint8_t toUint8 () const { return static_cast<uint8_t> (powersave); }
+};
+
+// ============================================================================
+// Specific decoders/encoders to more user-friendy values for WX enable
+// ============================================================================
+
+enum class ModeConfigWxValues {
+	Disabled,
+	Enabled,
+	EnabledWithOneWire,
+	EnabledWithValidator,
+	EnabledWithValidatorAndOneWire
+};
+
+struct ModeConfigWx {
+	ModeConfigWxValues mode;
+
+	/**
+	 * @brief converts value to string to be stored in configuration text file
+	 */
+	std::string toString ()
+	{
+		switch (mode) {
+		case ModeConfigWxValues::Disabled: return "OFF";
+		case ModeConfigWxValues::Enabled: return "ON";
+		case ModeConfigWxValues::EnabledWithOneWire: return "ON_ONEWIRE";
+		case ModeConfigWxValues::EnabledWithValidator: return "ON_VALIDATOR";
+		case ModeConfigWxValues::EnabledWithValidatorAndOneWire: return "ON_VALIDATOR_ONEWIRE";
+		default:
+			std::cout << "E = ModeConfigWx::toString, screwed mode value: " << std::hex << (int)mode
+					  << std::dec << std::endl;
+			throw std::out_of_range ("unknown value of mode in ModeConfigWx");
+		}
+	}
+
+	/**
+	 * @brief Converts value from a controller config NvMem area, field 'wx' in 'config_data_mode_t'
+	 * to internal value used by this tool
+	 * @note 'wx' is a bitmask, and it is converted to enum depends on which bits are set
+	 *      */
+	ModeConfigWx (uint8_t from)
+	{
+		// all bits which may be set in 'wx' field
+		const uint8_t known_bits = WX_ENABLED | WX_INTERNAL_AS_BACKUP | WX_INTERNAL_SPARKFUN_WIND |
+								   WX_INTERNAL_DISABLE_DALLAS | WX_CHECK_VALIDATE_PARAMS;
+
+		const bool enabled = (from & WX_ENABLED) != 0;
+		const bool disable_dallas = (from & WX_INTERNAL_DISABLE_DALLAS) != 0;
+		const bool validator = (from & WX_CHECK_VALIDATE_PARAMS) != 0;
+
+		if (from == 0U) {
+			mode = ModeConfigWxValues::Disabled;
+		}
+		else if (((from & ~known_bits) != 0) || !enabled) {
+			// undefined bits set, or some options set while wx itself is disabled
+			std::cout << "E = ModeConfigWx::ModeConfigWx, screwed mode 'from': " << std::hex
+					  << (int)from << std::dec << std::endl;
+			throw std::out_of_range ("unknown value of from in ModeConfigWx");
+		}
+		else if (!disable_dallas && !validator) {
+			mode = ModeConfigWxValues::EnabledWithOneWire;
+		}
+		else if (disable_dallas && !validator) {
+			mode = ModeConfigWxValues::Enabled;
+		}
+		else if (!disable_dallas && validator) {
+			mode = ModeConfigWxValues::EnabledWithValidatorAndOneWire;
+		}
+		else if (disable_dallas && validator) {
+			mode = ModeConfigWxValues::EnabledWithValidator;
+		}
+		else {
+			std::cout << "E = ModeConfigWx::ModeConfigWx, screwed mode 'from': " << std::hex
+					  << (int)from << std::dec << std::endl;
+			throw std::out_of_range ("unknown value of from in ModeConfigWx");
+		}
+	}
+
+	/**
+	 * @brief Converts string read from configuration text file to internal value used by this
+	 * config tool
+	 */
+	ModeConfigWx (std::string from)
+	{
+		std::string upper = from;
+		std::transform (upper.begin (), upper.end (), upper.begin (), [] (unsigned char c) {
+			return std::toupper (c);
+		});
+
+		if (upper == "OFF") {
+			mode = ModeConfigWxValues::Disabled;
+		}
+		else if (upper == "ON") {
+			mode = ModeConfigWxValues::Enabled;
+		}
+		else if (upper == "ON_ONEWIRE") {
+			mode = ModeConfigWxValues::EnabledWithOneWire;
+		}
+		else if (upper == "ON_VALIDATOR") {
+			mode = ModeConfigWxValues::EnabledWithValidator;
+		}
+		else if (upper == "ON_VALIDATOR_ONEWIRE" || upper == "ON_ONEWIRE_VALIDATOR") {
+			mode = ModeConfigWxValues::EnabledWithValidatorAndOneWire;
+		}
+		else {
+			std::cout << "E = ModeConfigWx::ModeConfigWx, screwed mode value: " << from << std::dec
+					  << std::endl;
+			throw std::out_of_range ("unknown value of mode in ModeConfigWx");
+		}
+	}
+
+	/**
+	 * @brief Converts internal value used by this tool back to a single byte to be stored in
+	 * a controller configuration NvMem area
+	 * @note this create a bitmask
+	 */
+	uint8_t toUint8 () const
+	{
+		uint8_t out = 0;
+
+		if (mode == ModeConfigWxValues::Enabled) {
+			out |= WX_ENABLED;
+			out |= WX_INTERNAL_DISABLE_DALLAS;
+		}
+		else if (mode == ModeConfigWxValues::EnabledWithOneWire) {
+			out |= WX_ENABLED;
+		}
+		else if (mode == ModeConfigWxValues::EnabledWithValidator) {
+			out |= WX_ENABLED;
+			out |= WX_INTERNAL_DISABLE_DALLAS;
+			out |= WX_CHECK_VALIDATE_PARAMS;
+		}
+		else if (mode == ModeConfigWxValues::EnabledWithValidatorAndOneWire) {
+			out |= WX_ENABLED;
+			out |= WX_CHECK_VALIDATE_PARAMS;
+		}
+		else {
+			std::cout << "E = ModeConfigWx::ModeConfigWx, screwed mode 'from': " << std::hex
+					  << (int)mode << std::dec << std::endl;
+			throw std::out_of_range ("unknown value of from in ModeConfigWx");
+
+		}
+
+		return out;
+	}
 };
 
 #endif /* SHARED_CONFIG_CONFIGVER0_SPECIFIC_H_ */
