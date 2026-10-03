@@ -175,6 +175,7 @@ int main (int argc, char *argv[])
 	// inverted logic to push default batch to the end
 	if (batchConfig.monitorMode) {
 		const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
+		didPrintResponse = !didIniReader.hasDescriptionForDid(did);
 
 		while (true) {
 			srvReadDid.sendRequestForDid (did, PRINT_RAW_DID);
@@ -183,6 +184,11 @@ int main (int argc, char *argv[])
 			// wait for configuration to be received
 			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
+
+			if (!PRINT_RAW_DID)
+			{
+				didDecoder.decodeAndPrintDid(did, srvReadDid.getDidResponse());
+			}
 
 			sleep (1);
 		}
@@ -198,6 +204,10 @@ int main (int argc, char *argv[])
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
 
 			main_readDid (did, srvReadDid, s, lock, cond1, PRINT_RAW_DID);
+			if (!PRINT_RAW_DID)
+			{
+				didDecoder.decodeAndPrintDid(did, srvReadDid.getDidResponse());
+			}
 			std::cout << "D = main, did has been read" << std::endl;
 		}
 		if (batchConfig.readConfig) {
@@ -281,6 +291,11 @@ int main (int argc, char *argv[])
 			// wait for configuration to be received
 			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
+
+			if (!PRINT_RAW_DID)
+			{
+				didDecoder.decodeAndPrintDid(did_list[i], srvReadDid.getDidResponse());
+			}
 
 			if (did_list[i] == 0xFF00U) {
 				// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)

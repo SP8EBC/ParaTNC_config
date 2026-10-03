@@ -421,11 +421,6 @@ DidDescription Parser::parseDidSection (const IniSection &section, uint16_t id)
 		variable.name = getString (section, p + "name");
 		variable.unit = getString (section, p + "unit");
 
-		if (variable.scalingD == 0) {
-			fail (getMandatory (section, p + "scalingd").line,
-				  "key '" + p + "scalingd' cannot be zero, as it is a divisor");
-		}
-
 		description.variables.push_back (variable);
 	}
 
