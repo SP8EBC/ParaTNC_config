@@ -46,7 +46,7 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
  * @param _cond1
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
-				   sem_t &_cond1);
+				   sem_t &_cond1, bool _printReponse);
 
 /**
  *

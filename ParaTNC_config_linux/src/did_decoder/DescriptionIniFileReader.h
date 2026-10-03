@@ -97,9 +97,13 @@ class DescriptionIniFileReader {
 	 */
 	bool parse();
 
+	bool hasDescriptionForDid(uint16_t did);
+
 	const std::string &getVersionFrom () const { return m_versionFrom; }
 	const std::string &getVersionTo () const { return m_versionTo; }
 	const std::map<uint16_t, DidDescription> &getDescriptions () const { return m_Descriptions; }
+	const std::string &getCreationDate () const { return m_creationDate; }
+	const std::string &getHeaderDescription () const { return m_headerDescription; }
 
   private:
 	/**
@@ -116,6 +120,10 @@ class DescriptionIniFileReader {
 	 * @brief the highest version of controller software this description is valid for
 	 */
 	std::string m_versionTo;
+
+	std::string m_creationDate;
+
+	std::string m_headerDescription;
 
 	/**
 	 * @brief all DIDs read from INI file.

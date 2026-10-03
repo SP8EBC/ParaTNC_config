@@ -52,6 +52,8 @@ class SrvReadDid: public IService {
 	 */
 	DidResponse didResponse;
 
+	bool printResponse;
+
 public:
 	/**
 	 *
@@ -62,9 +64,10 @@ public:
 
 	/**
 	 * Sends request to read given DID
-	 * @param did data identifier to be written
+	 * @param did data identifier to be read
+	 * @param printReponse if the @link{callback} shall print DID response on a console
 	 */
-	void sendRequestForDid(uint16_t did);
+	void sendRequestForDid(uint16_t did, bool printReponse);
 
 	/**
 	 * Returns

@@ -14,6 +14,8 @@
 #include "LogDumper.h"
 #include "Routines.hpp"
 #include "TimeTools.h"
+#include "did_decoder/DescriptionIniFileReader.h"
+#include "did_decoder/DidDecoder.h"
 #include "serial/Serial.h"
 #include <iomanip>
 #include <iostream>
@@ -28,6 +30,8 @@
 #include "../shared/kiss_communication_service_ids.h"
 
 #include "../shared/event_log.h"
+
+#define PRINT_RAW_DID ( didPrintResponse || !didIniAvailable )
 
 std::map<uint8_t, IService *> callbackMap;
 
@@ -121,6 +125,7 @@ int main (int argc, char *argv[])
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ROUTINE_CONTROL_RESP, &srvRoutineControl));
 
 	bool breakEventsLogDumpOnCrcFail = false;
+	bool didPrintResponse = true;
 
 	SerialRxBackgroundWorker worker(&s, callbackMap, nrc_callback);
 	worker.backgroundTimeoutCallback = timeout_callback;
@@ -129,9 +134,23 @@ int main (int argc, char *argv[])
 
 	batchConfig.defaultBatch = true;
 
+	// parsing all commandline arguments
 	parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail);
 
 	Routines routines(srvRoutineControl, srvReadDid);
+
+	DescriptionIniFileReader didIniReader("did-description.ini");
+	const bool didIniAvailable = didIniReader.parse();
+	const std::map<uint16_t, DidDescription> &didDescription = didIniReader.getDescriptions();
+
+	DidDecoder didDecoder(didDescription);
+
+	if (didIniAvailable) {
+		std::cout << "I = main, DID description file created " << didIniReader.getCreationDate()
+				<< ", having " << didDescription.size() << " definitions" << std::endl;
+
+		std::cout << "I = main, DID description file header info: " << didIniReader.getHeaderDescription() <<  std::endl;
+	}
 
 	bool portOpenResult = false;
 
@@ -152,12 +171,13 @@ int main (int argc, char *argv[])
 
 	worker.start ();
 
+	// clang-format on
 	// inverted logic to push default batch to the end
 	if (batchConfig.monitorMode) {
 		const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
 
 		while (true) {
-			srvReadDid.sendRequestForDid (did);
+			srvReadDid.sendRequestForDid (did, PRINT_RAW_DID);
 
 			pthread_mutex_lock (&lock);
 			// wait for configuration to be received
@@ -174,9 +194,10 @@ int main (int argc, char *argv[])
 		}
 		if (batchConfig.readDid) {
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
+			didPrintResponse = !didIniReader.hasDescriptionForDid(did);
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
 
-			main_readDid (did, srvReadDid, s, lock, cond1);
+			main_readDid (did, srvReadDid, s, lock, cond1, PRINT_RAW_DID);
 			std::cout << "D = main, did has been read" << std::endl;
 		}
 		if (batchConfig.readConfig) {
@@ -253,7 +274,8 @@ int main (int argc, char *argv[])
 			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec
 					  << std::endl;
 
-			srvReadDid.sendRequestForDid (did_list[i]);
+			didPrintResponse = !didIniReader.hasDescriptionForDid(did_list[i]);
+			srvReadDid.sendRequestForDid (did_list[i], PRINT_RAW_DID);
 
 			pthread_mutex_lock (&lock);
 			// wait for configuration to be received

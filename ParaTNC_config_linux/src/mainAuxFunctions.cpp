@@ -63,15 +63,14 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
  * @param _cond1
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
-				   sem_t &_cond1)
+				   sem_t &_cond1, bool _printResponse)
 {
-	_srvReadDid.sendRequestForDid (did);
+	_srvReadDid.sendRequestForDid (did, _printResponse);
 	//_s.waitForTransmissionDone ();
 	pthread_mutex_lock (&_lock);
 	// wait for DID value to be received
 	sem_wait (&_cond1);
 	pthread_mutex_unlock (&_lock);
-	const DidResponse &response = _srvReadDid.getDidResponse ();
 }
 
 std::shared_ptr<IConfigurationManager> main_readConfig (SrvGetRunningConfig &_srvRunningConfig,
@@ -195,7 +194,7 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
 	}
 
 	// read DID 0xF000u -> config_running_pgm_counter
-	_srvReadDid.sendRequestForDid (0xF000u);
+	_srvReadDid.sendRequestForDid (0xF000u, true);
 	//_s.waitForTransmissionDone ();
 	pthread_mutex_lock (&_lock);
 	// wait for DID value to be received
