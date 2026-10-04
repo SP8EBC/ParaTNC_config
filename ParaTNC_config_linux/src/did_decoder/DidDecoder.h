@@ -45,6 +45,12 @@ class DidDecoder {
 	 * @return false if map doesn't have description for did with given, true otherwise
 	 */
 	bool decodeAndPrintDid (uint16_t didNumberId, const DidResponse &response);
+
+	/**
+	 * Is set to true member function @link{decodeAndPrint} will put a DID name and
+	 * DID description on the console
+	 */
+	bool m_printDidNameDescription;
 };
 
 #endif /* SRC_DID_DECODER_DIDDECODER_H_ */

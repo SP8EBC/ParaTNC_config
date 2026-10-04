@@ -567,3 +567,16 @@ bool DescriptionIniFileReader::hasDescriptionForDid (uint16_t did)
 
 	return out;
 }
+
+std::vector<uint16_t> DescriptionIniFileReader::getDidList () const
+{
+	std::vector<uint16_t> out;
+	out.reserve (m_Descriptions.size ());
+
+	for (const auto &entry : m_Descriptions) {
+		out.push_back (entry.first);
+	}
+
+	// returned local is moved (or elided by NRVO), no copy of the vector is made
+	return out;
+}

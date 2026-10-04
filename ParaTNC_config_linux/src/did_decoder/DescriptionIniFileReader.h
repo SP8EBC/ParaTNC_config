@@ -5,6 +5,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 /**
  * @brief Thrown by DescriptionIniFileReader::parse when INI file is malformed
@@ -98,6 +99,12 @@ class DescriptionIniFileReader {
 	bool parse();
 
 	bool hasDescriptionForDid(uint16_t did);
+
+	/**
+	 * @brief returns identifiers of all DIDs stored in @link{m_Descriptions}
+	 * @return vector of DIDs, sorted ascending (in the order of map keys)
+	 */
+	std::vector<uint16_t> getDidList () const;
 
 	const std::string &getVersionFrom () const { return m_versionFrom; }
 	const std::string &getVersionTo () const { return m_versionTo; }

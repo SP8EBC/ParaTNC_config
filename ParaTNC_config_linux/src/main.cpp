@@ -31,7 +31,7 @@
 
 #include "../shared/event_log.h"
 
-#define PRINT_RAW_DID ( didPrintResponse || !didIniAvailable )
+#define PRINT_RAW_DID (didPrintResponse || !didIniAvailable)
 
 std::map<uint8_t, IService *> callbackMap;
 
@@ -56,10 +56,19 @@ std::string str;
 
 std::shared_ptr<IConfigurationManager> configManager;
 
-const uint16_t did_list[] = {0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
-							 0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
-							 0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
-							 0x2010U, 0x2011U, 0x2012U, 0xF000U, 0xFF00U, 0xFF0FU};
+/**
+ * Default DID list used if no INI description file is available
+ */
+const uint16_t fixedDidList[] = {0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
+								 0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
+								 0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
+								 0x2010U, 0x2011U, 0x2012U, 0xF000U, 0xFF00U, 0xFF0FU};
+
+/**
+ * List of DIDs to be read in default batch. Filled with IDs from INI description file
+ * or initialized with array @link{fixedDidList} if this file is not available
+ */
+std::vector<uint16_t> didList;
 
 uint32_t logAreaStart = 0;
 uint32_t logAreaEnd = 0;
@@ -73,7 +82,8 @@ bool verboseLogging;
 
 static void nrc_callback (uint16_t nrc)
 {
-	exit (nrc);
+	// exit (nrc);
+	sem_post (&cond1);
 }
 
 static void timeout_callback (void)
@@ -115,6 +125,9 @@ int main (int argc, char *argv[])
 	srvReset.setConditionVariable(&cond1);
 	srvRoutineControl.setConditionVariable(&cond1);
 
+	// put all handlers for diagnostics services into a callback map.
+	// this map is later used by @link{SerialRxBackgroundWorker} to know
+	// what to call on incoming diagnostic services response
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_RUNNING_CONFIG, &srvRunningConfig));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_VERSION_AND_ID, &srvGetVersion));
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ERASE_STARTUP_CFG_RESP, &srvEraseConfig));
@@ -137,6 +150,9 @@ int main (int argc, char *argv[])
 	// parsing all commandline arguments
 	parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail);
 
+	// creating an instance of wrapper class, which implements a specifics of each
+	// diagnostics routine and exposes convinent api to use each of them, instead of "raw"
+	// calls to Routine Control diagnostics service
 	Routines routines(srvRoutineControl, srvReadDid);
 
 	DescriptionIniFileReader didIniReader("did-description.ini");
@@ -150,6 +166,12 @@ int main (int argc, char *argv[])
 				<< ", having " << didDescription.size() << " definitions" << std::endl;
 
 		std::cout << "I = main, DID description file header info: " << didIniReader.getHeaderDescription() <<  std::endl;
+
+		didList = didIniReader.getDidList();
+	}
+	else {
+		// if INI description file is not available create list from hardcoded array
+		didList = std::vector<uint16_t>(std::begin(fixedDidList), std::end(fixedDidList));
 	}
 
 	bool portOpenResult = false;
@@ -175,7 +197,7 @@ int main (int argc, char *argv[])
 	// inverted logic to push default batch to the end
 	if (batchConfig.monitorMode) {
 		const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
-		didPrintResponse = !didIniReader.hasDescriptionForDid(did);
+		didPrintResponse = !didIniReader.hasDescriptionForDid (did);
 
 		while (true) {
 			srvReadDid.sendRequestForDid (did, PRINT_RAW_DID);
@@ -185,9 +207,9 @@ int main (int argc, char *argv[])
 			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
 
-			if (!PRINT_RAW_DID)
-			{
-				didDecoder.decodeAndPrintDid(did, srvReadDid.getDidResponse());
+			if (!PRINT_RAW_DID) {
+				didDecoder.decodeAndPrintDid (did, srvReadDid.getDidResponse ());
+				didDecoder.m_printDidNameDescription = false;
 			}
 
 			sleep (1);
@@ -200,13 +222,12 @@ int main (int argc, char *argv[])
 		}
 		if (batchConfig.readDid) {
 			const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
-			didPrintResponse = !didIniReader.hasDescriptionForDid(did);
+			didPrintResponse = !didIniReader.hasDescriptionForDid (did);
 			std::cout << "D = main, reading DID: 0x" << std::hex << did << std::endl;
 
 			main_readDid (did, srvReadDid, s, lock, cond1, PRINT_RAW_DID);
-			if (!PRINT_RAW_DID)
-			{
-				didDecoder.decodeAndPrintDid(did, srvReadDid.getDidResponse());
+			if (!PRINT_RAW_DID) {
+				didDecoder.decodeAndPrintDid (did, srvReadDid.getDidResponse ());
 			}
 			std::cout << "D = main, did has been read" << std::endl;
 		}
@@ -280,37 +301,42 @@ int main (int argc, char *argv[])
 		ConfigExporter exporter (configManager);
 		exporter.exportToFile (fileNamePrefix + ".conf");
 
-		for (int i = 0; i < ((int)sizeof (did_list) / (int)(sizeof (did_list[0]))); i++) {
-			std::cout << "I = main, reading DID " << std::hex << did_list[i] << std::dec
+		for (size_t i = 0; i < didList.size (); i++) {
+			std::cout << "I = main, reading DID " << std::hex << didList[i] << std::dec
 					  << std::endl;
 
-			didPrintResponse = !didIniReader.hasDescriptionForDid(did_list[i]);
-			srvReadDid.sendRequestForDid (did_list[i], PRINT_RAW_DID);
+			didPrintResponse = !didIniReader.hasDescriptionForDid (didList[i]);
+			srvReadDid.sendRequestForDid (didList[i], PRINT_RAW_DID);
 
 			pthread_mutex_lock (&lock);
 			// wait for configuration to be received
 			sem_wait (&cond1);
 			pthread_mutex_unlock (&lock);
 
-			if (!PRINT_RAW_DID)
-			{
-				didDecoder.decodeAndPrintDid(did_list[i], srvReadDid.getDidResponse());
-			}
+			try {
+				if (!PRINT_RAW_DID) {
+					didDecoder.decodeAndPrintDid (didList[i], srvReadDid.getDidResponse ());
+				}
 
-			if (did_list[i] == 0xFF00U) {
-				// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)
-				const DidResponse &response = srvReadDid.getDidResponse ();
-				logAreaStart = (uint32_t)response.first.i32;
-				logAreaEnd = (uint32_t)response.second.i32;
+				if (didList[i] == 0xFF00U) {
+					// 		ENTRY(0xFF00U, main_flash_log_start, main_flash_log_end, DID_EMPTY)
+					const DidResponse &response = srvReadDid.getDidResponse ();
+					logAreaStart = (uint32_t)response.first.i32;
+					logAreaEnd = (uint32_t)response.second.i32;
+				}
+				else if (didList[i] == 0xFF0FU) {
+					//		ENTRY(0xFF0FU, nvm_event_oldestFlash, nvm_event_newestFlash, DID_EMPTY)
+					const DidResponse &response = srvReadDid.getDidResponse ();
+					logOldestEntry = (uint32_t)response.first.i32;
+					logNewestEntry = (uint32_t)response.second.i32;
+				}
+				else {
+					;
+				}
 			}
-			else if (did_list[i] == 0xFF0FU) {
-				//		ENTRY(0xFF0FU, nvm_event_oldestFlash, nvm_event_newestFlash, DID_EMPTY)
-				const DidResponse &response = srvReadDid.getDidResponse ();
-				logOldestEntry = (uint32_t)response.first.i32;
-				logNewestEntry = (uint32_t)response.second.i32;
-			}
-			else {
-				;
+			catch (std::runtime_error &er) {
+				std::cout << "E = main, std::runtime_error thrown while parsing response for DID 0x"
+						  << std::hex << didList[i] << std::dec << ": " <<  er.what () << std::endl;
 			}
 		}
 

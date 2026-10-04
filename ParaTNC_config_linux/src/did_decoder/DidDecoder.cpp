@@ -9,9 +9,10 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <string.h>
 
 DidDecoder::DidDecoder (const std::map<uint16_t, DidDescription> &descriptions)
-	: m_descriptions (descriptions)
+	: m_descriptions (descriptions), m_printDidNameDescription (true)
 {
 }
 
@@ -19,21 +20,23 @@ DidDecoder::~DidDecoder ()
 {
 }
 
-void DidDecoder::printDidVariable (const DidResponse_Data &value, const DidDescriptionSingleVariable &descr,
-						   DidResponse_DataSize type)
+void DidDecoder::printDidVariable (const DidResponse_Data &value,
+								   const DidDescriptionSingleVariable &descr,
+								   DidResponse_DataSize type)
 {
 	// local variable to store value to be printed
 	int32_t v = 0;
 
 	// depending on a type, the value is stored in different union field
 	switch (type) {
-		case DIDRESPONSE_DATASIZE_INT8:		v = value.i8; break;
-		case DIDRESPONSE_DATASIZE_INT16:	v = value.i16; break;
-		case DIDRESPONSE_DATASIZE_INT32:	v = value.i32; break;
-		default: {
-			std::cout << "E = DidDecoder::printDid , DID should be an integer type at this place!" << std::endl;
-			throw std::runtime_error ("We should'nt be there!");
-		}
+	case DIDRESPONSE_DATASIZE_INT8: v = value.i8; break;
+	case DIDRESPONSE_DATASIZE_INT16: v = value.i16; break;
+	case DIDRESPONSE_DATASIZE_INT32: v = value.i32; break;
+	default: {
+		std::cout << "E = DidDecoder::printDid , DID should be an integer type at this place!"
+				  << std::endl;
+		throw std::runtime_error ("We should'nt be there!");
+	}
 	}
 
 	float decoded = (descr.scalingA * v * v) + descr.scalingB * v + descr.scalingC;
@@ -42,19 +45,16 @@ void DidDecoder::printDidVariable (const DidResponse_Data &value, const DidDescr
 
 	// Division by zero if of course not allowed. If this scalling coeff is set to zero
 	// simply print raw value as-is
-	if (descr.scalingD == 0)
-	{
+	if (descr.scalingD == 0) {
 		std::cout << "0x" << std::hex << v << std::dec << " " << descr.unit << std::endl;
 	}
 	// check if result are integer or float
-	else if (descr.scalingD == 1)
-	{
+	else if (descr.scalingD == 1) {
 		decoded /= descr.scalingD;
 		// for sure it is decimal.
 		std::cout << (int32_t)decoded << " " << descr.unit << std::endl;
 	}
-	else
-	{
+	else {
 		decoded /= descr.scalingD;
 		// it might be decimal, but print it as float
 		std::cout << decoded << " " << descr.unit << std::endl;
@@ -70,7 +70,6 @@ void DidDecoder::printDidVariable (float value, const DidDescriptionSingleVariab
 
 	// it might be decimal, but print it as float
 	std::cout << decoded << " " << descr.unit << std::endl;
-
 }
 
 bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &response)
@@ -101,14 +100,17 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 		}
 
 		if (howMany == 0) {
-			std::cout << "E = DidDecoder::printDid , didNumberId: " << didNumberId <<  std::endl;
+			std::cout << "E = DidDecoder::decodeAndPrintDid , didNumberId: 0x" << std::hex
+					  << didNumberId << std::dec << std::endl;
 			throw std::runtime_error ("It doesn't make any sense for DID to be empty!");
 		}
 		else {
-			// print description for this DID
-			std::cout << "I = DidDecoder::decodeAndPrintDid, 0x" << std::hex << didNumberId
-					  << std::dec << " - " << description.shortName << " - "
-					  << description.longerDescription << std::endl;
+			if (m_printDidNameDescription) {
+				// print description for this DID
+				std::cout << "I = DidDecoder::decodeAndPrintDid, 0x" << std::hex << didNumberId
+						  << std::dec << " - " << description.shortName << " - "
+						  << description.longerDescription << std::endl;
+			}
 		}
 
 		if ((response.firstSize == DIDRESPONSE_DATASIZE_STRING)) {
@@ -116,7 +118,17 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 			// in such cases there is of course no recalculation or decoding, and
 			// the string is printed as-is. DidDescription is used only to
 			// print a name and description of this DID, to give some more context
-			std::cout << "I = DidDecoder::decodeAndPrintDid, text: " << response.first.str;
+
+			const size_t ln = strlen (response.first.str);
+
+			if (ln > 0) {
+				std::cout << "I = DidDecoder::decodeAndPrintDid, text: " << response.first.str
+						  << std::endl;
+			}
+			else {
+				std::cout << "I = DidDecoder::decodeAndPrintDid, empty string has been returned"
+						  << std::endl;
+			}
 		}
 		else {
 			if (response.firstSize == DIDRESPONSE_DATASIZE_EMPTY) {
@@ -134,30 +146,36 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 			// print first DID
 			if (howMany > 0) {
 				if (response.firstSize == DIDRESPONSE_DATASIZE_FLOAT) {
-					printDidVariable (response.first.f, description.variables.at(0));
+					printDidVariable (response.first.f, description.variables.at (0));
 				}
 				else {
-					printDidVariable (response.first, description.variables.at(0), response.firstSize);
+					printDidVariable (response.first,
+									  description.variables.at (0),
+									  response.firstSize);
 				}
 			}
 
 			// print second DID
 			if (howMany > 1) {
 				if (response.secondSize == DIDRESPONSE_DATASIZE_FLOAT) {
-					printDidVariable (response.second.f, description.variables.at(1));
+					printDidVariable (response.second.f, description.variables.at (1));
 				}
 				else {
-					printDidVariable (response.second, description.variables.at(1), response.secondSize);
+					printDidVariable (response.second,
+									  description.variables.at (1),
+									  response.secondSize);
 				}
 			}
 
 			// print third DID
 			if (howMany > 2) {
 				if (response.thirdSize == DIDRESPONSE_DATASIZE_FLOAT) {
-					printDidVariable (response.third.f, description.variables.at(2));
+					printDidVariable (response.third.f, description.variables.at (2));
 				}
 				else {
-					printDidVariable (response.third, description.variables.at(2), response.thirdSize);
+					printDidVariable (response.third,
+									  description.variables.at (2),
+									  response.thirdSize);
 				}
 			}
 		}
