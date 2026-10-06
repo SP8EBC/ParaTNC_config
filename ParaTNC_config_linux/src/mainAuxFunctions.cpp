@@ -259,7 +259,7 @@ void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 		diagnosticServices.add_options ();
 	dsInit ("restart", " : Restart ParaMETEO");
 	dsInit ("read-did,r",
-			boost::program_options::value<std::string> (&batchConfig->didToRead),
+			boost::program_options::value<std::string> (&batchConfig->didToRead)->implicit_value("ALL"),
 			" : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
 	dsInit ("monitor-did,m",
 			boost::program_options::value<std::string> (&batchConfig->didToRead),

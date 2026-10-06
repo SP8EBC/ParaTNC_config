@@ -20,6 +20,14 @@ class DidDecoder {
 	const std::map<uint16_t, DidDescription> &m_descriptions;
 
 	/**
+	 * @brief Name of a log file to which this class will output decoded DID values
+	 * @note logging will be disabled if the string has a length of 0 or 1
+	 */
+	const std::string m_logFilename;
+
+	bool m_isLogFilename;
+
+	/**
 	 * Decodes any decimal value from a DID
 	 * @param value raw value returned from the controller
 	 * @param descr description of this DID
@@ -35,7 +43,7 @@ class DidDecoder {
 	void printDidVariable (float value, const DidDescriptionSingleVariable &descr);
 
   public:
-	DidDecoder (const std::map<uint16_t, DidDescription> &descriptions);
+	DidDecoder (const std::map<uint16_t, DidDescription> &descriptions, std::string logFileName);
 	virtual ~DidDecoder ();
 
 	/**

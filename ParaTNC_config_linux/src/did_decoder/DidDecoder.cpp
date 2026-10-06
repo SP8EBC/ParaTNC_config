@@ -8,12 +8,17 @@
 #include <did_decoder/DidDecoder.h>
 
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string.h>
 
-DidDecoder::DidDecoder (const std::map<uint16_t, DidDescription> &descriptions)
-	: m_descriptions (descriptions), m_printDidNameDescription (true)
+#include "TimeTools.h"
+
+DidDecoder::DidDecoder (const std::map<uint16_t, DidDescription> &descriptions,
+						std::string logFileName)
+	: m_descriptions (descriptions), m_logFilename (logFileName), m_printDidNameDescription (true)
 {
+	m_isLogFilename = m_logFilename.length () > 1;
 }
 
 DidDecoder::~DidDecoder ()
@@ -26,6 +31,9 @@ void DidDecoder::printDidVariable (const DidResponse_Data &value,
 {
 	// local variable to store value to be printed
 	int32_t v = 0;
+
+	// prepare a string to be displayed inside this stringstream
+	std::stringstream sstream;
 
 	// depending on a type, the value is stored in different union field
 	switch (type) {
@@ -41,35 +49,51 @@ void DidDecoder::printDidVariable (const DidResponse_Data &value,
 
 	float decoded = (descr.scalingA * v * v) + descr.scalingB * v + descr.scalingC;
 
-	std::cout << "I = DidDecoder::printDidVariable, \t" << descr.name << " - ";
+	sstream << " \t" << descr.name << " - ";
 
 	// Division by zero if of course not allowed. If this scalling coeff is set to zero
 	// simply print raw value as-is
 	if (descr.scalingD == 0) {
-		std::cout << "0x" << std::hex << v << std::dec << " " << descr.unit << std::endl;
+		sstream << "0x" << std::hex << v << std::dec << " " << descr.unit << std::endl;
 	}
 	// check if result are integer or float
 	else if (descr.scalingD == 1) {
 		decoded /= descr.scalingD;
 		// for sure it is decimal.
-		std::cout << (int32_t)decoded << " " << descr.unit << std::endl;
+		sstream << (int32_t)decoded << " " << descr.unit << std::endl;
 	}
 	else {
 		decoded /= descr.scalingD;
 		// it might be decimal, but print it as float
-		std::cout << decoded << " " << descr.unit << std::endl;
+		sstream << decoded << " " << descr.unit << std::endl;
 	}
+
+	if (m_isLogFilename) {
+		std::fstream logFile (m_logFilename, std::ios_base::out | std::ios_base::app);
+		logFile << TimeTools::getCurrentLocalTimeFnString () << " " << sstream.str ();
+		logFile.close ();
+	}
+
+	std::cout << "I = DidDecoder::printDidVariable, " << sstream.str ();
 }
 
 void DidDecoder::printDidVariable (float value, const DidDescriptionSingleVariable &descr)
 {
+	// prepare a string to be displayed inside this stringstream
+	std::stringstream sstream;
+
 	float decoded = (descr.scalingA * value * value) + descr.scalingB * value + descr.scalingC;
 	decoded /= descr.scalingD;
 
-	std::cout << "I = DidDecoder::printDidVariable, \t" << descr.name << " - ";
+	sstream << "\t" << descr.name << " - " << decoded << " " << descr.unit << std::endl;
 
-	// it might be decimal, but print it as float
-	std::cout << decoded << " " << descr.unit << std::endl;
+	if (m_isLogFilename) {
+		std::fstream logFile (m_logFilename, std::ios_base::out | std::ios_base::app);
+		logFile << TimeTools::getCurrentLocalTimeFnString () << " " << sstream.str ();
+		logFile.close ();
+	}
+
+	std::cout << "I = DidDecoder::printDidVariable, " << sstream.str ();
 }
 
 bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &response)
@@ -84,6 +108,9 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 	}
 	else {
 		const DidDescription &description = value->second;
+
+		// prepare a string to be displayed inside this stringstream
+		std::stringstream sstream;
 
 		int howMany = 0; // variables are returned by this DID
 
@@ -107,9 +134,19 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 		else {
 			if (m_printDidNameDescription) {
 				// print description for this DID
-				std::cout << "I = DidDecoder::decodeAndPrintDid, 0x" << std::hex << didNumberId
-						  << std::dec << " - " << description.shortName << " - "
-						  << description.longerDescription << std::endl;
+				sstream << "0x" << std::hex << didNumberId << std::dec << " - "
+						<< description.shortName << " - " << description.longerDescription
+						<< std::endl;
+
+				std::cout << "I = DidDecoder::decodeAndPrintDid, " << sstream.str ();
+
+				if (m_isLogFilename) {
+					std::fstream logFile (m_logFilename, std::ios_base::out | std::ios_base::app);
+					logFile << TimeTools::getCurrentLocalTimeFnString () << " " << sstream.str ();
+					logFile.close ();
+				}
+
+				sstream.str ("");
 			}
 		}
 
@@ -122,13 +159,19 @@ bool DidDecoder::decodeAndPrintDid (uint16_t didNumberId, const DidResponse &res
 			const size_t ln = strlen (response.first.str);
 
 			if (ln > 0) {
-				std::cout << "I = DidDecoder::decodeAndPrintDid, text: " << response.first.str
-						  << std::endl;
+				sstream << "\t text: " << response.first.str << std::endl;
 			}
 			else {
-				std::cout << "I = DidDecoder::decodeAndPrintDid, empty string has been returned"
-						  << std::endl;
+				sstream << "\t empty string has been returned" << std::endl;
 			}
+
+			if (m_isLogFilename) {
+				std::fstream logFile (m_logFilename, std::ios_base::out | std::ios_base::app);
+				logFile << TimeTools::getCurrentLocalTimeFnString () << " " << sstream.str ();
+				logFile.close ();
+			}
+
+			std::cout << "I = DidDecoder::decodeAndPrintDid, " << sstream.str ();
 		}
 		else {
 			if (response.firstSize == DIDRESPONSE_DATASIZE_EMPTY) {
