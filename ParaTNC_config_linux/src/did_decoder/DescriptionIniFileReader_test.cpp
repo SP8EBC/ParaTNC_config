@@ -24,22 +24,22 @@ namespace {
  * are important, as many tests modify single line and check if the error is reported
  * for exactly this line.
  */
-const char *const VALID_INI = "[Header]\n"										// 1
-							  "Description=\"Test file\"\n"						// 2
-							  "CreationDate=28092026\n"							// 3
-							  "VersionFrom=\"FA06\"\n"							// 4
-							  "VersionTo=\"FB00\"\n"							// 5
-							  "DIDList=0x1000\n"								// 6
-							  "\n"												// 7
-							  "[0x1000]\n"										// 8
-							  "ShortName=\"Uptime\"\n"							// 9
-							  "LongerDescription=\"Seconds from power on\"\n"	// 10
-							  "1stScalingA=0\n"									// 11
-							  "1stScalingB=1\n"									// 12
-							  "1stScalingC=0\n"									// 13
-							  "1stScalingD=1\n"									// 14
-							  "1stName=\"uptime\"\n"							// 15
-							  "1stUnit=\"seconds\"\n";							// 16
+const char *const VALID_INI = "[Header]\n"									  // 1
+							  "Description=\"Test file\"\n"					  // 2
+							  "CreationDate=28092026\n"						  // 3
+							  "VersionFrom=\"FA06\"\n"						  // 4
+							  "VersionTo=\"FB00\"\n"						  // 5
+							  "DIDList=0x1000\n"							  // 6
+							  "\n"											  // 7
+							  "[0x1000]\n"									  // 8
+							  "ShortName=\"Uptime\"\n"						  // 9
+							  "LongerDescription=\"Seconds from power on\"\n" // 10
+							  "1stScalingA=0\n"								  // 11
+							  "1stScalingB=1\n"								  // 12
+							  "1stScalingC=0\n"								  // 13
+							  "1stScalingD=1\n"								  // 14
+							  "1stName=\"uptime\"\n"						  // 15
+							  "1stUnit=\"seconds\"\n";						  // 16
 
 /**
  * @brief Writes given content into temporary file, which is removed
@@ -420,7 +420,8 @@ BOOST_AUTO_TEST_CASE (malformed_did_list)
 
 BOOST_AUTO_TEST_CASE (did_listed_but_section_missing)
 {
-	checkError (replaceLine (VALID_INI, 6, "DIDList=0x1000,0x2100"), 6,
+	checkError (replaceLine (VALID_INI, 6, "DIDList=0x1000,0x2100"),
+				6,
 				"DID 0x2100 is listed in 'didlist' but its section is missing");
 }
 
@@ -501,7 +502,8 @@ BOOST_AUTO_TEST_CASE (scaling_out_of_int32_range)
 	checkError (replaceLine (VALID_INI, 13, "1stScalingC=2147483648"), 13, "out of range");
 	checkError (replaceLine (VALID_INI, 13, "1stScalingC=-2147483649"), 13, "out of range");
 	checkError (replaceLine (VALID_INI, 13, "1stScalingC=0x100000000"), 13, "out of range");
-	checkError (replaceLine (VALID_INI, 13, "1stScalingC=99999999999999999999999"), 13,
+	checkError (replaceLine (VALID_INI, 13, "1stScalingC=99999999999999999999999"),
+				13,
 				"must be a decimal");
 }
 

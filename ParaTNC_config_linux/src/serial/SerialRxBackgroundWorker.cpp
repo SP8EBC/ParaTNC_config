@@ -142,9 +142,10 @@ bool SerialRxBackgroundWorker::start (void)
 
 		//		If pshared is nonzero, then the semaphore is shared between processes, and should be
 		// located 		in  a  region  of  shared  memory  (see  shm_open(3), mmap(2), and
-		// shmget(2)). 		(Since a child created by fork(2) inherits its parent's memory mappings, 		it
-		//can also access the semaphore.)  Any process that can access the shared memory 		region can
-		//operate on the semaphore using sem_post(3), sem_wait(3), and so on.
+		// shmget(2)). 		(Since a child created by fork(2) inherits its parent's memory mappings,
+		// it
+		// can also access the semaphore.)  Any process that can access the shared memory region can
+		// operate on the semaphore using sem_post(3), sem_wait(3), and so on.
 
 		const int cond_init_result = sem_init (&workerStartSync, (int)0, (unsigned int)0);
 

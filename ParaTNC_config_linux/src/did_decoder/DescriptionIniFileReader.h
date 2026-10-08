@@ -71,7 +71,7 @@ class DescriptionIniParseError : public std::runtime_error {
  *
  * Example section for single DID looks like that. Everything from this single section
  * goes into single instance of @link{DidDescription}. DidDescription::id is set to value
- * from section name. In case of this example -> 0x1000 
+ * from section name. In case of this example -> 0x1000
  *
  * [0x1000]
  * ShortName="Uptime"
@@ -96,9 +96,9 @@ class DescriptionIniFileReader {
 	 * @throw DescriptionIniParseError if file cannot be read, is malformed or any
 	 * mandatory data is missing. Class members are not modified in such case.
 	 */
-	bool parse();
+	bool parse ();
 
-	bool hasDescriptionForDid(uint16_t did);
+	bool hasDescriptionForDid (uint16_t did);
 
 	/**
 	 * @brief returns identifiers of all DIDs stored in @link{m_Descriptions}

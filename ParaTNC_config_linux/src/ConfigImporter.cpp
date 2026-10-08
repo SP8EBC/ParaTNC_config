@@ -296,7 +296,7 @@ void ConfigImporter::parseModeConfigSetting (const std::string &key, const std::
 	else if (key == "wx") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 1);
 		ModeConfigWx wx (value);
-		const uint8_t wxAsUint = wx.toUint8();
+		const uint8_t wxAsUint = wx.toUint8 ();
 		mode.setWx (wxAsUint);
 		if (verboseLogging) {
 			std::cout << "---- ConfigImporter::parseModeConfigSetting, wx, value: " << value
@@ -359,7 +359,7 @@ void ConfigImporter::parseModeConfigSetting (const std::string &key, const std::
 	}
 	else if (key == "powersave") {
 		CONFIG_IMPORTE_SET_FLAG (modeFlags, 14);
-		ModeConfigPowersave powersave(value);
+		ModeConfigPowersave powersave (value);
 		const uint8_t uint8 = powersave.toUint8 ();
 		if (verboseLogging) {
 			std::cout << "---- ConfigImporter::parseModeConfigSetting, powersave, value: " << value
@@ -386,26 +386,26 @@ void ConfigImporter::parseSourceConfigSetting (const std::string &key, const std
 	if (key == "temperature") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 0);
 		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Temperature);
-		source.setTemperature (sourcecfg.toUint8());
-		encodedValue = sourcecfg.toUint8();
+		source.setTemperature (sourcecfg.toUint8 ());
+		encodedValue = sourcecfg.toUint8 ();
 	}
 	else if (key == "pressure") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 1);
 		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Pressure);
-		source.setPressure (sourcecfg.toUint8());
-		encodedValue = sourcecfg.toUint8();
+		source.setPressure (sourcecfg.toUint8 ());
+		encodedValue = sourcecfg.toUint8 ();
 	}
 	else if (key == "humidity") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 2);
 		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Humidity);
-		source.setHumidity (sourcecfg.toUint8());
-		encodedValue = sourcecfg.toUint8();
+		source.setHumidity (sourcecfg.toUint8 ());
+		encodedValue = sourcecfg.toUint8 ();
 	}
 	else if (key == "wind") {
 		CONFIG_IMPORTE_SET_FLAG (sourceFlags, 3);
 		SourceConfigSourceConfig sourcecfg (value, SourceConfigForWhat::Wind);
-		source.setWind (sourcecfg.toUint8());
-		encodedValue = sourcecfg.toUint8();
+		source.setWind (sourcecfg.toUint8 ());
+		encodedValue = sourcecfg.toUint8 ();
 	}
 
 	if (verboseLogging) {

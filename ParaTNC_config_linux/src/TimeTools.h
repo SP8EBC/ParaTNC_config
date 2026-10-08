@@ -348,10 +348,10 @@ class TimeTools {
 
 		date_stream << current_time;
 
-		//out.append (date_stream.str ());
-		// strncpy(out, date_stream.str().c_str(), ret);
+		// out.append (date_stream.str ());
+		//  strncpy(out, date_stream.str().c_str(), ret);
 
-		return date_stream.str();
+		return date_stream.str ();
 	}
 
 	TimeTools ();

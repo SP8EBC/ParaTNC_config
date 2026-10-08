@@ -33,7 +33,7 @@ class DidDecoder {
 	 * @param descr description of this DID
 	 */
 	void printDidVariable (const DidResponse_Data &value, const DidDescriptionSingleVariable &descr,
-				   DidResponse_DataSize type);
+						   DidResponse_DataSize type);
 
 	/**
 	 * Float values require some distinct formatting
