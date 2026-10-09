@@ -26,7 +26,8 @@ extern bool verboseLogging;
  * @param out
  * @return
  */
-size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, std::string &out)
+size_t main_make_filename_prefix (const std::string &callsign, const std::string &api_name,
+								  std::string &out)
 {
 	size_t total_ln = 0;
 
@@ -238,8 +239,9 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
  * @param portName
  * @param breakEventsLogDumpOnCrcFail
  */
-void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
-							 std::string *portName, bool *breakEventsLogDumpOnCrcFail)
+void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
+								  std::string *portName, bool *breakEventsLogDumpOnCrcFail,
+								  bool *showGui)
 {
 	boost::program_options::variables_map variablesMap;
 
@@ -253,13 +255,15 @@ void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 			" : Serial port used for communication");
 	goInit ("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
 	goInit ("verbose", " : Print more things on the console");
+	goInit ("gui" , " ");
 
 	boost::program_options::options_description diagnosticServices ("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit =
 		diagnosticServices.add_options ();
 	dsInit ("restart", " : Restart ParaMETEO");
 	dsInit ("read-did,r",
-			boost::program_options::value<std::string> (&batchConfig->didToRead)->implicit_value("ALL"),
+			boost::program_options::value<std::string> (&batchConfig->didToRead)
+				->implicit_value ("ALL"),
 			" : Read DID (data-by-id) specified by hex in range 0000 to FFFF");
 	dsInit ("monitor-did,m",
 			boost::program_options::value<std::string> (&batchConfig->didToRead),
@@ -299,6 +303,13 @@ void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 	}
 	else {
 		verboseLogging = false;
+	}
+
+	if (variablesMap.count("gui")) {
+		*showGui = true;
+	}
+	else {
+		*showGui = false;
 	}
 
 	if (variablesMap.count ("restart")) {
@@ -352,7 +363,7 @@ void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 	}
 
 	if (batchConfig->writeConfig && batchConfig->amendConfig) {
-		throw std::runtime_error ("Cannot ammend and write at once!!");
+		throw std::runtime_error ("Cannot amend and write at once!!");
 	}
 
 	if (batchConfig->monitorMode && !batchConfig->defaultBatch) {

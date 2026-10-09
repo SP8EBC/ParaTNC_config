@@ -42,5 +42,6 @@ shared/exceptions \
 shared/services \
 src \
 src/did_decoder \
+src/gui_ncurses \
 src/serial \
 

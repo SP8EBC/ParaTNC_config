@@ -1,5 +1,8 @@
 #include "mainAuxFunctions.h"
 
+#include "../shared/config/ConfigVer0.h"
+#include "../shared/event_log.h"
+#include "../shared/kiss_communication_service_ids.h"
 #include "../shared/services/SrvEraseStartupConfig.h"
 #include "../shared/services/SrvGetRunningConfig.h"
 #include "../shared/services/SrvGetVersionAndId.h"
@@ -8,6 +11,10 @@
 #include "../shared/services/SrvReset.h"
 #include "../shared/services/SrvRoutineControl.h"
 #include "../shared/services/SrvSendStartupConfig.h"
+
+/// ==================================================================================================
+///	INCLUDES for application specific things
+/// ==================================================================================================
 #include "BatchConfig_t.h"
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
@@ -17,21 +24,28 @@
 #include "did_decoder/DescriptionIniFileReader.h"
 #include "did_decoder/DidDecoder.h"
 #include "serial/Serial.h"
+#include "serial/SerialPromptUserForPort.h"
+#include "serial/SerialRxBackgroundWorker.h"
+
+/// ==================================================================================================
+///	INCLUDES for NCurses user interface
+/// ==================================================================================================
+#include "gui_ncurses/MainGui.h"
+
+/// ==================================================================================================
+///	INCLUDES for standard libraries
+/// ==================================================================================================
 #include <iomanip>
 #include <iostream>
 #include <memory>
 #include <semaphore.h>
-#include <serial/SerialPromptUserForPort.h>
-#include <serial/SerialRxBackgroundWorker.h>
 #include <vector>
 
-#include "../shared/config/ConfigVer0.h"
-
-#include "../shared/kiss_communication_service_ids.h"
-
-#include "../shared/event_log.h"
-
 #define PRINT_RAW_DID (didPrintResponse || !didIniAvailable)
+
+/// ==================================================================================================
+///	GLOBAL VARIABLES
+/// ==================================================================================================
 
 std::map<uint8_t, IService *> callbackMap;
 
@@ -57,14 +71,6 @@ std::string str;
 std::shared_ptr<IConfigurationManager> configManager;
 
 /**
- * Default DID list used if no INI description file is available
- */
-const uint16_t fixedDidList[] = {0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
-								 0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
-								 0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
-								 0x2010U, 0x2011U, 0x2012U, 0xF000U, 0xFF00U, 0xFF0FU};
-
-/**
  * List of DIDs to be read in default batch. Filled with IDs from INI description file
  * or initialized with array @link{fixedDidList} if this file is not available
  */
@@ -82,6 +88,25 @@ bool didIniAvailable = false;
 bool didPrintResponse = true;
 bool verboseLogging = false;
 
+/// ==================================================================================================
+///	LOCAL VARIABLES
+/// ==================================================================================================
+
+static const std::string unknown ("unknown");
+static const std::string underscore ("_");
+
+/**
+ * Default DID list used if no INI description file is available
+ */
+static const uint16_t fixedDidList[] = {0x1000U, 0x1001U, 0x1002U, 0x1003U, 0x1004U, 0x1100U,
+										0x2003U, 0x2004U, 0x2005U, 0x2006U, 0x2007U, 0x2008U,
+										0x2200U, 0x2201U, 0x2002U, 0x1504U, 0x2000U, 0x2001U,
+										0x2010U, 0x2011U, 0x2012U, 0xF000U, 0xFF00U, 0xFF0FU};
+
+/// ==================================================================================================
+///	LOCAL FUNCTIONS
+/// ==================================================================================================
+
 static void nrc_callback (uint16_t nrc)
 {
 	// exit (nrc);
@@ -90,15 +115,6 @@ static void nrc_callback (uint16_t nrc)
 
 static void timeout_callback (void)
 {
-	sem_post (&cond1);
-}
-
-void routine_result_callback (RoutineControlResult result)
-{
-	std::cout << "I = routine_result_callback, routineId " << result.routineId
-			  << ", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode
-			  << std::endl;
-
 	sem_post (&cond1);
 }
 
@@ -148,6 +164,29 @@ static void main_read_all_dids (DescriptionIniFileReader &didIniReader, DidDecod
 	}
 }
 
+/// ==================================================================================================
+/// GLOBAL FUNCTIONS
+/// ==================================================================================================
+
+/**
+ *
+ * @param result
+ */
+void routine_result_callback (RoutineControlResult result)
+{
+	std::cout << "I = routine_result_callback, routineId " << result.routineId
+			  << ", subfunction: " << result.subfunction << ", resultCode: " << result.resultCode
+			  << std::endl;
+
+	sem_post (&cond1);
+}
+
+/**
+ * Simply a main function
+ * @param argc
+ * @param argv
+ * @return
+ */
 int main (int argc, char *argv[])
 {
 	std::string portName;
@@ -186,6 +225,7 @@ int main (int argc, char *argv[])
 	callbackMap.insert(std::pair<uint8_t, IService *>(KISS_ROUTINE_CONTROL_RESP, &srvRoutineControl));
 
 	bool breakEventsLogDumpOnCrcFail = false;
+	bool showGui = false;
 
 	SerialRxBackgroundWorker worker(&s, callbackMap, nrc_callback);
 	worker.backgroundTimeoutCallback = timeout_callback;
@@ -195,7 +235,7 @@ int main (int argc, char *argv[])
 	batchConfig.defaultBatch = true;
 
 	// parsing all commandline arguments
-	parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail);
+	main_parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail, &showGui);
 
 	// creating an instance of wrapper class, which implements a specifics of each
 	// diagnostics routine and exposes convinent api to use each of them, instead of "raw"
@@ -206,7 +246,6 @@ int main (int argc, char *argv[])
 	didIniAvailable = didIniReader.parse();
 	const std::map<uint16_t, DidDescription> &didDescription = didIniReader.getDescriptions();
 
-	DidDecoder didDecoder(didDescription, "test123.txt");
 
 	if (didIniAvailable) {
 		std::cout << "I = main, DID description file created " << didIniReader.getCreationDate()
@@ -220,6 +259,8 @@ int main (int argc, char *argv[])
 		// if INI description file is not available create list from hardcoded array
 		didList = std::vector<uint16_t>(std::begin(fixedDidList), std::end(fixedDidList));
 	}
+
+
 
 	// if no specific diagnostic service has been selected by commandline parameters
 	// the tool will perform, so called "default batch"
@@ -257,11 +298,21 @@ int main (int argc, char *argv[])
 
 	worker.start ();
 
+	if (showGui)
+	{
+		static MainGui gui;
+		gui.startGui();
+		return 0;
+	}
+
 	// clang-format on
 	// inverted logic to push default batch to the end
 	if (batchConfig.monitorMode) {
 		const int did = strtol (batchConfig.didToRead.c_str (), NULL, 16);
 		didPrintResponse = !didIniReader.hasDescriptionForDid (did);
+
+		main_make_filename_prefix (unknown, underscore, fileNamePrefix);
+		DidDecoder didDecoder (didDescription, fileNamePrefix + ".did.log");
 
 		while (true) {
 			srvReadDid.sendRequestForDid (did, PRINT_RAW_DID);
@@ -280,6 +331,9 @@ int main (int argc, char *argv[])
 		}
 	}
 	else if (!batchConfig.defaultBatch && !batchConfig.monitorMode) {
+		main_make_filename_prefix (unknown, underscore, fileNamePrefix);
+		DidDecoder didDecoder (didDescription, fileNamePrefix + ".did.log");
+
 		// exec diagnostic services in order
 		if (batchConfig.routineSetRtc) {
 			routines.setRtcToLocalDateTime ();
@@ -370,6 +424,7 @@ int main (int argc, char *argv[])
 		ConfigExporter exporter (configManager);
 		exporter.exportToFile (fileNamePrefix + ".conf");
 
+		DidDecoder didDecoder (didDescription, fileNamePrefix + ".did.log");
 		main_read_all_dids (didIniReader, didDecoder);
 
 		std::cout << "I = main, logAreaStart at: 0x" << std::hex << logAreaStart

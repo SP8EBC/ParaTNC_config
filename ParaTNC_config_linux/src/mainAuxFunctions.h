@@ -35,7 +35,8 @@ size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, 
  * @param out
  * @return
  */
-size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, std::string &out);
+size_t main_make_filename_prefix (const std::string &callsign, const std::string &api_name,
+								  std::string &out);
 
 /**
  *
@@ -115,7 +116,8 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
  * @param portName
  * @param breakEventsLogDumpOnCrcFail
  */
-void parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
-							 std::string *portName, bool *breakEventsLogDumpOnCrcFail);
+void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
+								  std::string *portName, bool *breakEventsLogDumpOnCrcFail,
+								  bool *showGui);
 
 #endif /* SRC_MAINAUXFUNCTIONS_H_ */

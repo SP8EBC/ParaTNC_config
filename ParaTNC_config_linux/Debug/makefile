@@ -9,6 +9,7 @@ RM := rm -rf
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include src/serial/subdir.mk
+-include src/gui_ncurses/subdir.mk
 -include src/did_decoder/subdir.mk
 -include src/subdir.mk
 -include shared/services/subdir.mk
@@ -76,7 +77,7 @@ main-build: ParaTNC_config
 ParaTNC_config: $(OBJS) $(USER_OBJS) makefile $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/lib/x86_64-linux-gnu -o "ParaTNC_config" $(OBJS) $(USER_OBJS) $(LIBS) -lboost_unit_test_framework -lboost_thread -lboost_date_time -lboost_system -lboost_program_options -lpthread
+	g++ -L/usr/lib/x86_64-linux-gnu -o "ParaTNC_config" $(OBJS) $(USER_OBJS) $(LIBS) -lboost_unit_test_framework -lboost_thread -lboost_date_time -lboost_system -lboost_program_options -lpthread -lncurses -lmenu -lpanel
 	@echo 'Finished building target: $@'
 	@echo ' '
 
