@@ -9,7 +9,6 @@
 #include <gui_ncurses/MainGui.h>
 #include <string.h>
 
-
 MainGui::MainGui () : m_window (NULL)
 {
 	m_window = initscr ();
@@ -18,17 +17,60 @@ MainGui::MainGui () : m_window (NULL)
 	start_color ();
 }
 
-void MainGui::printCentered (WINDOW *win, int y, const char *s)
-{
-    int w = getmaxx(win);
-    int x = (w - (int)strlen(s)) / 2;
-    if (x < 0) x = 0;               /* string wider than window */
-    mvwprintw(win, y, x, "%s", s);
-}
-
 MainGui::~MainGui ()
 {
 	endwin ();
+}
+
+void MainGui::printCentered (WINDOW *win, int y, const char *s)
+{
+	int w = getmaxx (win);
+	int x = (w - (int)strlen (s)) / 2;
+	if (x < 0)
+		x = 0; /* string wider than window */
+	mvwprintw (win, y, x, "%s", s);
+	wrefresh (win); /* Show that box                */
+	refresh ();
+}
+
+WINDOW *MainGui::createWindow (const char *title, bool titleSeparator, const int color,
+							   const int starty, const int startx, const int height,
+							   const int width)
+{
+	int _height, _width;
+	WINDOW *win = newwin (height, width, starty, startx);
+
+	assert (win != NULL);
+
+	// set a background for the whole window.
+	// title bar and the rest will have the same color
+	wbkgd (win, color);
+
+	getmaxyx (win, _height, _width);
+	(void)_height;
+
+	box (win, 0, 0);
+
+	if (titleSeparator) {
+		// these three lines of code prints horizontal line
+		// separating a window title from the window content
+		mvwaddch (win, 2, 0, ACS_LTEE);				// puts '├─' at the left side
+		mvwhline (win, 2, 1, ACS_HLINE, width - 2); // draws the line itself
+		mvwaddch (win, 2, width - 1, ACS_RTEE);		// puts '─┤' at the right side
+	}
+
+	const size_t length = (int)strlen (title);
+	const float temp = (_width - length) / 2;
+	const int _x = (int)temp;
+
+	// prints the window title, starting from the first line in the window (zero is the border).
+	// the text 'label' will be centered, by using value '_x' calculated from text lenght
+	mvwprintw (win, 1, _x, "%s", title);
+
+	wrefresh (win);
+	refresh ();
+
+	return win;
 }
 
 void MainGui::startGui ()
@@ -38,55 +80,40 @@ void MainGui::startGui ()
 
 	move (10, 10);
 
-	WINDOW *my_win;
 	int startx, starty, width, height;
 
-	cbreak (); /* disable line buffering and
-				* editing control characters   */
-	wbkgd (m_window, COLOR_PAIR (2));
+	cbreak ();						  /* disable line buffering and
+									   * editing control characters   */
+	wbkgd (m_window, COLOR_PAIR (2)); // global background color
+	refresh ();
 
 	height = 10;
 	width = 50;
 	starty = (LINES - height) / 2; /* Calculating for a center placement */
 	startx = (COLS - width) / 2;   /* of the window                */
-	refresh ();
-	my_win = newwin (height, width, starty, startx);
 
-	// let's define first color pair as such:
-	//	init_pair(1, COLOR_RED, COLOR_GREEN);
-	// this will make a text and border RED, background for border and text green
-	// but the rest will remain black, or in another way the box has a transparent background
-	// wbkgdset (my_win, COLOR_PAIR (1));
+	WINDOW *my_win =
+		MainGui::createWindow (" ", false, COLOR_PAIR (1), starty, startx, height, width);
 
-	/*
-	 * wbkgdset() only sets the background property for characters written later. The window's
-existing cells (all blanks after newwin) keep no color, so only what you draw (border, text) gets
-the color pair. wbkgd() sets the background property and applies it to every cell already in the
-window, so the whole box fills with green.
-	 */
-	wbkgd (my_win, COLOR_PAIR (1));
+	MainGui::printCentered (my_win, 3, "ParaMETEO configuration tool.");
 
-	box (my_win, 0, 0); /* 0, 0 gives default characters
-						 * for the vertical and horizontal
-						 * lines                        */
-
-	PANEL* my_panel = new_panel(my_win);
-
-	update_panels();
-	doupdate();
-
-	wrefresh (my_win);	/* Show that box                */
-	refresh ();
-
-	MainGui::printCentered (my_win, 2, "ParaMETEO configuration tool.");
-	wrefresh (my_win); /* Show that box                */
-	refresh ();
 	getch ();
+
+	WINDOW *second_win = MainGui::createWindow ("etykieta",
+												true,
+												COLOR_PAIR (1),
+												starty - 20,
+												startx + 20,
+												height,
+												width);
 
 	werase (my_win);
 	wrefresh (my_win);
-	del_panel(my_panel);
 	delwin (my_win);
+	refresh ();
+	getch ();
+	werase (second_win);
+	wrefresh (second_win);
 	refresh ();
 	getch ();
 }
