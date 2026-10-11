@@ -20,28 +20,6 @@ class MainGui {
 	 */
 	WINDOW *m_window;
 
-	/**
-	 *
-	 * @param win
-	 * @param y
-	 * @param s
-	 */
-	static void printCentered (WINDOW *win, int y, const char *s);
-
-	/**
-	 *
-	 * @param label
-	 * @param label_color
-	 * @param starty
-	 * @param startx
-	 * @param height
-	 * @param width
-	 * @return
-	 */
-	static WINDOW *createWindow (const char *title, bool titleSeparator, const int color,
-								 const int starty, const int startx, const int height,
-								 const int width);
-
   public:
 	/**
 	 * Entry point to the GUI.

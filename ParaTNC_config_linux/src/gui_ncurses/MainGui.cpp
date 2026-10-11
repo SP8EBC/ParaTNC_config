@@ -7,6 +7,9 @@
 
 #include "assert.h"
 #include <gui_ncurses/MainGui.h>
+#include <gui_ncurses/ncmp/Panel.h>
+#include <gui_ncurses/ncmp/Window.h>
+#include <memory>
 #include <string.h>
 
 MainGui::MainGui () : m_window (NULL)
@@ -20,57 +23,6 @@ MainGui::MainGui () : m_window (NULL)
 MainGui::~MainGui ()
 {
 	endwin ();
-}
-
-void MainGui::printCentered (WINDOW *win, int y, const char *s)
-{
-	int w = getmaxx (win);
-	int x = (w - (int)strlen (s)) / 2;
-	if (x < 0)
-		x = 0; /* string wider than window */
-	mvwprintw (win, y, x, "%s", s);
-	wrefresh (win); /* Show that box                */
-	refresh ();
-}
-
-WINDOW *MainGui::createWindow (const char *title, bool titleSeparator, const int color,
-							   const int starty, const int startx, const int height,
-							   const int width)
-{
-	int _height, _width;
-	WINDOW *win = newwin (height, width, starty, startx);
-
-	assert (win != NULL);
-
-	// set a background for the whole window.
-	// title bar and the rest will have the same color
-	wbkgd (win, color);
-
-	getmaxyx (win, _height, _width);
-	(void)_height;
-
-	box (win, 0, 0);
-
-	if (titleSeparator) {
-		// these three lines of code prints horizontal line
-		// separating a window title from the window content
-		mvwaddch (win, 2, 0, ACS_LTEE);				// puts '├─' at the left side
-		mvwhline (win, 2, 1, ACS_HLINE, width - 2); // draws the line itself
-		mvwaddch (win, 2, width - 1, ACS_RTEE);		// puts '─┤' at the right side
-	}
-
-	const size_t length = (int)strlen (title);
-	const float temp = (_width - length) / 2;
-	const int _x = (int)temp;
-
-	// prints the window title, starting from the first line in the window (zero is the border).
-	// the text 'label' will be centered, by using value '_x' calculated from text lenght
-	mvwprintw (win, 1, _x, "%s", title);
-
-	wrefresh (win);
-	refresh ();
-
-	return win;
 }
 
 void MainGui::startGui ()
@@ -92,28 +44,50 @@ void MainGui::startGui ()
 	starty = (LINES - height) / 2; /* Calculating for a center placement */
 	startx = (COLS - width) / 2;   /* of the window                */
 
-	WINDOW *my_win =
-		MainGui::createWindow (" ", false, COLOR_PAIR (1), starty, startx, height, width);
-
-	MainGui::printCentered (my_win, 3, "ParaMETEO configuration tool.");
+	ncurses::Window my_win (" ", false, COLOR_PAIR (1), starty, startx, height, width);
+	my_win.printCentered (std::string ("ParaMETEO configuration tool"), 3);
+	ncurses::Panel my_panel (my_win, NULL);
 
 	getch ();
 
-	WINDOW *second_win = MainGui::createWindow ("etykieta",
-												true,
-												COLOR_PAIR (1),
-												starty - 20,
-												startx + 20,
-												height,
-												width);
+	// my_win.move (12, 12);
 
-	werase (my_win);
-	wrefresh (my_win);
-	delwin (my_win);
-	refresh ();
-	getch ();
-	werase (second_win);
-	wrefresh (second_win);
-	refresh ();
-	getch ();
+	ncurses::Window
+		second_win ("etykieta", true, COLOR_PAIR (1), starty - 3, startx + 3, height, width);
+	ncurses::Panel second_panel (second_win, &my_panel);
+
+	// now all panels are created, so it is possible to set a pointer to "next-towards-the-top"
+	// panel on the bottom one
+	my_panel.setPanelAbove (&second_panel);
+
+	my_panel.setMTop(&second_panel);
+	my_panel.setMBottom(&my_panel);
+
+	ncurses::Panel * current = &second_panel;
+
+	// disable an echo not to see 'z' and 'x' on the screen while navigating
+
+	noecho();
+
+	int keypress = 0;
+	while (keypress != KEY_F(12))
+	{
+		keypress = getch();
+
+		if (keypress == 'z')
+		{
+			current = current->showBottom();
+		}
+		else if (keypress == 'x')
+		{
+			current = current->showTop();
+		}
+		else
+		{
+			;	// do nothing
+		}
+
+	}
+
+	getch();
 }
