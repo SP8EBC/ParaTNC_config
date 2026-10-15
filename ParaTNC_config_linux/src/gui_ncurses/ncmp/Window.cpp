@@ -48,9 +48,6 @@ Window::Window (const std::string &title, const bool titleSeparator, const int c
 	// prints the window title, starting from the first line in the window (zero is the border).
 	// the text 'label' will be centered, by using value '_x' calculated from text lenght
 	mvwprintw (m_window, 1, _x, "%s", m_windowTitle.c_str ());
-
-	wrefresh (m_window);
-	refresh ();
 }
 
 Window::~Window ()

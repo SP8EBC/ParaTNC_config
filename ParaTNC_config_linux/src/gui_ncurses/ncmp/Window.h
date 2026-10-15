@@ -37,8 +37,16 @@ class Window {
 			const int startx, const int height, const int width);
 	virtual ~Window ();
 
+	/**
+	 * Using this operator will refresh the window
+	 * @return
+	 */
 	WINDOW *operator() ();
 
+	/**
+	 * Using this operator will return a value of `m_window` pointer
+	 * @return copy of `m_window` pointer
+	 */
 	WINDOW *operator* ();
 
 	void printCentered (const std::string &text, const int y);
@@ -50,6 +58,7 @@ class Window {
 	 * @param newX
 	 */
 	void move (int newY, int newX);
+
 };
 
 } /* namespace ncurses */
