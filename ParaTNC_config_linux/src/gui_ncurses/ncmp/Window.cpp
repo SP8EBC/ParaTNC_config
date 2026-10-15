@@ -91,9 +91,8 @@ void Window::move (int newY, int newX)
 	wrefresh (m_window);
 	mvwin (m_window, newY, newX);
 	box (m_window, 0, 0);
-	wrefresh(m_window);
+	wrefresh (m_window);
 	refresh ();
 }
-
 
 } /* namespace ncurses */

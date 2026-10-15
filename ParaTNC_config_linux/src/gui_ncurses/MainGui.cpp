@@ -60,34 +60,29 @@ void MainGui::startGui ()
 	// panel on the bottom one
 	my_panel.setPanelAbove (&second_panel);
 
-	my_panel.setMTop(&second_panel);
-	my_panel.setMBottom(&my_panel);
+	my_panel.setMTop (&second_panel);
+	my_panel.setMBottom (&my_panel);
 
-	ncurses::Panel * current = &second_panel;
+	ncurses::Panel *current = &second_panel;
 
 	// disable an echo not to see 'z' and 'x' on the screen while navigating
 
-	noecho();
+	noecho ();
 
 	int keypress = 0;
-	while (keypress != KEY_F(12))
-	{
-		keypress = getch();
+	while (keypress != KEY_F (12)) {
+		keypress = getch ();
 
-		if (keypress == 'z')
-		{
-			current = current->showBottom();
+		if (keypress == 'z') {
+			current = current->showBottom ();
 		}
-		else if (keypress == 'x')
-		{
-			current = current->showTop();
+		else if (keypress == 'x') {
+			current = current->showTop ();
 		}
-		else
-		{
-			;	// do nothing
+		else {
+			; // do nothing
 		}
-
 	}
 
-	getch();
+	getch ();
 }

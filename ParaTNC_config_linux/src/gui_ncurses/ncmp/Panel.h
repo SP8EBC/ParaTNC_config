@@ -45,6 +45,7 @@ class Panel {
 	static Panel *m_Top;
 
 	static Panel *m_Bottom;
+
   public:
 	/**
 	 * Constructor which will create a panel over a provided instance of a Window.
@@ -60,18 +61,18 @@ class Panel {
 	/**
 	 * Shows a panel just below this one
 	 */
-	Panel * showBottom();
+	Panel *showBottom ();
 
 	/**
 	 * Shows a panel just above this one
 	 */
-	Panel * showTop();
+	Panel *showTop ();
 
 	void setPanelAbove (Panel *nPanelAbove) { m_panelAbove = nPanelAbove; }
 
-	void setMBottom ( Panel *mBottom) { Panel::m_Bottom = mBottom; }
+	void setMBottom (Panel *mBottom) { Panel::m_Bottom = mBottom; }
 
-	void setMTop ( Panel *mTop) { Panel::m_Top = mTop; }
+	void setMTop (Panel *mTop) { Panel::m_Top = mTop; }
 };
 
 } /* namespace ncurses */

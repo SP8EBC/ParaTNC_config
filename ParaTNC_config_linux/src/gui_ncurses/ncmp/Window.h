@@ -31,17 +31,17 @@ class Window {
 	int m_startY;
 
 	int m_startX;
+
   public:
-	Window (const std::string &title, const bool titleSeparator, const int color,
-			   const int starty, const int startx, const int height,
-			   const int width);
+	Window (const std::string &title, const bool titleSeparator, const int color, const int starty,
+			const int startx, const int height, const int width);
 	virtual ~Window ();
 
-	WINDOW * operator()();
+	WINDOW *operator() ();
 
-	WINDOW * operator*();
+	WINDOW *operator* ();
 
-	void printCentered(const std::string & text, const int y);
+	void printCentered (const std::string &text, const int y);
 
 	/**
 	 * Moves a window from one place to another, although any context
@@ -49,7 +49,7 @@ class Window {
 	 * @param newY
 	 * @param newX
 	 */
-	void move(int newY, int newX);
+	void move (int newY, int newX);
 };
 
 } /* namespace ncurses */

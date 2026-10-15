@@ -36,7 +36,7 @@ Panel::~Panel ()
 	doupdate ();
 }
 
-Panel * Panel::showBottom ()
+Panel *Panel::showBottom ()
 {
 	if (m_panelBelow) {
 		top_panel (m_panelBelow->m_panel);
@@ -48,9 +48,9 @@ Panel * Panel::showBottom ()
 	else if (Panel::m_Top) {
 		// if this is the most bottom panel, and there is something set
 		// as the top panel -> move to the top panel
-		top_panel(Panel::m_Top->m_panel);
-		update_panels();
-		doupdate();
+		top_panel (Panel::m_Top->m_panel);
+		update_panels ();
+		doupdate ();
 
 		return Panel::m_Top;
 	}
@@ -59,7 +59,7 @@ Panel * Panel::showBottom ()
 	}
 }
 
-Panel * Panel::showTop ()
+Panel *Panel::showTop ()
 {
 	if (m_panelAbove) {
 		top_panel (m_panelAbove->m_panel);
@@ -69,9 +69,9 @@ Panel * Panel::showTop ()
 		return m_panelAbove;
 	}
 	else if (Panel::m_Bottom) {
-		top_panel(Panel::m_Bottom->m_panel);
-		update_panels();
-		doupdate();
+		top_panel (Panel::m_Bottom->m_panel);
+		update_panels ();
+		doupdate ();
 
 		return Panel::m_Bottom;
 	}

@@ -255,7 +255,7 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 			" : Serial port used for communication");
 	goInit ("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
 	goInit ("verbose", " : Print more things on the console");
-	goInit ("gui" , " ");
+	goInit ("gui", " ");
 
 	boost::program_options::options_description diagnosticServices ("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit =
@@ -305,7 +305,7 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 		verboseLogging = false;
 	}
 
-	if (variablesMap.count("gui")) {
+	if (variablesMap.count ("gui")) {
 		*showGui = true;
 	}
 	else {
