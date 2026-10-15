@@ -79,6 +79,11 @@ class Menu {
 	MENU *m_menu;
 
 	/**
+	 * Subwindow derived from `m_window`, where menu items are displayed
+	 */
+	WINDOW *m_subWindow;
+
+	/**
 	 * Ncurses window to display this menu
 	 */
 	Window m_window;

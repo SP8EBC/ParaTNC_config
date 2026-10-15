@@ -27,7 +27,7 @@ MenuItem::~MenuItem ()
 
 Menu::Menu (std::vector<std::unique_ptr<MenuItem>> &menuItems, const std::string &title,
 			const int color, const int starty, const int startx, const int height, const int width)
-	: m_menu (NULL), m_window (title, false, color, starty, startx, height, width),
+	: m_menu (NULL), m_subWindow (NULL), m_window (title, false, color, starty, startx, height, width),
 	  m_menuItems (menuItems)
 {
 	for (std::unique_ptr<MenuItem> &item : m_menuItems) {
@@ -41,18 +41,25 @@ Menu::Menu (std::vector<std::unique_ptr<MenuItem>> &menuItems, const std::string
 	m_itemsPointer.push_back (NULL);
 
 	m_menu = new_menu (m_itemsPointer.data ());
+	assert (m_menu != NULL);
 	// m_window = newwin (height, width, starty, startx);
 	keypad (*m_window, TRUE);
 
 	/* Set main window and sub window */
 
-	constexpr int derived_nlines = 6;
-	constexpr int derived_ncols = 68;
-	constexpr int derived_begin_y = 3;
-	constexpr int derived_begin_x = 1;
+	// the subwindow is placed below the title (row 1) and the border, so it must leave
+	// 3 rows at the top, 1 row at the bottom and 1 column on each side. derwin returns
+	// NULL if the subwindow doesn't fit inside the parent window
+	int win_height, win_width;
+	getmaxyx (*m_window, win_height, win_width);
+
+	const int derived_begin_y = 3;
+	const int derived_begin_x = 1;
+	const int derived_nlines = win_height - derived_begin_y - 1;
+	const int derived_ncols = win_width - derived_begin_x - 1;
 
 	constexpr int menu_format_rows = 5;
-	constexpr int menu_format_cols = 3;
+	constexpr int menu_format_cols = 1;
 
 	/*
 	 * Every menu has an associated pair of curses windows. The menu window displays any title and
@@ -70,9 +77,10 @@ Menu::Menu (std::vector<std::unique_ptr<MenuItem>> &menuItems, const std::string
 	 * subwindows and the derived windows.
 	 */
 	set_menu_win (m_menu, *m_window);
-	set_menu_sub (
-		m_menu,
-		derwin (*m_window, derived_nlines, derived_ncols, derived_begin_y, derived_begin_x));
+	m_subWindow = derwin (*m_window, derived_nlines, derived_ncols, derived_begin_y, derived_begin_x);
+	assert (m_subWindow != NULL);
+
+	set_menu_sub (m_menu, m_subWindow);
 
 	/*
 	 * The function set_menu_format sets the maximum display size of the given menu. If this size is
@@ -88,18 +96,20 @@ Menu::~Menu ()
 {
 	unpost_menu (m_menu);
 	free_menu (m_menu);
+	delwin (m_subWindow);
 }
 
 void Menu::showMenu ()
 {
 	/* Post the menu */
-	post_menu (m_menu);
-	refresh ();
+	const int result = post_menu (m_menu);
+	assert (result == E_OK);
+	(void)result;
 	wrefresh (*m_window);
 
 	int keypress = 0;
 	while (keypress != KEY_F (4)) {
-		keypress = getch ();
+		keypress = wgetch (*m_window);
 
 		switch (keypress) {
 		case KEY_DOWN: menu_driver (m_menu, REQ_DOWN_ITEM); break;
