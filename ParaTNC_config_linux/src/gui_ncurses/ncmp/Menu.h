@@ -89,9 +89,11 @@ class Menu {
 	Window m_window;
 
 	/**
-	 * Menu items owned by this menu, each one providing its own onSelect callback
+	 * Menu items owned by this menu, each one providing its own onSelect callback. They are
+	 * destroyed (and their ITEMs freed) after the destructor body frees `m_menu`, as ncurses
+	 * refuses to free an item still connected to a menu
 	 */
-	std::vector<std::unique_ptr<MenuItem>> &m_menuItems;
+	std::vector<std::unique_ptr<MenuItem>> m_menuItems;
 
 	/**
 	 * Vector of pointers to menu items. required to be passed to `new_menu`
@@ -99,9 +101,16 @@ class Menu {
 	std::vector<ITEM *> m_itemsPointer;
 
   public:
-	Menu (std::vector<std::unique_ptr<MenuItem>> &menuItems, const std::string &title,
+	Menu (std::vector<std::unique_ptr<MenuItem>> menuItems, const std::string &title,
 		  const int color, const int starty, const int startx, const int height, const int width);
 	virtual ~Menu ();
+
+	/**
+	 * @note Menu can't be copied. It owns a raw MENU* and the subwindow, which would be
+	 * freed twice
+	 */
+	Menu (const Menu &) = delete;
+	Menu &operator= (const Menu &) = delete;
 
 	/**
 	 * Shows menu, waits for a user to make a selection and then calls a callback

@@ -25,10 +25,10 @@ MenuItem::~MenuItem ()
 	free_item (m_item);
 }
 
-Menu::Menu (std::vector<std::unique_ptr<MenuItem>> &menuItems, const std::string &title,
+Menu::Menu (std::vector<std::unique_ptr<MenuItem>> menuItems, const std::string &title,
 			const int color, const int starty, const int startx, const int height, const int width)
 	: m_menu (NULL), m_subWindow (NULL), m_window (title, false, color, starty, startx, height, width),
-	  m_menuItems (menuItems)
+	  m_menuItems (std::move (menuItems))
 {
 	for (std::unique_ptr<MenuItem> &item : m_menuItems) {
 		// fill an array (continuous storage) of pointers to elements

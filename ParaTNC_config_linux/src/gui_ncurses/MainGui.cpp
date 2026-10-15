@@ -11,6 +11,7 @@
 #include <gui_ncurses/ncmp/Window.h>
 #include <gui_ncurses/ncmp/Menu.h>
 #include <memory>
+#include <utility>
 #include <string.h>
 
 class MenuItem1 : public ncurses::MenuItem {
@@ -115,7 +116,7 @@ void MainGui::startGui ()
 	std::vector<std::unique_ptr<ncurses::MenuItem>> menu_items;
 	menu_items.emplace_back(std::make_unique<MenuItem1>());
 	menu_items.emplace_back(std::make_unique<MenuItem2>());
-	ncurses::Menu menu (menu_items, "menu", COLOR_PAIR(1), starty, startx, 50, 50);
+	ncurses::Menu menu (std::move (menu_items), "menu", COLOR_PAIR(1), starty, startx, 50, 50);
 
 	menu.showMenu();
 
