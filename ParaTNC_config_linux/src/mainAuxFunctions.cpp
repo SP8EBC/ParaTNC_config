@@ -247,7 +247,9 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 
 	boost::program_options::options_description od ("");
 
-	// SET ALL COMMANDLINE OPTIONS
+	// ----------------
+	// GENERAL OPTIONS
+	// ----------------
 	boost::program_options::options_description generalOptions ("General Options");
 	boost::program_options::options_description_easy_init goInit = generalOptions.add_options ();
 	goInit ("port,P",
@@ -257,6 +259,9 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 	goInit ("verbose", " : Print more things on the console");
 	goInit ("gui", " ");
 
+	// -------------------
+	// DIAGNOSTIC SERVICES
+	// -------------------
 	boost::program_options::options_description diagnosticServices ("Diagnostic Services", 120, 90);
 	boost::program_options::options_description_easy_init dsInit =
 		diagnosticServices.add_options ();
