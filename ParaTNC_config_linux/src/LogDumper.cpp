@@ -10,6 +10,7 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <string>
 
 #include "pthread.h"
 
@@ -22,8 +23,10 @@ const uint16_t LogDumper::daysInYearByMonth[2][13] = {
 	{0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}};
 
 LogDumper::LogDumper (SrvReadMemory &_srvReadMemory, sem_t &_cond1,
-					  SerialRxBackgroundWorker &_serial_thread)
-	: srvReadMemory (_srvReadMemory), cond1 (_cond1), serialRxBackgroundWorker (_serial_thread)
+					  SerialRxBackgroundWorker &_serial_thread,
+					  std::unique_ptr<EventDescriptionsStorage> &&_jsonEvents, bool decodeJsonOnly)
+	: srvReadMemory (_srvReadMemory), cond1 (_cond1), serialRxBackgroundWorker (_serial_thread),
+	  jsonEvents (std::move (_jsonEvents)), decodeFromJsonOnly (decodeJsonOnly)
 {
 	// TODO Auto-generated constructor stub
 	timeout = false;
@@ -140,6 +143,8 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 	uint32_t decoded_events = 0u;
 	uint32_t events_with_failed_crc = 0u;
 
+	bool hasDecodedEvents = false;
+
 	struct tm decodedDateTime = {0u};
 
 	event_log_exposed_t exposed = {0u};
@@ -147,17 +152,29 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 	// declaring mutex
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
+	// stream to store RAW binary read from the controller
 	std::ofstream outBin (filename + ".bin", std::ios::out | std::ios::binary);
 
 	const size_t logEntrySize = sizeof (event_log_t);
 
 	const int eventsNum = (endAddress - startAddress) / logEntrySize;
 
+	// check if dumper should use JSON database
+	if (jsonEvents) {
+		hasDecodedEvents = true;
+	}
+	else {
+		hasDecodedEvents = false;
+	}
+
 	std::cout << "I = LogDumper::dumpEventsToReport, number of events to process: " << std::dec
 			  << eventsNum << std::endl;
 
+	// this initializes ctable library. it does not create a file on disk
 	logDumperTextFile.startTextExport (filename);
 
+	// create a binding the timeout callback, which will simply push the process
+	// further (to the same event). binding in a context of current instance
 	auto timeoutCallback = std::bind (&LogDumper::timeoutCallback, this);
 
 	for (int i = 0; i < eventsNum; i++) {
@@ -169,7 +186,6 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 				  << ". Total progress: " << currentProgress << "%" << std::endl;
 		const uint32_t address = startAddress + (logEntrySize * i);
 		srvReadMemory.sendRequestForMemoryRange (address, sizeof (event_log_t));
-		// srvReadMemory.waitForTransmissionDone();
 
 		pthread_mutex_lock (&lock);
 		// wait for configuration to be received
@@ -185,6 +201,7 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 			std::vector<uint8_t> memoryData = srvReadMemory.getResponseData ();
 
+			// append raw binary data to the output file
 			if (outBin && outBin.good ()) {
 				std::ostream_iterator<char> oi (outBin);
 				std::copy (memoryData.begin (), memoryData.end (), oi);
@@ -192,12 +209,34 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 			const event_log_t *event = (event_log_t *)memoryData.data ();
 
+			// check if an event is not corrupted (by CRC32 calculation) and decode it
 			const bool crc =
 				LogDumper::convertEventToExposedEvent (event, exposed, decodedDateTime);
 
+			// if crc for decoded event is correct
 			if (crc) {
 				decoded_events++;
-				logDumperTextFile.storeEntryInExport (&exposed, &decodedDateTime);
+
+				// if JSON file with descriptions should be used
+				// user provided 'decode-json' or 'decode-json-only'
+				if (hasDecodedEvents) {
+					// look for a description for current event.
+					// it is guaranteed at this point, that a pointer is set to something
+					std::optional<EventDescriptionObject> description =
+						jsonEvents->getForEvent (*event);
+
+					// if a description for this event has been found 
+					if (description) {
+						EventDescriptionObject & descriptionObject = description.value();
+						logDumperTextFile.storeEntryInExport (&exposed, &decodedDateTime, &descriptionObject, decodeFromJsonOnly);
+					}
+				}
+				else {
+					// if not simply store this in output file using some hardcoded decoding
+					// for specific events
+					logDumperTextFile.storeEntryInExport (&exposed, &decodedDateTime);
+				}
+
 			}
 			else {
 				events_with_failed_crc++;

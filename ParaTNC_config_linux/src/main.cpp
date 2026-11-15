@@ -18,6 +18,7 @@
 #include "BatchConfig_t.h"
 #include "ConfigExporter.h"
 #include "ConfigImporter.h"
+#include "EventDescriptionsStorage.hpp"
 #include "LogDumper.h"
 #include "Routines.hpp"
 #include "TimeTools.h"
@@ -70,6 +71,8 @@ std::string str;
 
 std::shared_ptr<IConfigurationManager> configManager;
 
+std::unique_ptr<EventDescriptionsStorage> jsonEvents (nullptr);
+
 /**
  * List of DIDs to be read in default batch. Filled with IDs from INI description file
  * or initialized with array @link{fixedDidList} if this file is not available
@@ -87,6 +90,8 @@ size_t fileNamePrefixLenght = 0;
 bool didIniAvailable = false;
 bool didPrintResponse = true;
 bool verboseLogging = false;
+bool decodeJson = false;
+bool decodeJsonOnly = false;
 
 /// ==================================================================================================
 ///	LOCAL VARIABLES
@@ -94,6 +99,16 @@ bool verboseLogging = false;
 
 static const std::string unknown ("unknown");
 static const std::string underscore ("_");
+
+/**
+ * Keep this currently hardcoded
+ */
+static const std::string iniFileName ("did-description.ini");
+
+/**
+ *
+ */
+static const std::string jsonFileName ("event_log_description.json");
 
 /**
  * Default DID list used if no INI description file is available
@@ -114,9 +129,7 @@ static void nrc_callback (uint16_t nrc)
 }
 
 static void timeout_callback (void)
-{
-	sem_post (&cond1);
-}
+{ sem_post (&cond1); }
 
 /**
  * Reading all DIDs refactored out from main function
@@ -230,19 +243,18 @@ int main (int argc, char *argv[])
 	SerialRxBackgroundWorker worker(&s, callbackMap, nrc_callback);
 	worker.backgroundTimeoutCallback = timeout_callback;
 
-	LogDumper logDumper(srvReadMemory, cond1, worker);
 
 	batchConfig.defaultBatch = true;
 
 	// parsing all commandline arguments
-	main_parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail, &showGui);
+	main_parse_commandline_args(argc, argv, &batchConfig, &portName, &breakEventsLogDumpOnCrcFail, &showGui, &decodeJson, &decodeJsonOnly);
 
 	// creating an instance of wrapper class, which implements a specifics of each
 	// diagnostics routine and exposes convinent api to use each of them, instead of "raw"
 	// calls to Routine Control diagnostics service
 	Routines routines(srvRoutineControl, srvReadDid);
 
-	DescriptionIniFileReader didIniReader("did-description.ini");
+	DescriptionIniFileReader didIniReader(iniFileName);
 	didIniAvailable = didIniReader.parse();
 	const std::map<uint16_t, DidDescription> &didDescription = didIniReader.getDescriptions();
 
@@ -260,8 +272,6 @@ int main (int argc, char *argv[])
 		didList = std::vector<uint16_t>(std::begin(fixedDidList), std::end(fixedDidList));
 	}
 
-
-
 	// if no specific diagnostic service has been selected by commandline parameters
 	// the tool will perform, so called "default batch"
 	if (batchConfig.defaultBatch)
@@ -274,6 +284,25 @@ int main (int argc, char *argv[])
 		std::cout << std::endl;
 	}
 
+	// reads JSON and creates database with event description (what parameters means etc)
+	if (decodeJson || decodeJsonOnly) {
+		// read content of a file from path 'jsonEventsFile'
+		std::ifstream jsonFile (jsonFileName);
+		if (!jsonFile.is_open ()) {
+			std::cout << "E = Cannot open JSON events file: " << jsonFileName << std::endl;
+			std::cout << "E = check if this file exists or do not use options --decode-json" << std::endl;
+			return -5;
+		}
+
+		const std::string jsonContent ((std::istreambuf_iterator<char> (jsonFile)),
+									   std::istreambuf_iterator<char> ());
+
+		// create an instance of EventDescriptionsStorage on jsonEvents using data from file
+		jsonEvents = std::make_unique<EventDescriptionsStorage> (jsonContent);
+	}
+
+	LogDumper logDumper(srvReadMemory, cond1, worker, std::move(jsonEvents), decodeJsonOnly);
+	
 	if(batchConfig.readDid && batchConfig.didToRead == "ALL")
 	{
 		std::cout << "I = main, no specific DID was specified, so all of them will be read" << std::endl;

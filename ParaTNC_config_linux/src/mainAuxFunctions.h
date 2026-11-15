@@ -18,12 +18,11 @@
 #include "BatchConfig_t.h"
 
 /**
- *
- * @param callsign
- * @param api_name
- * @param out
- * @param max_out_ln
- * @return
+ * Generates a prefix for files created from data received from the controller
+ * @param callsign decoded from configuration blob
+ * @param api_name decoded from configuration blob
+ * @param out output string the prefix will be assembled into
+ * @return length of prefix
  */
 size_t main_make_filename_prefix (std::string &callsign, std::string &api_name, char *out,
 								  size_t max_out_ln);
@@ -39,12 +38,12 @@ size_t main_make_filename_prefix (const std::string &callsign, const std::string
 								  std::string &out);
 
 /**
- *
- * @param did
- * @param _srvReadDid
- * @param _s
- * @param _lock
- * @param _cond1
+ * Reads a did from connected controller
+ * @param did numer to read from range 0x0000u to 0xFFFFu
+ * @param _srvReadDid reference to an instance of ReadDID service handler
+ * @param _s reference to serial port wrapper
+ * @param _lock reference to a mutex which guards against concurrent access to condition variable 
+ * @param _cond1 reference to a condition variable, which block caller until the did is read 
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
 				   sem_t &_cond1, bool _printReponse);
@@ -118,6 +117,6 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
  */
 void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 								  std::string *portName, bool *breakEventsLogDumpOnCrcFail,
-								  bool *showGui);
+								  bool *showGui, bool* decodeJson, bool* decodeJsonOnly);
 
 #endif /* SRC_MAINAUXFUNCTIONS_H_ */

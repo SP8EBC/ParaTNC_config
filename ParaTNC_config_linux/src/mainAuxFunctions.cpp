@@ -20,11 +20,11 @@
 extern bool verboseLogging;
 
 /**
- *
- * @param callsign
- * @param api_name
- * @param out
- * @return
+ * Generates a prefix for files created from data received from the controller
+ * @param callsign decoded from configuration blob
+ * @param api_name decoded from configuration blob
+ * @param out output string the prefix will be assembled into
+ * @return length of prefix
  */
 size_t main_make_filename_prefix (const std::string &callsign, const std::string &api_name,
 								  std::string &out)
@@ -56,12 +56,12 @@ size_t main_make_filename_prefix (const std::string &callsign, const std::string
 }
 
 /**
- *
- * @param did
- * @param _srvReadDid
- * @param _s
- * @param _lock
- * @param _cond1
+ * Reads a did from connected controller
+ * @param did numer to read from range 0x0000u to 0xFFFFu
+ * @param _srvReadDid reference to an instance of ReadDID service handler
+ * @param _s reference to serial port wrapper
+ * @param _lock reference to a mutex which guards against concurrent access to condition variable
+ * @param _cond1 reference to a condition variable, which block caller until the did is read
  */
 void main_readDid (const int did, SrvReadDid &_srvReadDid, Serial &_s, pthread_mutex_t &_lock,
 				   sem_t &_cond1, bool _printResponse)
@@ -241,7 +241,7 @@ void main_amendConfig (std::shared_ptr<IConfigurationManager> _configManager,
  */
 void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConfig,
 								  std::string *portName, bool *breakEventsLogDumpOnCrcFail,
-								  bool *showGui)
+								  bool *showGui, bool *decodeJson, bool *decodeJsonOnly)
 {
 	boost::program_options::variables_map variablesMap;
 
@@ -258,6 +258,16 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 	goInit ("valid-events,e", " : Stop dumping events log on first empty event or first crc error");
 	goInit ("verbose", " : Print more things on the console");
 	goInit ("gui", " ");
+
+	// ----------------
+	// GENERAL OPTIONS
+	// ----------------
+	boost::program_options::options_description decodingOptions ("Events decoding options");
+	boost::program_options::options_description_easy_init decodingInit =
+		decodingOptions.add_options ();
+	decodingInit ("decode-json",
+				  " : Use descriptions in JSON file to decode all non-hardcoded events");
+	decodingInit ("decode-json-only", " : Ignore hardcoded events and decode only using JSON file");
 
 	// -------------------
 	// DIAGNOSTIC SERVICES
@@ -284,6 +294,7 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 
 	od.add (generalOptions);
 	od.add (diagnosticServices);
+	od.add (decodingOptions);
 
 	std::cout << od << std::endl;
 
@@ -365,6 +376,21 @@ void main_parse_commandline_args (int argc, char *argv[], BatchConfig *batchConf
 
 	if (variablesMap.count ("valid-events")) {
 		*breakEventsLogDumpOnCrcFail = true;
+	}
+
+	if (variablesMap.count ("decode-json")) {
+		*decodeJson = true;
+	}
+	else {
+		*decodeJson = false;
+	}
+
+	if (variablesMap.count ("decode-json-only")) {
+		*decodeJsonOnly = true;
+		*decodeJson = false;
+	}
+	else {
+		*decodeJsonOnly = false;
 	}
 
 	if (batchConfig->writeConfig && batchConfig->amendConfig) {

@@ -11,6 +11,7 @@
 #include <string>
 
 #include "../shared/services/SrvReadMemory.h"
+#include "EventDescriptionsStorage.hpp"
 #include "LogDumperTextFile.h"
 #include "serial/SerialRxBackgroundWorker.h"
 
@@ -40,11 +41,15 @@ class LogDumper {
 	SerialRxBackgroundWorker &serialRxBackgroundWorker;
 
 	/**
-	 * Class writing report
+	 * Class writing a report to text file
 	 */
 	LogDumperTextFile logDumperTextFile;
 
+	std::unique_ptr<EventDescriptionsStorage> jsonEvents;
+
 	bool timeout;
+
+	bool decodeFromJsonOnly;
 
 	int progress;
 
@@ -60,7 +65,8 @@ class LogDumper {
 
   public:
 	LogDumper (SrvReadMemory &_srvReadMemory, sem_t &_cond1,
-			   SerialRxBackgroundWorker &_serial_thread);
+			   SerialRxBackgroundWorker &_serial_thread,
+			   std::unique_ptr<EventDescriptionsStorage> &&_jsonEvents, bool _decodeJsonOnly);
 	virtual ~LogDumper ();
 
 	void dumpEventsToReport (uint32_t startAddress, uint32_t endAddress, std::string filename,

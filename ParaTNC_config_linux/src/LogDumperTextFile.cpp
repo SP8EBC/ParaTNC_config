@@ -6,6 +6,7 @@
  */
 
 #include <LogDumperTextFile.h>
+#include <exception>
 #include <iostream>
 #include <string.h>
 
@@ -57,7 +58,9 @@ void LogDumperTextFile::startTextExport (std::string filename)
 }
 
 void LogDumperTextFile::storeEntryInExport (const event_log_exposed_t *eventLogEntry,
-											const struct tm *const timestamp)
+											const struct tm *const timestamp,
+											EventDescriptionObject *jsonDescription,
+											bool decodeFromJsonOnly)
 {
 
 	// special cases
@@ -65,89 +68,139 @@ void LogDumperTextFile::storeEntryInExport (const event_log_exposed_t *eventLogE
 	auto svrty = eventLogEntry->severity;
 	auto id = eventLogEntry->event_id;
 
-	if (src == EVENT_SRC_MAIN && svrty == EVENT_TIMESYNC && id == EVENTS_MAIN_TIMESYNC_NTP) {
-		storeTimesyncEntryInExport (eventLogEntry, timestamp);
+	const char *eventIdString;
+
+	// unknown event id?
+	if (eventLogEntry->event_str_name == event_log_default) {
+		// so convert event id
+		const std::string intToStr = std::to_string (eventLogEntry->event_id);
+		eventIdString = intToStr.c_str ();
 	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
-			 id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
-		storeHardfaultException (eventLogEntry, timestamp);
+	else {
+		eventIdString = eventLogEntry->event_str_name;
 	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
-			 id == EVENTS_MAIN_POSTMORTEM_SUPERVISOR) {
-		storeSupervisorFault (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC && id == EVENTS_MAIN_CYCLIC) {
-		storeCyclic (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
-			 id == EVENTS_MAIN_CONFIG_FIRST_CRC_FAIL) {
-		storeConfigFirstCrcFail (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
-			 id == EVENTS_MAIN_CONFIG_SECOND_CRC_FAIL) {
-		storeConfigSecondCrcFail (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_FIRST_RESTORE) {
-		storeConfigFirstRestore (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_SECOND_RESTORE) {
-		storeConfigSecondRestore (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP &&
-			 id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
-		storeGsmRegisteredNetwork (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP && id == EVENTS_GSM_GPRS_IMSI) {
-		storeGsmImsi (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP &&
-			 id == EVENTS_GSM_GPRS_IP_ADDRESS) {
-		storeGsmIpAddress (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_MAIN && svrty == EVENT_BOOTUP && id == EVENTS_MAIN_BOOTUP_COMPLETE) {
-		storeBootupComplete (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_FANET && svrty == EVENT_ERROR &&
-			 id == EVENTS_FANET_FAIL_TO_SEND_METEO) {
-		storeFanetFail (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_ERASING_STARTUP) {
-		storeErasingStartup (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_FLASHING_STARTUP) {
-		storeFlashingStartup (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_SWITCHING_MODE) {
-		storeSwitchingPowersavingMode (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_WOKEN_UP_AFTER_LAST_SLEEP) {
-		storeWokenUpAfterLastSleep (eventLogEntry, timestamp);
-	}
-	else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_GO_TO_SLEEP) {
-		storeGoToSleep (eventLogEntry, timestamp);
+
+	if (decodeFromJsonOnly) {
+		// ignore all hardcoded specific decoders/formatters.
+		if (jsonDescription != nullptr) {}
+		else {
+			// if no definition for this event was decoded from JSON, print this in raw format
+			// add_cell_fmt
+			add_cell_fmt (table, "%d", eventLogEntry->event_counter_id);
+			add_cell_fmt (table, "%s", eventLogEntry->severity_str);
+			add_cell_fmt (table,
+						  "%02d-%02d %02d:%02d",
+						  timestamp->tm_mday,
+						  timestamp->tm_mon + 1,
+						  timestamp->tm_hour,
+						  timestamp->tm_min);
+			add_cell_fmt (table, "%d", eventLogEntry->event_master_time / 1000u);
+			add_cell_fmt (table, "%s", eventLogEntry->source_str_name);
+			add_cell_fmt (table, "%s", eventIdString);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param2);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam2);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam3);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam);
+			add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam2);
+			next_row (table);
+		}
 	}
 	else {
 
-		// add_cell_fmt
-		add_cell_fmt (table, "%d", eventLogEntry->event_counter_id);
-		add_cell_fmt (table, "%s", eventLogEntry->severity_str);
-		add_cell_fmt (table,
-					  "%02d-%02d %02d:%02d",
-					  timestamp->tm_mday,
-					  timestamp->tm_mon + 1,
-					  timestamp->tm_hour,
-					  timestamp->tm_min);
-		add_cell_fmt (table, "%d", eventLogEntry->event_master_time / 1000u);
-		add_cell_fmt (table, "%s", eventLogEntry->source_str_name);
-		add_cell_fmt (table, "%s", eventLogEntry->event_str_name);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param2);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam2);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam3);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam);
-		add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam2);
-		next_row (table);
+		if (jsonDescription != nullptr) {}
+		else {
+
+			if (src == EVENT_SRC_MAIN && svrty == EVENT_TIMESYNC &&
+				id == EVENTS_MAIN_TIMESYNC_NTP) {
+				storeTimesyncEntryInExport (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
+					 id == EVENTS_MAIN_POSTMORTEM_HARDFAULT) {
+				storeHardfaultException (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
+					 id == EVENTS_MAIN_POSTMORTEM_SUPERVISOR) {
+				storeSupervisorFault (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_INFO_CYCLIC &&
+					 id == EVENTS_MAIN_CYCLIC) {
+				storeCyclic (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
+					 id == EVENTS_MAIN_CONFIG_FIRST_CRC_FAIL) {
+				storeConfigFirstCrcFail (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_ERROR &&
+					 id == EVENTS_MAIN_CONFIG_SECOND_CRC_FAIL) {
+				storeConfigSecondCrcFail (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_FIRST_RESTORE) {
+				storeConfigFirstRestore (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && id == EVENTS_MAIN_CONFIG_SECOND_RESTORE) {
+				storeConfigSecondRestore (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP &&
+					 id == EVENTS_GSM_GPRS_REGISTERED_NETWORK) {
+				storeGsmRegisteredNetwork (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP &&
+					 id == EVENTS_GSM_GPRS_IMSI) {
+				storeGsmImsi (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_GSM_GPRS && svrty == EVENT_BOOTUP &&
+					 id == EVENTS_GSM_GPRS_IP_ADDRESS) {
+				storeGsmIpAddress (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_MAIN && svrty == EVENT_BOOTUP &&
+					 id == EVENTS_MAIN_BOOTUP_COMPLETE) {
+				storeBootupComplete (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_FANET && svrty == EVENT_ERROR &&
+					 id == EVENTS_FANET_FAIL_TO_SEND_METEO) {
+				storeFanetFail (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_ERASING_STARTUP) {
+				storeErasingStartup (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_KISS && id == EVENTS_DEFINITIONS_KISS_WARN_FLASHING_STARTUP) {
+				storeFlashingStartup (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_SWITCHING_MODE) {
+				storeSwitchingPowersavingMode (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_WOKEN_UP_AFTER_LAST_SLEEP) {
+				storeWokenUpAfterLastSleep (eventLogEntry, timestamp);
+			}
+			else if (src == EVENT_SRC_PWR_SAVE && id == EVENTS_PWR_SAVE_GO_TO_SLEEP) {
+				storeGoToSleep (eventLogEntry, timestamp);
+			}
+			else {
+
+				// add_cell_fmt
+				add_cell_fmt (table, "%d", eventLogEntry->event_counter_id);
+				add_cell_fmt (table, "%s", eventLogEntry->severity_str);
+				add_cell_fmt (table,
+							  "%02d-%02d %02d:%02d",
+							  timestamp->tm_mday,
+							  timestamp->tm_mon + 1,
+							  timestamp->tm_hour,
+							  timestamp->tm_min);
+				add_cell_fmt (table, "%d", eventLogEntry->event_master_time / 1000u);
+				add_cell_fmt (table, "%s", eventLogEntry->source_str_name);
+				add_cell_fmt (table, "%s", eventIdString);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->param2);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam2);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->wparam3);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam);
+				add_cell_fmt (table, "0x%X", (uint32_t)eventLogEntry->lparam2);
+				next_row (table);
+			}
+		}
 	}
 }
 
@@ -837,6 +890,96 @@ void LogDumperTextFile::storeGoToSleep (const event_log_exposed_t *eventLogEntry
 	set_span (table, 7, 1);
 	add_cell_fmt (table,
 				  "Minutes to next WX packet: %u, Powersave mode: %s",
+				  eventLogEntry->wparam,
+				  powersaveToString (eventLogEntry->wparam2));
+	next_row (table);
+	set_hline (table, BORDER_SINGLE);
+}
+
+enum class EventDescriptionObjectParameterSelector {
+	PARAM,
+	PARAM2,
+	WPARAM,
+	WPARAM2,
+	WPARAM3,
+	LPARAM,
+	LPARAM2
+};
+
+static std::string
+jsonDescriptionParametersHelper (EventDescriptionObject *jsonDescription,
+								 EventDescriptionObjectParameterSelector selector)
+{
+	switch (selector) {
+	case EventDescriptionObjectParameterSelector::PARAM:
+		if (jsonDescription->asHexParam) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::PARAM2:
+		if (jsonDescription->asHexParam2) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::WPARAM:
+		if (jsonDescription->asHexWparam) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::WPARAM2:
+		if (jsonDescription->asHexWparam2) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::WPARAM3:
+		if (jsonDescription->asHexWparam3) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::LPARAM:
+		if (jsonDescription->asHexLparam) {}
+		else {
+		}
+	case EventDescriptionObjectParameterSelector::LPARAM2:
+		if (jsonDescription->asHexLParam2) {}
+		else {
+		}
+	default: throw std::runtime_error ("");
+	}
+}
+
+void LogDumperTextFile::storeFromJsonDescription (const event_log_exposed_t *eventLogEntry,
+												  const struct tm *const timestamp,
+												  EventDescriptionObject *jsonDescription)
+{
+	set_hline (table, BORDER_SINGLE);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table, "%d \n -", eventLogEntry->event_counter_id);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table, "%s \n -", eventLogEntry->severity_str);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table,
+				  "%02d-%02d %02d:%02d \n -",
+				  timestamp->tm_mday,
+				  timestamp->tm_mon + 1,
+				  timestamp->tm_hour,
+				  timestamp->tm_min);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table, "%d \n -", eventLogEntry->event_master_time / 1000u);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table, "%s \n -", eventLogEntry->source_str_name);
+	set_span (table, 1, 2);
+	override_vertical_alignment (table, V_ALIGN_CENTER);
+	add_cell_fmt (table, jsonDescription->eventString.c_str ());
+	set_span (table, 7, 1);
+	add_cell_fmt (table,
+				  "Current WX frames interval: %u, packet_tx_get_meteo_counter: %u",
+				  eventLogEntry->param,
+				  eventLogEntry->param2);
+	next_row (table);
+	set_span (table, 7, 1);
+	add_cell_fmt (table,
+				  "Minutes to next WX packet: %u, New powersave mode: %s",
 				  eventLogEntry->wparam,
 				  powersaveToString (eventLogEntry->wparam2));
 	next_row (table);

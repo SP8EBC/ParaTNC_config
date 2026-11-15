@@ -12,6 +12,7 @@
 #include <string>
 
 #include "../shared/event_log_t.h"
+#include "EventDescriptionsStorage.hpp"
 #include "table.h"
 
 class LogDumperTextFile {
@@ -74,6 +75,10 @@ class LogDumperTextFile {
 	void storeGoToSleep (const event_log_exposed_t *eventLogEntry,
 						 const struct tm *const timestamp);
 
+	void storeFromJsonDescription (const event_log_exposed_t *eventLogEntry,
+								   const struct tm *const timestamp,
+								   EventDescriptionObject *jsonDescription);
+
   public:
 	LogDumperTextFile ();
 	virtual ~LogDumperTextFile ();
@@ -81,7 +86,9 @@ class LogDumperTextFile {
 	void startTextExport (std::string filename);
 
 	void storeEntryInExport (const event_log_exposed_t *eventLogEntry,
-							 const struct tm *const timestamp);
+							 const struct tm *const timestamp,
+							 EventDescriptionObject *jsonDescription = nullptr,
+							 bool decodeFromJsonOnly = false);
 	void closeAndSaveTextExport (void);
 };
 
