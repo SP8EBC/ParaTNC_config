@@ -68,9 +68,9 @@ EventDescriptionsStorage::EventDescriptionsStorage (const std::string_view &json
 	try {
 		const json root = json::parse (jsonContent);
 
-		std::cout << "--- JSON event log description: " << root.at ("name").get<std::string> ()
+		std::cout << "I = JSON event log description: " << root.at ("name").get<std::string> ()
 				  << std::endl;
-		std::cout << "--- JSON event log creation date: "
+		std::cout << "I = JSON event log creation date: "
 				  << root.at ("lastEditUtcISO8601").get<std::string> () << std::endl;
 
 		for (const json &event : root.at ("events")) {
@@ -82,7 +82,7 @@ EventDescriptionsStorage::EventDescriptionsStorage (const std::string_view &json
 			const auto [it, inserted] = map->emplace (description.eventId, description);
 			// exact copies of an already stored description are harmless
 			if (!inserted && !(it->second == description)) {
-				std::cout << "--- Duplicated event description for source "
+				std::cout << "W = Duplicated event description for source "
 						  << event_log_source_to_str (description.source) << ", event ID "
 						  << (int)description.eventId << ". event name '" << description.eventString
 						  << "'" << std::endl;
@@ -92,7 +92,7 @@ EventDescriptionsStorage::EventDescriptionsStorage (const std::string_view &json
 		m_ConstructorSuccess = true;
 	}
 	catch (const std::exception &ex) {
-		std::cout << "--- Failed to parse event descriptions JSON: " << ex.what () << std::endl;
+		std::cout << "E = Failed to parse event descriptions JSON: " << ex.what () << std::endl;
 		m_ConstructorSuccess = false;
 	}
 }

@@ -9,8 +9,8 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
-#include <utility>
 #include <string>
+#include <utility>
 
 #include "pthread.h"
 
@@ -136,8 +136,38 @@ void LogDumper::timeoutCallback (void)
 	sem_post (&cond1);
 }
 
+/**
+ * Reads the event log from the controller's flash one entry at a time, then writes
+ * a raw binary dump and a decoded text report.
+ *
+ * The address range [startAddress, endAddress) holds N amount of events, each sizeof(event_log_t).
+ * This are by definition is defined not to leave any unused tail, so it's size is
+ * divisible by sizeof(event_log_t). The function sends a read memory request through
+ * SrvReadMemory and waits for the response. After a timeout, the same entry
+ * is requested again. There is no retry limit, so the function blocks until the
+ * controller answers.
+ *
+ * Each response is appended unchanged to "<filename>.bin", whether or not its CRC is
+ * correct. Its CRC is then checked and the entry decoded by convertEventToExposedEvent().
+ * Entries with a correct CRC go into the text report.
+ *
+ * @param startAddress			first address of the event log area in controller memory
+ * @param endAddress			end of the event log area (exclusive)
+ * @param filename				base name of the output files; the text report is created
+ * 								by LogDumperTextFile, the raw dump is saved as filename + ".bin"
+ * @param exitOnFirstCrcFail	if true, stop at the first entry with a wrong CRC; files
+ * 								are still closed and saved with what has been read so far
+ * @param logOldestEntryAddress	address of the oldest log entry
+ * @param logNewestEntryAddress	address of the newest log entry
+ * @param lastNewestEvents		if set to non-zero this function will download N newest
+ * 								events. If the value is bigger than amount of events
+ * 								from [startAddress, logNewestEntryAddress) no roll over
+ * 								will be performed
+ */
 void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
-									std::string filename, bool exitOnFirstCrcFail)
+									std::string filename, bool exitOnFirstCrcFail,
+									uint32_t logOldestEntryAddress, uint32_t logNewestEntryAddress,
+									size_t lastNewestEvents)
 {
 
 	uint32_t decoded_events = 0u;
@@ -149,6 +179,9 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 	event_log_exposed_t exposed = {0u};
 
+	// how many events to dump
+	int eventsNum;
+
 	// declaring mutex
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -157,7 +190,38 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 	const size_t logEntrySize = sizeof (event_log_t);
 
-	const int eventsNum = (endAddress - startAddress) / logEntrySize;
+	// in events
+	const size_t logAreaSize = (endAddress - startAddress) / logEntrySize;
+
+	if (lastNewestEvents > logAreaSize) {
+		throw std::runtime_error (
+			"You manually selected to dump more events that a size of area in the controller");
+	}
+
+	// check if all events shall be dumped or only 'lastNewestEvents'
+	if (lastNewestEvents != 0) {
+		// size in bytes
+		const size_t sizeOfEventsToDmp = logEntrySize * lastNewestEvents;
+
+		// value of logNewestEntryAddress point to the start of an event
+		const uint32_t endAddressOfNewest = logNewestEntryAddress + logEntrySize;
+
+		// check if we fit within log entry area
+		if (endAddressOfNewest - sizeOfEventsToDmp >= startAddress) {
+			// we fit, so update start and end address
+			startAddress = endAddressOfNewest - sizeOfEventsToDmp;
+			endAddress = endAddressOfNewest;
+		}
+		else {
+			// update only end address;
+			endAddress = logNewestEntryAddress;
+		}
+
+		eventsNum = lastNewestEvents;
+	}
+	else {
+		eventsNum = (endAddress - startAddress) / logEntrySize;
+	}
 
 	// check if dumper should use JSON database
 	if (jsonEvents) {
@@ -209,6 +273,13 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 			const event_log_t *event = (event_log_t *)memoryData.data ();
 
+			if (memoryData.size () < logEntrySize) {
+				std::cout << "E = LogDumper::dumpEventsToReport, data read from address 0x"
+						  << std::hex << address << " is too small to be correct event_log_t"
+						  << std::endl;
+				continue;
+			}
+
 			// check if an event is not corrupted (by CRC32 calculation) and decode it
 			const bool crc =
 				LogDumper::convertEventToExposedEvent (event, exposed, decodedDateTime);
@@ -225,10 +296,13 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 					std::optional<EventDescriptionObject> description =
 						jsonEvents->getForEvent (*event);
 
-					// if a description for this event has been found 
+					// if a description for this event has been found
 					if (description) {
-						EventDescriptionObject & descriptionObject = description.value();
-						logDumperTextFile.storeEntryInExport (&exposed, &decodedDateTime, &descriptionObject, decodeFromJsonOnly);
+						EventDescriptionObject &descriptionObject = description.value ();
+						logDumperTextFile.storeEntryInExport (&exposed,
+															  &decodedDateTime,
+															  &descriptionObject,
+															  decodeFromJsonOnly);
 					}
 				}
 				else {
@@ -236,7 +310,6 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 					// for specific events
 					logDumperTextFile.storeEntryInExport (&exposed, &decodedDateTime);
 				}
-
 			}
 			else {
 				events_with_failed_crc++;

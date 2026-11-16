@@ -132,7 +132,9 @@ static void timeout_callback (void)
 { sem_post (&cond1); }
 
 /**
- * Reading all DIDs refactored out from main function
+ * Reading all DIDs refactored out from main function. It has a side effect by using
+ * list of DIDs @link{didList}. Filled with IDs from INI description file
+ * or initialized with array @link{fixedDidList} if this file is not available
  * @param didIniReader
  * @param didDecoder
  */
@@ -464,7 +466,10 @@ int main (int argc, char *argv[])
 		logDumper.dumpEventsToReport (logAreaStart,
 									  logAreaEnd,
 									  fileNamePrefix + ".log",
-									  breakEventsLogDumpOnCrcFail);
+									  breakEventsLogDumpOnCrcFail,
+									  logOldestEntry,
+									  logNewestEntry,
+									  (size_t)0);
 	}
 	worker.terminate ();
 

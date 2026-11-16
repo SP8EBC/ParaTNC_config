@@ -7,6 +7,7 @@
 
 #include <LogDumperTextFile.h>
 #include <exception>
+#include <format>
 #include <iostream>
 #include <string.h>
 
@@ -82,7 +83,9 @@ void LogDumperTextFile::storeEntryInExport (const event_log_exposed_t *eventLogE
 
 	if (decodeFromJsonOnly) {
 		// ignore all hardcoded specific decoders/formatters.
-		if (jsonDescription != nullptr) {}
+		if (jsonDescription != nullptr) {
+			storeFromJsonDescription (eventLogEntry, timestamp, jsonDescription);
+		}
 		else {
 			// if no definition for this event was decoded from JSON, print this in raw format
 			// add_cell_fmt
@@ -109,7 +112,9 @@ void LogDumperTextFile::storeEntryInExport (const event_log_exposed_t *eventLogE
 	}
 	else {
 
-		if (jsonDescription != nullptr) {}
+		if (jsonDescription != nullptr) {
+			storeFromJsonDescription (eventLogEntry, timestamp, jsonDescription);
+		}
 		else {
 
 			if (src == EVENT_SRC_MAIN && svrty == EVENT_TIMESYNC &&
@@ -207,29 +212,29 @@ void LogDumperTextFile::storeEntryInExport (const event_log_exposed_t *eventLogE
 void LogDumperTextFile::storeHardfaultException (const event_log_exposed_t *eventLogEntry,
 												 const struct tm *const timestamp)
 {
-	char *first_register = "   ";
-	char *second_register = "   ";
+	const char *first_register = "   ";
+	const char *second_register = "   ";
 
 	switch (eventLogEntry->param) {
 	case 1:
-		first_register = (char *)event_log_str_hardfault_lr;
-		second_register = (char *)event_log_str_hardfault_pc;
+		first_register = event_log_str_hardfault_lr;
+		second_register = event_log_str_hardfault_pc;
 		break;
 	case 2:
-		first_register = (char *)event_log_str_hardfault_r0;
-		second_register = (char *)event_log_str_hardfault_r1;
+		first_register = event_log_str_hardfault_r0;
+		second_register = event_log_str_hardfault_r1;
 		break;
 	case 3:
-		first_register = (char *)event_log_str_hardfault_r2;
-		second_register = (char *)event_log_str_hardfault_r3;
+		first_register = event_log_str_hardfault_r2;
+		second_register = event_log_str_hardfault_r3;
 		break;
 	case 4:
-		first_register = (char *)event_log_str_hardfault_r12;
-		second_register = (char *)event_log_str_hardfault_cfsr;
+		first_register = event_log_str_hardfault_r12;
+		second_register = event_log_str_hardfault_cfsr;
 		break;
 	case 5:
-		first_register = (char *)event_log_str_hardfault_src;
-		second_register = (char *)event_log_str_hardfault_xpsr;
+		first_register = event_log_str_hardfault_src;
+		second_register = event_log_str_hardfault_xpsr;
 		break;
 	default: {
 		std::cout << "E = LogDumperTextFile::storeHardfaultException, unknown value of 'param': 0x"
@@ -908,39 +913,76 @@ enum class EventDescriptionObjectParameterSelector {
 
 static std::string
 jsonDescriptionParametersHelper (EventDescriptionObject *jsonDescription,
-								 EventDescriptionObjectParameterSelector selector)
+								 EventDescriptionObjectParameterSelector selector, uint32_t value)
 {
 	switch (selector) {
 	case EventDescriptionObjectParameterSelector::PARAM:
-		if (jsonDescription->asHexParam) {}
+		if (jsonDescription->asHexParam) {
+			return std::string{jsonDescription->param + ": 0x" +
+							   std::format ("{:x}", (uint8_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->param + ": " +
+							   std::format ("{:d}", (uint8_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::PARAM2:
-		if (jsonDescription->asHexParam2) {}
+		if (jsonDescription->asHexParam2) {
+			return std::string{jsonDescription->param2 + ": 0x" +
+							   std::format ("{:x}", (uint8_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->param2 + ": " +
+							   std::format ("{:d}", (uint8_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::WPARAM:
-		if (jsonDescription->asHexWparam) {}
+		if (jsonDescription->asHexWparam) {
+			return std::string{jsonDescription->wparam + ": 0x" +
+							   std::format ("{:x}", (uint16_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->wparam + ": " +
+							   std::format ("{:d}", (uint16_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::WPARAM2:
-		if (jsonDescription->asHexWparam2) {}
+		if (jsonDescription->asHexWparam2) {
+			return std::string{jsonDescription->wparam2 + ": 0x" +
+							   std::format ("{:x}", (uint16_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->wparam2 + ": " +
+							   std::format ("{:d}", (uint16_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::WPARAM3:
-		if (jsonDescription->asHexWparam3) {}
+		if (jsonDescription->asHexWparam3) {
+			return std::string{jsonDescription->wparam3 + ": 0x" +
+							   std::format ("{:x}", (uint16_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->wparam3 + ": " +
+							   std::format ("{:d}", (uint16_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::LPARAM:
-		if (jsonDescription->asHexLparam) {}
+		if (jsonDescription->asHexLparam) {
+			return std::string{jsonDescription->lparam + ": 0x" +
+							   std::format ("{:x}", (uint32_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->lparam + ": " +
+							   std::format ("{:d}", (uint32_t)value)};
 		}
 	case EventDescriptionObjectParameterSelector::LPARAM2:
-		if (jsonDescription->asHexLParam2) {}
+		if (jsonDescription->asHexLParam2) {
+			return std::string{jsonDescription->lparam2 + ": 0x" +
+							   std::format ("{:x}", (uint32_t)value)};
+		}
 		else {
+			return std::string{jsonDescription->lparam2 + ": " +
+							   std::format ("{:d}", (uint32_t)value)};
 		}
 	default: throw std::runtime_error ("");
 	}
+
+	return "";
 }
 
 void LogDumperTextFile::storeFromJsonDescription (const event_log_exposed_t *eventLogEntry,
@@ -972,16 +1014,22 @@ void LogDumperTextFile::storeFromJsonDescription (const event_log_exposed_t *eve
 	override_vertical_alignment (table, V_ALIGN_CENTER);
 	add_cell_fmt (table, jsonDescription->eventString.c_str ());
 	set_span (table, 7, 1);
-	add_cell_fmt (table,
-				  "Current WX frames interval: %u, packet_tx_get_meteo_counter: %u",
-				  eventLogEntry->param,
-				  eventLogEntry->param2);
+	const std::string param =
+		jsonDescriptionParametersHelper (jsonDescription,
+										 EventDescriptionObjectParameterSelector::PARAM,
+										 eventLogEntry->param);
+	const std::string param2 =
+		jsonDescriptionParametersHelper (jsonDescription,
+										 EventDescriptionObjectParameterSelector::PARAM2,
+										 eventLogEntry->param2);
+	const std::string wparam =
+		jsonDescriptionParametersHelper (jsonDescription,
+										 EventDescriptionObjectParameterSelector::WPARAM,
+										 eventLogEntry->wparam);
+	add_cell_fmt (table, "%s %s %s", param, param2, wparam);
 	next_row (table);
 	set_span (table, 7, 1);
-	add_cell_fmt (table,
-				  "Minutes to next WX packet: %u, New powersave mode: %s",
-				  eventLogEntry->wparam,
-				  powersaveToString (eventLogEntry->wparam2));
+	add_cell_fmt (table, " ");
 	next_row (table);
 	set_hline (table, BORDER_SINGLE);
 }
