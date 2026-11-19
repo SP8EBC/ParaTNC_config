@@ -1026,10 +1026,10 @@ void LogDumperTextFile::storeFromJsonDescription (const event_log_exposed_t *eve
 		jsonDescriptionParametersHelper (jsonDescription,
 										 EventDescriptionObjectParameterSelector::WPARAM,
 										 eventLogEntry->wparam);
-	add_cell_fmt (table, "%s %s %s", param, param2, wparam);
+	add_cell_fmt (table, "%s, %s, %s", param.c_str(), param2.c_str(), wparam.c_str());
 	next_row (table);
 	set_span (table, 7, 1);
-	add_cell_fmt (table, " ");
+	add_cell_fmt (table, " test test test ");
 	next_row (table);
 	set_hline (table, BORDER_SINGLE);
 }

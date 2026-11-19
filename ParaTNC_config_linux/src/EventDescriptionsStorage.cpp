@@ -54,7 +54,7 @@ static EventDescriptionObject parseSingleEvent (const json &j)
 	out.asHexLparam = j.at ("asHexLparam").get<bool> ();
 	out.asHexLParam2 = j.at ("asHexLparam2").get<bool> ();
 
-	if (out.eventString.length () == 0 || std::isprint (out.eventString[0])) {
+	if (out.eventString.length () == 0 || !std::isprint (static_cast<unsigned char>(out.eventString[0]))) {
 		// put a placeholder name with event id
 		out.eventString = "Event id " + std::to_string (out.eventId);
 	}

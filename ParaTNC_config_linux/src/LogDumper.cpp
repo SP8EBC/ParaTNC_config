@@ -11,6 +11,7 @@
 #include <iterator>
 #include <string>
 #include <utility>
+#include <stdexcept>
 
 #include "pthread.h"
 
@@ -179,14 +180,14 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 
 	event_log_exposed_t exposed = {0u};
 
+	// keep for sanity check
+	const uint32_t originalStartAddress = startAddress;
+
 	// how many events to dump
 	int eventsNum;
 
 	// declaring mutex
 	pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-
-	// stream to store RAW binary read from the controller
-	std::ofstream outBin (filename + ".bin", std::ios::out | std::ios::binary);
 
 	const size_t logEntrySize = sizeof (event_log_t);
 
@@ -198,12 +199,20 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 			"You manually selected to dump more events that a size of area in the controller");
 	}
 
+	if (logOldestEntryAddress < startAddress || logOldestEntryAddress > endAddress) {
+		throw std::runtime_error("Corrupted value of 'logOldestEntryAddress' - application cannot continue");
+	}
+
+	if (logNewestEntryAddress < startAddress || logNewestEntryAddress > endAddress) {
+		throw std::runtime_error("Corrupted value of 'logOldestEntryAddress' - application cannot continue");
+	}
+
 	// check if all events shall be dumped or only 'lastNewestEvents'
 	if (lastNewestEvents != 0) {
 		// size in bytes
 		const size_t sizeOfEventsToDmp = logEntrySize * lastNewestEvents;
 
-		// value of logNewestEntryAddress point to the start of an event
+		// value of logNewestEntryAddress points to the start of an event
 		const uint32_t endAddressOfNewest = logNewestEntryAddress + logEntrySize;
 
 		// check if we fit within log entry area
@@ -213,14 +222,29 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 			endAddress = endAddressOfNewest;
 		}
 		else {
-			// update only end address;
+			// here we want to dump less events, because we must trim the memory range
+			lastNewestEvents = (endAddressOfNewest - startAddress) / logEntrySize;
+
+			// update end address, but keep start unchanged
 			endAddress = logNewestEntryAddress;
+
 		}
 
 		eventsNum = lastNewestEvents;
 	}
 	else {
 		eventsNum = (endAddress - startAddress) / logEntrySize;
+	}
+
+	// log dumper shall never wrap around. If 'lastNewestEvents' is bigger than
+	// amount of events from startAddress until, the range shall be trimmed 
+	// starting from 'originalStartAddress'
+	if (endAddress < startAddress) {
+		throw std::runtime_error("safety check 'endAddress < startAddress' has failed");
+	}
+
+	if (startAddress < originalStartAddress) {
+		throw std::runtime_error("safety check 'startAddress < originalStartAddress' has failed");
 	}
 
 	// check if dumper should use JSON database
@@ -230,6 +254,9 @@ void LogDumper::dumpEventsToReport (uint32_t startAddress, uint32_t endAddress,
 	else {
 		hasDecodedEvents = false;
 	}
+
+	// stream to store RAW binary read from the controller
+	std::ofstream outBin (filename + ".bin", std::ios::out | std::ios::binary);
 
 	std::cout << "I = LogDumper::dumpEventsToReport, number of events to process: " << std::dec
 			  << eventsNum << std::endl;
